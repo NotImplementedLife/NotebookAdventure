@@ -1,0 +1,85 @@
+/*! \file dialog_background.hpp	
+ */
+ 
+#pragma once
+
+#include "background.hpp"
+#include "dialogbox.hpp"
+#include "sprite.hpp"
+
+class DialogBackground : public Background
+{		
+	friend class DialogBox;
+public:		
+	//void char_base_address;
+	using Background::set_scroll;
+		
+	/*! \brief Creates a Background component specialized in dialog render
+		\param id background id (0..3)
+		\param char_base  VRAM char block base (0..3)
+		\param map_base   VRAM screen block base (0..31)			
+	*/
+	DialogBackground(u16 id, u16 char_base, u16 map_base);
+protected:	
+	/*! \brief loads tileset graphics into its specific VRAM block		
+		\param source     tiles buffer data
+		\param len        buffer length
+		\param compressed specifies if tiles are LZ77 compressed			
+		\details In a Dialog Background, tiles have predefined purposes:
+		- tile 0 : transparent tile		
+		- tile 1 : dialog box corner tile		
+		- tile 2 : horizontal box border tile (top/bottom by reflection)		
+		- tile 3 : vertical box border tile (left/right by reflection)  				
+		- tile 4 : dialog box fill tile		
+		- Tiles 16+ can be allocated to a VWF renderer
+		
+	 */
+	void load_tiles(const void* source, u8 palette_displacement=0);
+	
+	/*! \brief sets the tile id which would be the caret sprite
+		\param obj_tile_id tile id in OBJ Tiles VRAM
+	 */
+	void set_caret(int obj_tile_id);	
+	
+protected:
+	void assign_caret_to(int dialog_id);
+public:
+	/*! \brief fills map with transparent tiles
+	*/
+	void clear_map();
+	
+	/*! \brief builds & updates dialog interface
+	*/
+	void build_map();	
+	
+	void render();
+	
+	void key_down(u16 keys);
+	void key_held(u16 keys);
+	void key_up(u16 keys);
+	
+private:
+	int caret_waiting;
+	u16 obj_caret_id;
+	ObjAttribute* obj_caret;
+	
+	DialogBox* dialogs[4];
+	u8 dialogs_count;
+	u32 allocated[4];
+	char* awaiting_text[4];
+	const u32 max_alloc = 0x1800;	
+	
+	DialogBox* get_dialog(u32 dialog_id);
+	DialogBox* active_dialog=NULL;
+public:
+	int create_dialog_box(u8 left, u8 top, u8 width, u8 height, Vwf* vwf);
+	
+	void show_dialog_box(u32 id);
+	
+	void hide_dialog_box(u32 id);	
+	
+	void launch_dialog(int dialog_id, const char* msg);
+	
+	~DialogBackground();
+	
+};

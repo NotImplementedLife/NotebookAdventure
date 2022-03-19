@@ -1,0 +1,6 @@
+.git/
+build/
+*.elf
+*.gba
+docs/
+resources/

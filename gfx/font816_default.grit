@@ -1,0 +1,20 @@
+#-------------------------------------------------------
+# graphics in tile format
+#-------------------------------------------------------
+-gt
+
+#-------------------------------------------------------
+# graphics bit depth is 8 (256 color)
+#-------------------------------------------------------
+-gB8
+
+-aw8
+-ah4096
+-ga255
+
+# ignore the first 32 lines containing 256 random colors
+# their purpose is to force grit assign black to 0x00 and white to 0xFF
+-at32
+
+# exclude palette as we don't need it
+-p!
