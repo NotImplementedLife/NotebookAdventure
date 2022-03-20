@@ -5,7 +5,7 @@
 
 #include "background.hpp"
 #include "dialogbox.hpp"
-#include "sprite.hpp"
+#include "oam.hpp"
 
 class DialogBackground : public Background
 {		
@@ -79,7 +79,7 @@ private:
 	const int DIALOG_HIDE    = 1<<1;
 	
 protected:
-	void show_dialog_box(u32 id);	
+	void show_dialog_box(u32 id);
 	void hide_dialog_box(u32 id);
 public:
 
@@ -92,6 +92,32 @@ public:
 	 */
 	int create_dialog_box(u8 left, u8 top, u8 width, u8 height, Vwf* vwf);	
 		
+	/*! \brief schedules a new dialog text to render
+		\param dialog_id id of the dialog box that should display the text
+		\param msg       the text to be displayed
+		\param cooldown  number of render ticks to wait until dialog disappears. If 0, dialog box closes on A button pressed
+		\return true if the operation succeeded, false otherwise
+		
+		\details Calling launch_dialog() does not necessarily start displaying the desired dialog box. 
+		If any dialog box is already displaying, the render system will wait for the operation to be finished.
+		Eventually, the pending dialog box with the lowest id is being processed. 
+		
+		Therefore, the following example will display first "text0", "text1" and finally "text2", despite the order of launching dialogs:
+		
+		\code
+			dialog_bg.launch_dialog(2, "text2");
+			dialog_bg.launch_dialog(0, "text0", 30);
+			dialog_bg.launch_dialog(1, "text1", 30);	
+
+			while(1) { 
+				VBlankIntrWait();
+				scanKeys();
+				int keys_down = keysDown();
+				dialog_bg.key_down(keys_down);
+				dialog_bg.render();
+			}
+		\endcode
+	 */
 	bool launch_dialog(int dialog_id, const char* msg, u16 cooldown=0);
 		
 	~DialogBackground();

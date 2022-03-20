@@ -6,7 +6,7 @@
 #include "notebook-sheet.h"
 #include "dialog_frame.h"
 #include "vwf.hpp"
-#include "sprite.hpp"
+#include "oam.hpp"
 #include "error.hpp"
 
 #include "heart_sprite.h"
@@ -29,7 +29,7 @@ public:
 class map0 : public DialogBackground
 {
 private:
-	Vwf *vwf1, *vwf2;
+	Vwf *vwf1, *vwf2, *vwf3;
 public:
 	map0() : DialogBackground(0, 0, 28)
 	{
@@ -37,15 +37,17 @@ public:
 		clear_map();
 		vwf1=new Vwf(defaultFont816);
 		vwf2=new Vwf(defaultFont816);
+		vwf3=new Vwf(defaultFont816);
 		create_dialog_box(1, 1, 16, 4, vwf1);
 		create_dialog_box(1, 14, 28, 6, vwf2);
+		create_dialog_box(1, 8, 28, 6, vwf3);
 		
 		dmaCopy(dialog_arrTiles, (u8*)(VRAM + 0x10000 + 0x64*64), 64);
 		set_caret(0xC8);		
 		
 		vwf1->set_text_color(15);
-		vwf2->set_text_color(20);		
-		//vwf1->draw_text("Test title 1");
+		vwf2->set_text_color(15);		
+		vwf3->set_text_color(15);
 		launch_dialog(0,"Test title 1",30);
 		launch_dialog(1,"Days go past, and days come still, All is old and all is new, What is well and what is ill, You imagine and construe Do not hope and do not fear, Waves that leap like waves must fall; Should they praise or should they jeer,Look but coldly on it all.");
 	}
@@ -68,7 +70,7 @@ int main(void) {
 		
 	SPRITE_PALETTE[1]=RGB5(31,0,0);	
 	
-	for(int i=0;i<10;i++)
+	/*for(int i=0;i<10;i++)
 		for(int j=0;j<i;j++)
 		OamPool::add_obj(ObjAttribute(SIZE_16x16, 20*i, 20*j, 8, 0, 0, 0));
 	
@@ -89,7 +91,7 @@ int main(void) {
 		int id=i*(i-1)/2+j;
 		if(id%3==1) OamPool::remove_obj(id);
 	}
-	OamPool::deploy();	
+	OamPool::deploy();	*/
 	
 	map3 bg3;
 	map0 bg0;	
@@ -107,24 +109,27 @@ int main(void) {
 		y[t]=420+160*sin(a)-80;
 	}
 	int t=0;
+	bg0.launch_dialog(2,"text2");
+	bg0.launch_dialog(0,"text0",30);
+	bg0.launch_dialog(1,"text1",30);
 	while (1) {		
 		VBlankIntrWait();
 		scanKeys();
 		int down=keysDown();
 		//if(down & KEY_B)
 		//{
-			//*((u16*)0x4000002) ^=1;			
+			//*((u16*)0x4000002) ^=1;
 		//}		
 		if(down & KEY_UP)
 		{
 			bg0.launch_dialog(0,"Hello!");
-		}
+		}		
 		VBlankIntrWait();
 		bg3.set_scroll(x[t],y[t]);
 		t++;
 		if(t==300) t=0;
 		bg0.build_map();
-		bg3.build_map();		
+		bg3.build_map();	
 		
 		bg0.key_down(down);
 		bg0.render();
