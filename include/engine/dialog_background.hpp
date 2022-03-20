@@ -67,19 +67,33 @@ private:
 	u8 dialogs_count;
 	u32 allocated[4];
 	char* awaiting_text[4];
-	const u32 max_alloc = 0x1800;	
+	u16 _cooldown[4];
+	const u32 max_alloc = 0x1800;
 	
 	DialogBox* get_dialog(u32 dialog_id);
-	DialogBox* active_dialog=NULL;
+	u32 active_dialog_id=4;
+	u16 caret_release_action = 0;
+	
+	const int DIALOG_NOTHING = 0;
+	const int DIALOG_CLEAR   = 1<<0;
+	const int DIALOG_HIDE    = 1<<1;
+	
+protected:
+	void show_dialog_box(u32 id);	
+	void hide_dialog_box(u32 id);
 public:
-	int create_dialog_box(u8 left, u8 top, u8 width, u8 height, Vwf* vwf);
-	
-	void show_dialog_box(u32 id);
-	
-	void hide_dialog_box(u32 id);	
-	
-	void launch_dialog(int dialog_id, const char* msg);
-	
+
+	/*! \brief creates a new dialog box on the background
+		\param left    horizontal position in tiles of the dialog top-left corner
+		\param top     vertical position in tiles of the dialog top-left corner
+		\param width   dialog width in tiles
+		\param height  dialog height in tiles
+		\param vwf     Vwf processor
+	 */
+	int create_dialog_box(u8 left, u8 top, u8 width, u8 height, Vwf* vwf);	
+		
+	bool launch_dialog(int dialog_id, const char* msg, u16 cooldown=0);
+		
 	~DialogBackground();
 	
 };

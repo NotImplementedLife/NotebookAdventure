@@ -18,6 +18,7 @@ public:
 		Vwf vwf=Vwf(defaultFont816);
 		
 		create_dialog_box(0, 0, 30, 14, &vwf);
+		show_dialog_box(0);
 		
 		vwf.set_text_color(2);
 		vwf.draw_text(__str_err_intro);
@@ -28,6 +29,7 @@ public:
 		if(err_code != 0)
 		{
 			create_dialog_box(0, 15, 30, 4, &vwf);
+			show_dialog_box(1);
 			vwf.set_text_color(2);
 			vwf.draw_text(__str_err_code);
 			vwf.set_text_color(1);
@@ -45,7 +47,7 @@ public:
 		
 		BG_PALETTE[0] = RGB5(24,0,0);		
 		BG_PALETTE[1] = RGB5(31,31,0);
-		BG_PALETTE[2] = RGB5(31,31,31);
+		BG_PALETTE[2] = RGB5(31,31,31);				
 	}
 };
 

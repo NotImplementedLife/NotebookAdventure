@@ -41,14 +41,14 @@ public:
 		create_dialog_box(1, 14, 28, 6, vwf2);
 		
 		dmaCopy(dialog_arrTiles, (u8*)(VRAM + 0x10000 + 0x64*64), 64);
-		set_caret(0xC8);
-		assign_caret_to(1);
+		set_caret(0xC8);		
 		
 		vwf1->set_text_color(15);
 		vwf2->set_text_color(20);		
-		vwf1->draw_text("Test title 1");
+		//vwf1->draw_text("Test title 1");
+		launch_dialog(0,"Test title 1",30);
 		launch_dialog(1,"Days go past, and days come still, All is old and all is new, What is well and what is ill, You imagine and construe Do not hope and do not fear, Waves that leap like waves must fall; Should they praise or should they jeer,Look but coldly on it all.");
-	}	
+	}
 };
 
 int main(void) {
@@ -63,7 +63,6 @@ int main(void) {
 	//int obj1 = OamPool::add_obj(ObjAttribute(SIZE_16x16, 5, 6, 8, 0, 0, 2));
 	
 	//dmaCopy(OamPool::get_object_by_id(obj1), (u32*)VRAM, 8);
-	
 	
 	//while (1) VBlankIntrWait();	
 		
@@ -116,6 +115,10 @@ int main(void) {
 		//{
 			//*((u16*)0x4000002) ^=1;			
 		//}		
+		if(down & KEY_UP)
+		{
+			bg0.launch_dialog(0,"Hello!");
+		}
 		VBlankIntrWait();
 		bg3.set_scroll(x[t],y[t]);
 		t++;

@@ -9,6 +9,7 @@ DialogBackground::DialogBackground(u16 id, u16 char_base, u16 map_base) : Backgr
 		dialogs[i]=NULL;
 		allocated[i]=0;
 		awaiting_text[i]=0;
+		_cooldown[i]=0;
 	}
 	obj_caret = NULL;
 	caret_waiting = 0;
@@ -46,12 +47,45 @@ void DialogBackground::clear_map()
 
 void DialogBackground::key_down(u16 keys)
 {
-	if(keys & KEY_A)
+	if(active_dialog_id!=4)
 	{
-		caret_waiting = 0;		
-		obj_caret->hide();
-		if(active_dialog!=NULL)
-			active_dialog->clear();	
+		if(!_cooldown[active_dialog_id] && caret_waiting && (keys & KEY_A))
+		{		
+			caret_waiting = 0;		
+			obj_caret->hide();		
+				
+			if(caret_release_action & DIALOG_CLEAR)
+			{
+				dialogs[active_dialog_id]->clear();								
+			}
+			if(caret_release_action & DIALOG_HIDE)
+			{		
+				hide_dialog_box(active_dialog_id);
+				active_dialog_id=4;				
+			}						
+			caret_release_action=0;			
+		}	
+		
+		if(_cooldown[active_dialog_id] && caret_waiting)
+		{
+			if(_cooldown[active_dialog_id]==1)								
+			{
+				caret_waiting = 0;
+				obj_caret->hide();		
+					
+				if(caret_release_action & DIALOG_CLEAR)
+				{
+					dialogs[active_dialog_id]->clear();								
+				}
+				if(caret_release_action & DIALOG_HIDE)
+				{		
+					hide_dialog_box(active_dialog_id);
+					active_dialog_id=4;				
+				}						
+				caret_release_action=0;		
+			}			
+			_cooldown[active_dialog_id]--;
+		}
 	}
 }
 
@@ -70,8 +104,9 @@ void DialogBackground::render()
 		caret_waiting++;
 		if(caret_waiting==10)
 		{	
-			caret_waiting=1;				
-			obj_caret->show();
+			caret_waiting=1;
+			if(!_cooldown[active_dialog_id])
+				obj_caret->show();
 		}
 		else if(caret_waiting==5)
 		{
@@ -79,26 +114,34 @@ void DialogBackground::render()
 		}		
 		return;
 	}
-	for(int i=0;i<dialogs_count;i++)
+	if(active_dialog_id==4)
 	{
-		if(awaiting_text[i])
-		{			
-			active_dialog=dialogs[i];
-			int k=dialogs[i]->vwf->draw_word(awaiting_text[i]);
-			if(k==0)
-			{
-				if(awaiting_text[i][0]=='\0') 
-				{
-					awaiting_text[i]=NULL;
-					obj_caret->hide();
-				}
-				caret_waiting = 1;
+		for(int i=0;i<dialogs_count;i++)
+		{
+			if(awaiting_text[i])
+			{			
+				active_dialog_id=i;
+				assign_caret_to(active_dialog_id);
+				show_dialog_box(active_dialog_id);				
 				break;
-			}
-			else			
-				awaiting_text[i] += k;
-		}	
-	}	
+			}	
+		}			
+	}
+	if(active_dialog_id==4) return;	
+	int k=dialogs[active_dialog_id]->vwf->draw_word(awaiting_text[active_dialog_id]);
+	if(k==0)
+	{
+		caret_release_action = DIALOG_CLEAR;
+		if(awaiting_text[active_dialog_id][0]=='\0')
+		{
+			awaiting_text[active_dialog_id]=NULL;
+			obj_caret->hide();			
+			caret_release_action |= DIALOG_HIDE;
+		}
+		caret_waiting = 1;		
+	}
+	else			
+		awaiting_text[active_dialog_id] += k;
 }
 
 void DialogBackground::build_map()
@@ -188,18 +231,18 @@ int DialogBackground::create_dialog_box(u8 left, u8 top, u8 width, u8 height, Vw
 	u32* fill_addr = ((u32*)char_base_address)+16*(8+total_alloc);	
 	dialogs[dialogs_count]->set_vram(fill_addr, base_tile_gfx);	
 	
-	dialogs_count++;	
-	show_dialog_box(dialogs_count-1);
-	
-	return dialogs_count;
+	return dialogs_count++;
 }
 
-void DialogBackground::launch_dialog(int dialog_id, const char* msg)
+bool DialogBackground::launch_dialog(int dialog_id, const char* msg, u16 cooldown)
 {
-	get_dialog(dialog_id);
+	get_dialog(dialog_id); // just to check if the dialog exists
 	if(awaiting_text[dialog_id]!=NULL)
-		fatal("Dialog box can't run two texts simultaneously");
+		// fatal("Dialog box can't run two texts simultaneously",123);
+		return false;
 	awaiting_text[dialog_id]=(char*)msg;
+	_cooldown[dialog_id]=cooldown;
+	return true;
 }
 
 DialogBackground::~DialogBackground()

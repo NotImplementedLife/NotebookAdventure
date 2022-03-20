@@ -10,7 +10,7 @@ class DialogBox
 	friend class Vwf;
 private:	
 	const u32 *bg_tile;
-	Vwf *vwf;	
+	Vwf *vwf;
 public:
 	u8 left, top, width, height;
 	
@@ -20,8 +20,10 @@ public:
 		\param tileaddr address of first render zone tile 
 		\param bg_tile_gfx address of the "background" box tile
 	 */
-	void set_vram(u32 *tile_addr, const u32* bg_tile_gfx);
+	void set_vram(u32 *tile_addr, const u32* bg_tile_gfx);	
 	
+	/*! \brief clears dialog VRAM zone
+	 */
 	void clear();
 	
 	/*! \brief gets available text render space, in tiles
