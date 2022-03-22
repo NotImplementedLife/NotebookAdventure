@@ -142,6 +142,16 @@ void Sprite::set_anchor(u8 x, u8 y)
 	anchy = (y * hitbox.height) >> 8;
 }
 
+void Sprite::set_x(sf24 px) { pos_x = px; }
+
+void Sprite::set_y(sf24 py) { pos_y = py; }
+
+void Sprite::set_pos(sf24 px, sf24 py)
+{
+	pos_x = px;
+	pos_y = py;
+}
+
 s16 Sprite::get_actual_x() const
 {
 	return (s16)pos_x - hitbox.left - anchx;

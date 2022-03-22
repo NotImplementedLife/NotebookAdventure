@@ -76,12 +76,16 @@ public:
 	/*! \brief get sprite hitbox
 		\return hitbox coordinates
 	 */
-	Hitbox get_hitbox() const;	
+	Hitbox get_hitbox() const;
 	
 	/*! \brief decides sprite's minimal-size hitbox that covers its non-transparent pixels */
 	void auto_detect_hitbox();
 	
 	void set_anchor(u8 x, u8 y);
+	
+	void set_x(sf24 px);
+	void set_y(sf24 py);
+	void set_pos(sf24 px, sf24 py);
 	
 	/*! \brief get sprite visual 
 		\return sprite visual
@@ -94,3 +98,20 @@ public:
 	
 	~Sprite();
 };
+
+// Sprite anchor shortcut definitions
+
+/*           Name                X    Y  */
+#define ANCHOR_TOP_LEFT           0,   0
+#define ANCHOR_TOP              128,   0
+#define ANCHOR_TOP_RIGHT        255,   0
+#define ANCHOR_LEFT               0, 128
+#define ANCHOR_CENTER           128, 128
+#define ANCHOR_RIGHT            255, 128
+#define ANCHOR_BOTTOM_LEFT        0, 255
+#define ANCHOR_BOTTOM           128, 255
+#define ANCHOR_BOTTOM_RIGHT     255, 255
+
+// Usage : sprite->set_anchor(ANCHOR_CENTER)
+
+

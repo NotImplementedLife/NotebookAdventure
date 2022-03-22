@@ -6,13 +6,15 @@
 class Camera 
 {
 private:
-	u16 x, y;
+	sf24 x, y;
 public:
 	Camera();
-	Camera(u16 x, u16 y);
-	u16 get_x() const;
-	u16 get_y() const;
+	Camera(sf24 x, sf24 y);
+	s16 get_x() const;
+	s16 get_y() const;
 	
-	void set_x(u16 value);	
-	void set_y(u16 value);	
+	void set_x(const sf24& value);	
+	void set_y(const sf24& value);
+	
+	void move(sf24 x, sf24 y);
 };

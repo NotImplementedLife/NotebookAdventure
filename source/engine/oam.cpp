@@ -68,13 +68,21 @@ u16 ObjAttribute::get_flip_h() const
 }
 
 void ObjAttribute::set_x(s16 x)
-{
+{	
 	attr1 &= ~0x01FF;
+	if(x < -64) 
+		x=-64;
+	else if(x > 240+64) 
+		x = 240+64;
 	attr1 |= x & 0x01FF;
 }
 	
 void ObjAttribute::set_y(s16 y)
 {
+	if(y < -64) 
+		y=-64;
+	else if(y > 160+64) 
+		y = 160+64;
 	*((s8*)(&attr0)) = (s8)y;
 }
 	

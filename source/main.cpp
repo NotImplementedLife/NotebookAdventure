@@ -74,22 +74,32 @@ int main(void) {
 				
 	//while (1) VBlankIntrWait();
 	
-	Camera* camera = new Camera(10,0);
+	Camera* camera = new Camera(0,0);
 	
-	Sprite* heart1=new Sprite(SIZE_16x16,1);
+	Sprite* heart1=new Sprite(SIZE_16x16, 1);
 	heart1->get_visual()->set_frame(0,8);
 	heart1->get_visual()->set_crt_gfx(0);
 	heart1->update_visual();
 	heart1->auto_detect_hitbox();
+	heart1->set_anchor(ANCHOR_CENTER);
+	heart1->update_position(camera);
+	
+	Sprite* heart2=new Sprite(SIZE_16x16, 1);
+	heart2->get_visual()->set_frame(0,16);
+	heart2->get_visual()->set_crt_gfx(0);
+	heart2->update_visual();
+	heart2->auto_detect_hitbox();
+	heart2->set_anchor(ANCHOR_CENTER);
+	heart2->set_pos(-30,0);
+	heart2->update_position(camera);
 	
 	//Hitbox hb = heart1->get_hitbox();
 	//fatal("test hitbox",((u32*)&hb)[0]);
 	
-	heart1->set_anchor(128,128);		
-	heart1->update_position(camera);
+	
 	OamPool::deploy();
 	
-
+	
 	while (1) 
 	{
 		VBlankIntrWait();
@@ -98,7 +108,12 @@ int main(void) {
 		if(down & KEY_B)
 		{			
 			break;
-		}		
+		}				
+		
+		camera->move(0,sf24(0,32));
+		heart1->update_position(camera);
+		heart2->update_position(camera);
+		OamPool::deploy();
 	}
 	
 	delete heart1;	
