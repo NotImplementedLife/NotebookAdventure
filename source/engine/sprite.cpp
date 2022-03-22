@@ -1,4 +1,5 @@
 #include "sprite.hpp"
+#include "error.hpp"
 
 Hitbox::Hitbox()
 {
@@ -23,11 +24,54 @@ Hitbox::Hitbox(ObjSize size)
 	height = objsize_to_height[size];
 }
 
-Sprite::Sprite(ObjSize size)
+ObjVisual::ObjVisual(u8 frames_count)
+{
+	this->frames_count = frames_count;
+	frames = new u16[frames_count];
+}
+
+u8 ObjVisual::get_frames_count() const
+{
+	return frames_count;
+}
+
+u16 ObjVisual::get_frame(int id) const
+{
+	if(id>=frames_count)
+		fatal(ERR_ARG_OUT_OF_RANGE, "ObjVisual::get_frame()");
+	return frames[id];
+}
+
+void ObjVisual::set_frame(int id, u16 obj_tile_index)
+{
+	if(id>=frames_count)
+		fatal(ERR_ARG_OUT_OF_RANGE, "ObjVisual::set_frame()");
+	frames[id]=obj_tile_index;
+}
+
+u16 ObjVisual::get_crt_gfx() const
+{
+	return frames[crt_gfx_id];
+}
+	
+void ObjVisual::set_crt_gfx(int frame_id)
+{
+	if(frame_id>=frames_count)
+		fatal(ERR_ARG_OUT_OF_RANGE, "ObjVisual::set_crt_gfx()");
+	crt_gfx_id=frame_id;
+}
+
+ObjVisual::~ObjVisual()
+{	
+	delete[] frames;
+}
+
+Sprite::Sprite(ObjSize size, u16 frames_count)
 {
 	id = OamPool::add_obj(ObjAttribute(size,0,0,0));
 	attr = OamPool::get_object_by_id(id);
 	hitbox = Hitbox(size);
+	visual = new ObjVisual(frames_count);
 }
 
 void Sprite::set_hitbox(u8 left, u8 top, u8 width, u8 height)
@@ -37,6 +81,69 @@ void Sprite::set_hitbox(u8 left, u8 top, u8 width, u8 height)
 
 void Sprite::auto_detect_hitbox()
 {
-	//u16* tileid = attr->get_tile_index();
+	u32* tileaddr = SPR_VRAM(attr->get_tile_index());	
+	bool _1D = REG_DISPCNT & OBJ_1D_MAP;
+	Hitbox hb = Hitbox(attr->get_size());
+	u8 wcnt = hb.width>>3;
+	u8 hcnt = hb.height>>3;
 	
+	u8 x0=hitbox.width, y0=hitbox.height, x1=0, y1=0;
+	if(_1D)
+	{
+		u8 *line = new u8[8];
+		for(int ty=0;ty<hcnt;ty++)		
+			for(int tx=0;tx<wcnt;tx++)
+			{				
+				for(int y=0;y<8;y++)
+				{														
+					*((u32*)line + 0) = *(tileaddr++);
+					*((u32*)line + 1) = *(tileaddr++);					
+					for(int x=0;x<8;x++)					
+						if(line[x]) // non-transparent pixel
+						{							
+							u8 rx = (tx<<3)|x;
+							u8 ry = (ty<<3)|y;
+							fatal("pula2",(line[x]<<16)|(rx<<8)|ry);
+							if(rx < x0) x0=rx;
+							if(rx > x1) x1=rx;
+							if(ry < y0) y0=ry;
+							if(ry > y1) y1=ry;							
+						}					
+				}				
+			}		
+		delete[] line;
+	}
+	else
+	{
+		fatal("2D sprites are not yet implemented!");
+	}		
+	if(x0!=hb.width)
+	{				
+		hitbox = Hitbox(x0, y0, x1-x0+1, y1-y0+1);
+	}
+	else 
+	{		
+		hitbox = Hitbox(0,0,0,0);
+	}
+}
+
+Hitbox Sprite::get_hitbox() const
+{
+	return hitbox;
+}
+
+ObjVisual* Sprite::get_visual() const
+{
+	return visual;
+}
+
+void Sprite::update_visual()
+{
+	attr->set_tile_index(visual->get_crt_gfx());
+}
+
+Sprite::~Sprite()
+{
+	OamPool::remove_obj(id);
+	delete visual;
 }

@@ -36,35 +36,40 @@ public:
 	
 	/*! \fn ObjAttribute
 		\brief creates an object attribute
-		\param size       sprite size
-		\param x          sprite position - horizontal coordinate
-		\param y          sprite position - vertical coordinate
+		\param size       object size
+		\param x          object position - horizontal coordinate
+		\param y          object position - vertical coordinate
 		\param tile_index tile number in OAM Tiles section of VRAM
 		\param hflip      horizontal flip (0 = no ; non-0 = yes)
 		\param hflip      vertical flip (0 = no ; non-0 = yes)
-		\param priority   sprite priority (0..3)
+		\param priority   object priority (0..3)
 	 */ 
 	ObjAttribute(ObjSize size, s16 x, s16 y, u16 tile_index, u16 hflip=0, u16 vflip=0, u16 priority=0);
 	
 	/*! \fn set_size
-		\brief set sprite size
+		\brief set object size
 		\param size object size
 	 */
 	void set_size(ObjSize size);
 	
+	/*! \brief get object size		
+		\return object size 
+	 */
+	ObjSize get_size() const;
+	
 	/*! \fn flip_v
-		\brief flip sprite vertically 	
+		\brief flip object vertically 	
 	 */
 	void flip_v();
 	
 	/*! \fn set_flip_v
-		\brief set sprite vertical flip
+		\brief set object vertical flip
 		\param flip 0 if no flip, non-0 value if flipped
 	 */
 	void set_flip_v(u16 flip);
 	
 	/*! \fn get_flip_v
-		\brief get sprite vertical flip
+		\brief get object vertical flip
 		\return 0 if no flip, 1 if flipped
 	 */
 	u16 get_flip_v() const;

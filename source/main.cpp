@@ -7,6 +7,7 @@
 #include "dialog_frame.h"
 #include "vwf.hpp"
 #include "oam.hpp"
+#include "sprite.hpp"
 #include "error.hpp"
 
 #include "heart_sprite.h"
@@ -53,24 +54,57 @@ public:
 	}
 };
 
+#include "utils.hpp"
+
 int main(void) {
 	irqInit();
-	irqEnable(IRQ_VBLANK);
+	irqEnable(IRQ_VBLANK);	
 
 	SetMode(MODE_0 | OBJ_ENABLE | OBJ_1D_MAP);
-	OamPool::reset();		
 	
-	dmaCopy(heart_spriteTiles,(u8*)(VRAM|0x10000)+4*64,heart_spriteTilesLen);
+	sf24 a(9,0);
+	sf24 b(0,128);
+	sf24 c = a * b;
+	
+	fatal("yee",c.to_u32());
+		
+	OamPool::reset();
+	
+	SPRITE_PALETTE[1]=RGB5(31,0,0);
+	dmaCopy(heart_spriteTiles,(u8*)SPR_VRAM(8), heart_spriteTilesLen);
+				
+	//while (1) VBlankIntrWait();;
+	
+	Sprite* heart1=new Sprite(SIZE_16x16,1);
+	heart1->get_visual()->set_frame(0,8);
+	heart1->get_visual()->set_crt_gfx(0);
+	heart1->update_visual();
+	OamPool::deploy();
+
+	while (1) 
+	{
+		VBlankIntrWait();
+		scanKeys();
+		int down=keysDown();
+		if(down & KEY_B)
+		{			
+			break;
+		}		
+	}
+	
+	delete heart1;	
+	OamPool::deploy();
+		//((u32*)VRAM)[0] = *((u32*)&hb);	
 	
 	//int obj1 = OamPool::add_obj(ObjAttribute(SIZE_16x16, 5, 6, 8, 0, 0, 2));
 	
 	//dmaCopy(OamPool::get_object_by_id(obj1), (u32*)VRAM, 8);
 	
-	//while (1) VBlankIntrWait();	
-		
-	SPRITE_PALETTE[1]=RGB5(31,0,0);	
+	while (1) VBlankIntrWait();		
 	
-	/*for(int i=0;i<10;i++)
+	/*while (1) VBlankIntrWait();	
+	
+	for(int i=0;i<10;i++)
 		for(int j=0;j<i;j++)
 		OamPool::add_obj(ObjAttribute(SIZE_16x16, 20*i, 20*j, 8, 0, 0, 0));
 	
@@ -91,7 +125,7 @@ int main(void) {
 		int id=i*(i-1)/2+j;
 		if(id%3==1) OamPool::remove_obj(id);
 	}
-	OamPool::deploy();	*/
+	OamPool::deploy();	
 	
 	map3 bg3;
 	map0 bg0;	
@@ -134,7 +168,7 @@ int main(void) {
 		bg0.key_down(down);
 		bg0.render();
 		OamPool::deploy();
-	}
+	}*/
 }
 
 

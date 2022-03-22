@@ -29,6 +29,14 @@ void ObjAttribute::set_size(ObjSize size)
 	attr1 = (attr1 & 0x3FFF) | (size<<14);
 }
 
+ObjSize ObjAttribute::get_size() const
+{
+	//u8 shape = (attr0 & 0xC000)>>12;
+	//u8 size  = (attr1 & 0xC000)>>12;
+	//return 	(shape<<2) | size;
+	return (ObjSize)(((attr0 & 0xC000) | (attr1>>2))>>12);
+}
+
 void ObjAttribute::flip_v()
 {
 	attr1 ^= (1<<13);
@@ -274,17 +282,15 @@ namespace OamPool
 		if(p==-1) 
 		{
 			fatal(ERR_OAM_INVALID_ID);
-		}		
-		
+		}				
 		unlock_id(p);
-		u32* ptr = (u32*)&__oam_buffer[p];
-		ptr[0] = ptr[1] = 0x00000000;			
-		__oam_size--;	
+		u32* ptr = (u32*)&__oam_buffer[p];			
+		ptr[0] = ptr[1] = 0x00000000;		
+		__oam_size--;			
 	}		
 	
 	void deploy()
-	{
-		if(__oam_size==0) return;
+	{		
 		dmaCopy(__oam_buffer, OAM, 128 << 3);
 	}		
 }
