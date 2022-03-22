@@ -2,6 +2,8 @@
 #pragma once
 
 #include "oam.hpp"
+#include "utils.hpp"
+#include "camera.hpp"
 
 class Hitbox
 {
@@ -55,6 +57,11 @@ public:
 	u8 anchx, anchy; // sprite anchor (0..255, scaled to hitbox)
 	Hitbox hitbox;
 	ObjVisual* visual;
+	
+	sf24 pos_x, pos_y;
+	
+	s16 get_actual_x() const;
+	s16 get_actual_y() const;
 public:
 	Sprite(ObjSize size, u16 frames_count);
 	
@@ -69,10 +76,12 @@ public:
 	/*! \brief get sprite hitbox
 		\return hitbox coordinates
 	 */
-	Hitbox get_hitbox() const;
+	Hitbox get_hitbox() const;	
 	
 	/*! \brief decides sprite's minimal-size hitbox that covers its non-transparent pixels */
 	void auto_detect_hitbox();
+	
+	void set_anchor(u8 x, u8 y);
 	
 	/*! \brief get sprite visual 
 		\return sprite visual
@@ -80,6 +89,8 @@ public:
 	ObjVisual* get_visual() const;
 	
 	void update_visual();
+	
+	void update_position(Camera* cam);
 	
 	~Sprite();
 };

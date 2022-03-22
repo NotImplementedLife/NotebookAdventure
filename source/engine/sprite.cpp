@@ -71,7 +71,7 @@ Sprite::Sprite(ObjSize size, u16 frames_count)
 	id = OamPool::add_obj(ObjAttribute(size,0,0,0));
 	attr = OamPool::get_object_by_id(id);
 	hitbox = Hitbox(size);
-	visual = new ObjVisual(frames_count);
+	visual = new ObjVisual(frames_count);	
 }
 
 void Sprite::set_hitbox(u8 left, u8 top, u8 width, u8 height)
@@ -102,8 +102,7 @@ void Sprite::auto_detect_hitbox()
 						if(line[x]) // non-transparent pixel
 						{							
 							u8 rx = (tx<<3)|x;
-							u8 ry = (ty<<3)|y;
-							fatal("pula2",(line[x]<<16)|(rx<<8)|ry);
+							u8 ry = (ty<<3)|y;							
 							if(rx < x0) x0=rx;
 							if(rx > x1) x1=rx;
 							if(ry < y0) y0=ry;
@@ -137,9 +136,39 @@ ObjVisual* Sprite::get_visual() const
 	return visual;
 }
 
+void Sprite::set_anchor(u8 x, u8 y)
+{
+	anchx = (x * hitbox.width) >> 8;
+	anchy = (y * hitbox.height) >> 8;
+}
+
+s16 Sprite::get_actual_x() const
+{
+	return (s16)pos_x - hitbox.left - anchx;
+}
+
+s16 Sprite::get_actual_y() const
+{
+	return (s16)pos_y - hitbox.top - anchy;
+}
+
 void Sprite::update_visual()
 {
 	attr->set_tile_index(visual->get_crt_gfx());
+}
+
+void Sprite::update_position(Camera* cam)
+{
+	if(cam==NULL)
+	{
+		attr->set_x((s16)pos_x);
+		attr->set_y((s16)pos_y);		
+	}
+	else
+	{
+		attr->set_x(get_actual_x() - cam->get_x() + 240/2);
+		attr->set_y(get_actual_y() - cam->get_y() + 160/2);
+	}
 }
 
 Sprite::~Sprite()

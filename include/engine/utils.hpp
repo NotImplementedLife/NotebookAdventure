@@ -8,18 +8,24 @@ class sf24
 {
 private:
 	u32 data;
-	sf24(u32 data);
+	static sf24 create_from_data(u32 data);	
 public:
-	sf24(s16 x);		
-	sf24(s16 x,u8 frac);
+	sf24();
+	sf24(s16 x);
+	sf24(s16 x, u8 frac);
 	
 	s16 get_int() const;
 	u8 get_frac() const;
 	
 	sf24 operator + (const sf24& b) const;
 	sf24 operator - (const sf24& b) const;
-	sf24 operator * (const sf24& b) const;
+	sf24 operator * (const sf24& b) const;	
 	
-	u32 to_u32() const;
+	void operator += (const sf24& b);
+	void operator -= (const sf24& b);
+	void operator *= (const sf24& b);	
+	
+	explicit operator int() const;
+	explicit operator s16() const;
 };
 

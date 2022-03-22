@@ -5,12 +5,15 @@
 #include "scrollmap.hpp"
 #include "notebook-sheet.h"
 #include "dialog_frame.h"
+
+
 #include "vwf.hpp"
 #include "oam.hpp"
 #include "sprite.hpp"
 #include "error.hpp"
 
 #include "heart_sprite.h"
+#include "heart_narrow.h"
 
 #include <math.h>
 
@@ -61,25 +64,31 @@ int main(void) {
 	irqEnable(IRQ_VBLANK);	
 
 	SetMode(MODE_0 | OBJ_ENABLE | OBJ_1D_MAP);
-	
-	sf24 a(9,0);
-	sf24 b(0,128);
-	sf24 c = a * b;
-	
-	fatal("yee",c.to_u32());
 		
 	OamPool::reset();
 	
 	SPRITE_PALETTE[1]=RGB5(31,0,0);
+	
 	dmaCopy(heart_spriteTiles,(u8*)SPR_VRAM(8), heart_spriteTilesLen);
+	dmaCopy(heart_narrowTiles,(u8*)SPR_VRAM(16), heart_narrowTilesLen);
 				
-	//while (1) VBlankIntrWait();;
+	//while (1) VBlankIntrWait();
+	
+	Camera* camera = new Camera(10,0);
 	
 	Sprite* heart1=new Sprite(SIZE_16x16,1);
 	heart1->get_visual()->set_frame(0,8);
 	heart1->get_visual()->set_crt_gfx(0);
 	heart1->update_visual();
+	heart1->auto_detect_hitbox();
+	
+	//Hitbox hb = heart1->get_hitbox();
+	//fatal("test hitbox",((u32*)&hb)[0]);
+	
+	heart1->set_anchor(128,128);		
+	heart1->update_position(camera);
 	OamPool::deploy();
+	
 
 	while (1) 
 	{
