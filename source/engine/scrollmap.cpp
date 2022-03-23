@@ -2,9 +2,19 @@
 
 TextScrollMap::TextScrollMap()
 {
-	for(int i=0;i<4;i++) bg[i]=NULL;
+	for(int i=0;i<4;i++) 
+	{
+		bg[i] = NULL;
+		scroll_speed[i] = 0x10;
+	}
 	OamPool::reset();
 	camera = new Camera();
+}
+
+void TextScrollMap::set_background(u8 i, Background* bg, u8 scroll_speed)
+{
+	this->bg[i]=bg;
+	this->scroll_speed[i]=scroll_speed;
 }
 
 void TextScrollMap::run()
@@ -36,5 +46,5 @@ TextScrollMap::~TextScrollMap()
 	for(int i=0;i<3;i++)
 		delete bg[i];
 	delete camera;
-	
+	OamPool::reset();
 }

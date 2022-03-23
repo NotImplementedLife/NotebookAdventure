@@ -152,6 +152,12 @@ void Sprite::set_pos(sf24 px, sf24 py)
 	pos_y = py;
 }
 
+void Sprite::move(sf24 dx, sf24 dy)
+{
+	pos_x += dx;
+	pos_y += dy;
+}
+
 s16 Sprite::get_actual_x() const
 {
 	return (s16)pos_x - hitbox.left - anchx;
@@ -179,6 +185,25 @@ void Sprite::update_position(Camera* cam)
 		attr->set_x(get_actual_x() - cam->get_x() + 240/2);
 		attr->set_y(get_actual_y() - cam->get_y() + 160/2);
 	}
+}
+
+bool Sprite::touches(Sprite* spr)
+{
+	sf24 x0 = pos_x + hitbox.left;
+	sf24 y0 = pos_y + hitbox.top;
+	s16 w0 = hitbox.width;
+	s16 h0 = hitbox.height;	
+	
+	
+	sf24 x1 = spr->pos_x + spr->hitbox.left;
+	sf24 y1 = spr->pos_y + spr->hitbox.top;
+	s16 w1 = spr->hitbox.width;
+	s16 h1 = spr->hitbox.height;
+	
+	//fatal((x0+w0).to_string(),x0<x1 ? 1:0);
+	
+	return (x0.in_range(x1,x1+w1) || x1.in_range(x0, x0+w0)) 
+	    && (y0.in_range(y1,y1+h1) || y1.in_range(y0, y0+h0));
 }
 
 Sprite::~Sprite()

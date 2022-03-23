@@ -2,15 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "engine.hpp"
+
 #include "scrollmap.hpp"
 #include "notebook-sheet.h"
 #include "dialog_frame.h"
-
-
-#include "vwf.hpp"
-#include "oam.hpp"
-#include "sprite.hpp"
-#include "error.hpp"
 
 #include "heart_sprite.h"
 #include "heart_narrow.h"
@@ -57,22 +53,20 @@ public:
 	}
 };
 
-#include "utils.hpp"
-
 int main(void) {
 	irqInit();
-	irqEnable(IRQ_VBLANK);	
-
-	SetMode(MODE_0 | OBJ_ENABLE | OBJ_1D_MAP);
+	irqEnable(IRQ_VBLANK);
+	SetMode(MODE_0 | OBJ_ENABLE | OBJ_1D_MAP);	
+		
+	//sf24 a=12, b=-16;
+	//fatal("a",a>=b);
 		
 	OamPool::reset();
 	
 	SPRITE_PALETTE[1]=RGB5(31,0,0);
 	
-	dmaCopy(heart_spriteTiles,(u8*)SPR_VRAM(8), heart_spriteTilesLen);
-	dmaCopy(heart_narrowTiles,(u8*)SPR_VRAM(16), heart_narrowTilesLen);
-				
-	//while (1) VBlankIntrWait();
+	LOAD_GRIT_SPRITE_TILES(heart_sprite, 8);
+	LOAD_GRIT_SPRITE_TILES(heart_narrow, 16);		
 	
 	Camera* camera = new Camera(0,0);
 	
@@ -93,7 +87,7 @@ int main(void) {
 	heart2->set_pos(-30,0);
 	heart2->update_position(camera);
 	
-	//Hitbox hb = heart1->get_hitbox();
+	//Hitbox hb = heart2->get_hitbox();
 	//fatal("test hitbox",((u32*)&hb)[0]);
 	
 	
@@ -110,9 +104,20 @@ int main(void) {
 			break;
 		}				
 		
-		camera->move(0,sf24(0,32));
+		heart2->move(sf24(0,32),0);
+		camera->move(0,sf24(0,8));
 		heart1->update_position(camera);
 		heart2->update_position(camera);
+		
+		if(heart1->touches(heart2))
+		{
+			SPRITE_PALETTE[1]=RGB5(0,31,0);
+		}
+		else
+		{
+			SPRITE_PALETTE[1]=RGB5(31,0,0);
+		}			
+		
 		OamPool::deploy();
 	}
 	

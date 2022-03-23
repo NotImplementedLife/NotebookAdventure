@@ -5,6 +5,13 @@
 #include "utils.hpp"
 #include "camera.hpp"
 
+/*! \def LOAD_GRIT_SPRITE_TILES(res_name, tile_id)
+	\brief macro to copy grit generated binary graphics into OBJ VRAM
+	\param res_name resource name (usually the image file name, without extension)
+	\param tile_id OBJ tile position 
+ */
+#define LOAD_GRIT_SPRITE_TILES(res_name, tile_id)  dmaCopy( res_name ## Tiles,(u8*)SPR_VRAM((tile_id)), res_name ## TilesLen)
+
 class Hitbox
 {
 public:
@@ -86,6 +93,7 @@ public:
 	void set_x(sf24 px);
 	void set_y(sf24 py);
 	void set_pos(sf24 px, sf24 py);
+	void move(sf24 dx, sf24 dy);
 	
 	/*! \brief get sprite visual 
 		\return sprite visual
@@ -95,6 +103,11 @@ public:
 	void update_visual();
 	
 	void update_position(Camera* cam);
+	
+	/*! \brief checks if sprite hitboxes overlap
+		\return true is sprites are collided
+	 */
+	bool touches(Sprite* spr);
 	
 	~Sprite();
 };

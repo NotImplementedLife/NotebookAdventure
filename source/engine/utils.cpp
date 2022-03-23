@@ -79,6 +79,36 @@ sf24::operator s16() const
 	return get_int();
 }
 
+bool sf24::operator < (const sf24& b) const
+{
+	return (s32)data < (s32)b.data;
+}
+
+bool sf24::operator > (const sf24& b) const
+{
+	return (s32)data > (s32)b.data;
+}
+
+bool sf24::operator <= (const sf24& b) const
+{
+	return (s32)data <= (s32)b.data;
+}
+
+bool sf24::operator >= (const sf24& b) const
+{
+	return (s32)data >= (s32)b.data;
+}
+
+bool sf24::operator == (const sf24& b) const
+{
+	return data == b.data;
+}
+
+bool sf24::operator != (const sf24& b) const
+{
+	return data != b.data;
+}
+
 sf24 sf24::create_from_data(u32 data)
 {
 	sf24 result;	
@@ -86,7 +116,49 @@ sf24 sf24::create_from_data(u32 data)
 	return result;
 }
 
+bool sf24::in_range(const sf24& min, const sf24& max) const
+{
+	return (s32)min.data<=(s32)data && (s32)data<=(s32)max.data;
+}
 
+char* sf24::to_string()
+{
+	s16 i = get_int();
+	int sgn=0;
+	u32 f = get_frac();
+	
+	if(i<0) 
+	{
+		i=-i;
+		sgn=1;
+		f=-f;
+	}
+	
+	f=10000+f*10000/256;
+	
+	
+	char si[8];
+	char sf[5];
+	u8 li=0, lf=0;
+	
+	if(i==0) 
+		si[0]='0', li=1;
+	for(;i>0;i/=10)	si[li++]='0'+i%10;
+	if(sgn==1)
+		si[li++]='-';
+	
+	if(f==0) 
+		sf[0]='0', lf=1;
+	for(;f>1;f/=10)	sf[lf++]='0'+f%10;
+	
+	char* result = new char[li+lf+2];
+	u8 k=0;
+	for(;li--;) result[k++]=si[li];
+	result[k++]='.';
+	for(;lf--;) result[k++]=sf[lf];
+	result[k]='\0';
+	return result;
+}
 
 
 

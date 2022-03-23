@@ -2,6 +2,8 @@
 
 #include <gba.h>
 
+char* concat(char delim, ...);
+
 /*! \brief signed fixed 16.8 decimal number 
  */
 class sf24
@@ -27,5 +29,17 @@ public:
 	
 	explicit operator int() const;
 	explicit operator s16() const;
+	
+	bool operator < (const sf24& b) const;
+	bool operator > (const sf24& b) const;
+	bool operator <= (const sf24& b) const;
+	bool operator >= (const sf24& b) const;
+	bool operator == (const sf24& b) const;
+	bool operator != (const sf24& b) const;
+	
+	bool in_range(const sf24& min, const sf24& max) const;
+	
+	char* to_string();
 };
+
 
