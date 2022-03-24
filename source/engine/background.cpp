@@ -48,7 +48,7 @@ void Background::set_map_stream_source(const void* source)
 	map_stream_source = (u16*)source;
 }
 
-void Background::set_scroll(u16 x,u16 y)
+void Background::set_scroll(s16 x,s16 y)
 {		
 	scroll_x = x; 
 	scroll_y = y;
@@ -75,8 +75,10 @@ void Background::build_map()
 			for(int x=0;x<=30;x++)
 			{			
 				int src_offset=x+ tile_offset_x;
-				
-				target_line[(screen_base_x+x)&31] = source_line[src_offset];
+				if(0<=src_offset&&src_offset<width)
+					target_line[(screen_base_x+x)&31] = source_line[src_offset];
+				else
+					target_line[(screen_base_x+x)&31] = 0;
 			}
 		}
 		else

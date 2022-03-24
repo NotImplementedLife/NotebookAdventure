@@ -12,8 +12,8 @@ protected:
 	u16 *char_base_address, *map_base_address;
 	u16 width, height;
 	u16 *map_stream_source;	
-	u16 scroll_x, scroll_y;
-	u16 tile_offset_x, tile_offset_y;
+	s16 scroll_x, scroll_y;
+	s16 tile_offset_x, tile_offset_y;
 	u16 *ptr_bg_hofs, *ptr_bg_vofs;
 	u16 bg_hofs, bg_vofs;
 	
@@ -46,7 +46,7 @@ public:
 	
 	virtual void init();
 		
-	void set_scroll(u16 x,u16 y);
+	void set_scroll(s16 x,s16 y);
 	
 	/*! \brief renders the visible map portion in VRAM
 	 */

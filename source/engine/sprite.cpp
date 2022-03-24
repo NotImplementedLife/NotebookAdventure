@@ -185,8 +185,7 @@ void Sprite::update_position(Camera* cam)
 	else
 	{
 		//attr->set_x(get_actual_x() - cam->get_x() + 240/2);
-		//attr->set_y(get_actual_y() - cam->get_y() + 160/2);
-		//fatal("pr",(s16)pos_x - cam->get_x() - hitbox.left - anchx + 240/2);
+		//attr->set_y(get_actual_y() - cam->get_y() + 160/2);		
 		attr->set_x((s16)pos_x - cam->get_x() - hitbox.left - anchx + 240/2);
 		attr->set_y((s16)pos_y - cam->get_y() - hitbox.top  - anchy + 160/2);		
 	}

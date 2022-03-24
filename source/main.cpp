@@ -88,7 +88,7 @@ public:
 		xheart1->update_visual();
 		xheart1->auto_detect_hitbox();
 		xheart1->set_anchor(ANCHOR_CENTER);
-		xheart2->set_pos(100,100);		
+		xheart1->set_pos(100,100);
 		
 		xheart2=new Sprite(SIZE_16x16, 1);							
 		xheart2->get_visual()->set_frame(0,16);
@@ -96,27 +96,23 @@ public:
 		xheart2->update_visual();
 		xheart2->auto_detect_hitbox();
 		xheart2->set_anchor(ANCHOR_CENTER);
-		xheart2->set_pos(-16,00);
+		xheart2->set_pos(100,70);
 		
-		get_camera()->follow(xheart1);
+		camera->follow(xheart2);
 		
-		xheart1->update_position(get_camera());
-		xheart2->update_position(get_camera());
+		xheart1->update_position(camera);
+		xheart2->update_position(camera);
 		
 	}
 	
 	void on_frame() override
-	{	
-		//fatal("1",(u32)m3);
-		//m3->build_map();
-		xheart2->move(sf24(0,32),0);		
-		xheart1->update_position(get_camera());
-		xheart2->update_position(get_camera());
+	{			
+		xheart2->move(sf24(1,32),-sf24(0,128));
+		xheart1->update_position(camera);
+		xheart2->update_position(camera);
 		
-		if(xheart1->touches(xheart2))
-		{
-			SPRITE_PALETTE[1]=RGB5(0,31,0);		
-		}
+		if(xheart1->touches(xheart2))		
+			SPRITE_PALETTE[1]=RGB5(0,31,0);				
 		else
 			SPRITE_PALETTE[1]=RGB5(31,0,0);
 		
