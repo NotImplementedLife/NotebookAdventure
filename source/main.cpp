@@ -11,17 +11,21 @@
 #include "heart_sprite.h"
 #include "heart_narrow.h"
 
+#include <string.h>
+
 #include <math.h>
 
 class map3 : public Background
 {
 public:
-	map3() : Background(3,2,31,75,105)
+	map3() : Background(3,2,31,75,105) { strcpy(magic,"map3"); }
+	
+	void init() override
 	{
 		Background::load_tiles(notebook_sheetTiles,notebook_sheetTilesLen,true,0);
 		Background::set_map_stream_source(notebook_sheetMap);
 		dmaCopy((u8*)notebook_sheetPal,(u8*)(BG_PALETTE),notebook_sheetPalLen);
-	}
+	}	
 };
 
 #include "dialog_arr.h"
@@ -31,7 +35,9 @@ class map0 : public DialogBackground
 private:
 	Vwf *vwf1, *vwf2, *vwf3;
 public:
-	map0() : DialogBackground(0, 0, 28)
+	map0() : DialogBackground(0, 0, 28) { strcpy(magic,"map0"); }
+	
+	void init() override
 	{
 		load_tiles(dialog_frameTiles);
 		clear_map();
@@ -53,151 +59,83 @@ public:
 	}
 };
 
+class scrollmap : virtual public TextScrollMap
+{
+private:
+	map3 *m3;
+	Sprite *xheart1;
+	Sprite *xheart2;
+public:
+	scrollmap() : TextScrollMap() {}
+	
+	void init() override
+	{	
+		((u32*)(VRAM))[0]++;
+		TextScrollMap::init();
+		
+		m3 = new map3();		
+		m3->set_scroll(0,0);		
+		set_background(3, m3, 1);		
+		
+		SPRITE_PALETTE[1]=RGB5(31,0,0);
+		
+		LOAD_GRIT_SPRITE_TILES(heart_sprite, 8);
+		LOAD_GRIT_SPRITE_TILES(heart_narrow, 16);		
+		
+		xheart1=new Sprite(SIZE_16x16, 1);
+		xheart1->get_visual()->set_frame(0,8);
+		xheart1->get_visual()->set_crt_gfx(0);
+		xheart1->update_visual();
+		xheart1->auto_detect_hitbox();
+		xheart1->set_anchor(ANCHOR_CENTER);
+		xheart2->set_pos(100,100);		
+		
+		xheart2=new Sprite(SIZE_16x16, 1);							
+		xheart2->get_visual()->set_frame(0,16);
+		xheart2->get_visual()->set_crt_gfx(0);
+		xheart2->update_visual();
+		xheart2->auto_detect_hitbox();
+		xheart2->set_anchor(ANCHOR_CENTER);
+		xheart2->set_pos(-16,00);
+		
+		get_camera()->follow(xheart1);
+		
+		xheart1->update_position(get_camera());
+		xheart2->update_position(get_camera());
+		
+	}
+	
+	void on_frame() override
+	{	
+		//fatal("1",(u32)m3);
+		//m3->build_map();
+		xheart2->move(sf24(0,32),0);		
+		xheart1->update_position(get_camera());
+		xheart2->update_position(get_camera());
+		
+		if(xheart1->touches(xheart2))
+		{
+			SPRITE_PALETTE[1]=RGB5(0,31,0);		
+		}
+		else
+			SPRITE_PALETTE[1]=RGB5(31,0,0);
+		
+		
+	}	
+};
+
 int main(void) {
 	irqInit();
 	irqEnable(IRQ_VBLANK);
-	SetMode(MODE_0 | OBJ_ENABLE | OBJ_1D_MAP);	
-		
-	//sf24 a=12, b=-16;
-	//fatal("a",a>=b);
+	SetMode(MODE_0 | OBJ_ENABLE | OBJ_1D_MAP);
 		
 	OamPool::reset();
-	
-	SPRITE_PALETTE[1]=RGB5(31,0,0);
-	
-	LOAD_GRIT_SPRITE_TILES(heart_sprite, 8);
-	LOAD_GRIT_SPRITE_TILES(heart_narrow, 16);		
-	
-	Camera* camera = new Camera(0,0);
-	
-	Sprite* heart1=new Sprite(SIZE_16x16, 1);
-	heart1->get_visual()->set_frame(0,8);
-	heart1->get_visual()->set_crt_gfx(0);
-	heart1->update_visual();
-	heart1->auto_detect_hitbox();
-	heart1->set_anchor(ANCHOR_CENTER);
-	heart1->update_position(camera);
-	
-	Sprite* heart2=new Sprite(SIZE_16x16, 1);
-	heart2->get_visual()->set_frame(0,16);
-	heart2->get_visual()->set_crt_gfx(0);
-	heart2->update_visual();
-	heart2->auto_detect_hitbox();
-	heart2->set_anchor(ANCHOR_CENTER);
-	heart2->set_pos(-30,0);
-	heart2->update_position(camera);
-	
-	//Hitbox hb = heart2->get_hitbox();
-	//fatal("test hitbox",((u32*)&hb)[0]);
-	
-	
-	OamPool::deploy();
-	
-	
-	while (1) 
-	{
-		VBlankIntrWait();
-		scanKeys();
-		int down=keysDown();
-		if(down & KEY_B)
-		{			
-			break;
-		}				
 		
-		heart2->move(sf24(0,32),0);
-		camera->move(0,sf24(0,8));
-		heart1->update_position(camera);
-		heart2->update_position(camera);
-		
-		if(heart1->touches(heart2))
-		{
-			SPRITE_PALETTE[1]=RGB5(0,31,0);
-		}
-		else
-		{
-			SPRITE_PALETTE[1]=RGB5(31,0,0);
-		}			
-		
-		OamPool::deploy();
-	}
+	scrollmap* sm = new scrollmap();
+	sm->init();
+	sm->run();	
 	
-	delete heart1;	
-	OamPool::deploy();
-		//((u32*)VRAM)[0] = *((u32*)&hb);	
-	
-	//int obj1 = OamPool::add_obj(ObjAttribute(SIZE_16x16, 5, 6, 8, 0, 0, 2));
-	
-	//dmaCopy(OamPool::get_object_by_id(obj1), (u32*)VRAM, 8);
-	
-	while (1) VBlankIntrWait();		
-	
-	/*while (1) VBlankIntrWait();	
-	
-	for(int i=0;i<10;i++)
-		for(int j=0;j<i;j++)
-		OamPool::add_obj(ObjAttribute(SIZE_16x16, 20*i, 20*j, 8, 0, 0, 0));
-	
-	
-	OamPool::deploy();
-	for(int i=0;i<10;i+=3)
-		for(int j=0;j<i;j++)
-	{
-		ObjAttribute* obj = OamPool::get_object_by_id(i*(i-1)/2+j);
-		obj->flip_v();
-		obj->flip_h();
-	}
-	OamPool::deploy();
-	
-	for(int i=0;i<10;i++)
-		for(int j=0;j<i;j++)
-	{
-		int id=i*(i-1)/2+j;
-		if(id%3==1) OamPool::remove_obj(id);
-	}
-	OamPool::deploy();	
-	
-	map3 bg3;
-	map0 bg0;	
-	bg0.set_scroll(0,0);	
-		
-	OamPool::deploy();
-	
-
-	int x[300];
-	int y[300];
-	for(int t=0;t<300;t++)
-	{
-		double a=2*3.14159*t/300;
-		x[t]=300+160*cos(a)-120;
-		y[t]=420+160*sin(a)-80;
-	}
-	int t=0;
-	bg0.launch_dialog(2,"text2");
-	bg0.launch_dialog(0,"text0",30);
-	bg0.launch_dialog(1,"text1",30);
-	while (1) {		
-		VBlankIntrWait();
-		scanKeys();
-		int down=keysDown();
-		//if(down & KEY_B)
-		//{
-			//*((u16*)0x4000002) ^=1;
-		//}		
-		if(down & KEY_UP)
-		{
-			bg0.launch_dialog(0,"Hello!");
-		}		
-		VBlankIntrWait();
-		bg3.set_scroll(x[t],y[t]);
-		t++;
-		if(t==300) t=0;
-		bg0.build_map();
-		bg3.build_map();	
-		
-		bg0.key_down(down);
-		bg0.render();
-		OamPool::deploy();
-	}*/
+	delete sm;
 }
 
 

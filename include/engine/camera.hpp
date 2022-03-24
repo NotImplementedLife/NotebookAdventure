@@ -3,10 +3,14 @@
 #include <gba.h>
 #include "utils.hpp"
 
+class Sprite;
+
 class Camera 
 {
+	friend class Sprite;
 private:
 	sf24 x, y;
+	Sprite* target;
 public:
 	Camera();
 	Camera(sf24 x, sf24 y);
@@ -17,4 +21,7 @@ public:
 	void set_y(const sf24& value);
 	
 	void move(sf24 x, sf24 y);
+	
+	void follow(Sprite* spr);
+	
 };

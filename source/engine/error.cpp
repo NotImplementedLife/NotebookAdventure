@@ -9,8 +9,19 @@ const char* __str_hex = "0123456789ABCDEF";
 
 class FatalErrScreen : public DialogBackground
 {	
+private:
+	const char* msg;
+	const char* hint;
+	u32 err_code;
 public:
 	FatalErrScreen(const char* msg,u32 err_code, const char* hint=NULL) : DialogBackground(0, 0, 28)
+	{
+		this->msg = msg;
+		this->err_code = err_code;
+		this->hint = hint;		
+	}
+	
+	void init() override
 	{
 		u32 _0 = 0;
 		CpuFastSet(&_0, BG_PALETTE, 128 | FILL);
@@ -56,7 +67,7 @@ public:
 		
 		BG_PALETTE[bgColor] = RGB5(24,0,0);		
 		BG_PALETTE[hlColor] = RGB5(31,31,0);
-		BG_PALETTE[fgColor] = RGB5(31,31,31);
+		BG_PALETTE[fgColor] = RGB5(31,31,31);		
 	}
 	
 	const int bgColor = 0;
@@ -67,6 +78,7 @@ public:
 void fatal(const char* msg, u32 err_code, const char* hint)
 {
 	FatalErrScreen scr(msg, err_code, hint);
+	scr.init();
 	scr.set_scroll(0,0);	
 	scr.build_map();
 	while (1) {		

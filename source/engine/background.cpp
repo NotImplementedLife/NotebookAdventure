@@ -58,6 +58,9 @@ void Background::set_scroll(u16 x,u16 y)
 	ptr_bg_vofs[0] = bg_vofs = (u16)(scroll_y & 0x00FF);
 }
 
+void Background::init() { }
+
+
 void Background::build_map()
 {		
 	u16 screen_base_x = bg_hofs>>3;
@@ -87,3 +90,17 @@ void Background::build_map()
 }
 
 void Background::render() { }
+
+
+void Background::key_down(u16 keys) { }
+
+void Background::key_held(u16 keys) { }
+	
+void Background::key_up(u16 keys) { }
+
+Background::~Background() = default;
+
+
+
+
+

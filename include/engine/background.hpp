@@ -8,6 +8,7 @@
 class Background
 {
 protected:	
+	char magic[16] = "Background";
 	u16 *char_base_address, *map_base_address;
 	u16 width, height;
 	u16 *map_stream_source;	
@@ -42,18 +43,22 @@ public:
 		\param map_height tilemap height in tiles
 	 */
 	Background(u16 id, u16 char_base,u16 map_base,u16 map_width, u16 map_height);
+	
+	virtual void init();
 		
 	void set_scroll(u16 x,u16 y);
 	
 	/*! \brief renders the visible map portion in VRAM
 	 */
-	void build_map();
+	virtual void build_map();
 	
-	void render();
+	virtual void render();
 	
-	void key_down(u16 keys) {}
+	virtual void key_down(u16 keys);
 	
-	void key_held(u16 keys) {}
+	virtual void key_held(u16 keys);
 	
-	void key_up(u16 keys) {}
+	virtual void key_up(u16 keys);
+	
+	virtual ~Background();
 };

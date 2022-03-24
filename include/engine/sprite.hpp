@@ -3,7 +3,8 @@
 
 #include "oam.hpp"
 #include "utils.hpp"
-#include "camera.hpp"
+
+class Camera;
 
 /*! \def LOAD_GRIT_SPRITE_TILES(res_name, tile_id)
 	\brief macro to copy grit generated binary graphics into OBJ VRAM
@@ -41,7 +42,7 @@ private:
 	u8 frames_count;	
 	u8 crt_gfx_id;
 public:
-	ObjVisual(u8 frames_count);
+	ObjVisual(u8 frames_count);	
 		
 	u8 get_frames_count() const;
 	
@@ -59,8 +60,7 @@ public:
 class Sprite
 {
 public:
-	u16 id;
-	ObjAttribute* attr;
+	u16 id;	
 	u8 anchx, anchy; // sprite anchor (0..255, scaled to hitbox)
 	Hitbox hitbox;
 	ObjVisual* visual;
@@ -70,6 +70,7 @@ public:
 	s16 get_actual_x() const;
 	s16 get_actual_y() const;
 public:
+	ObjAttribute* attr;
 	Sprite(ObjSize size, u16 frames_count);
 	
 	/*! \brief sets sprite hitbox

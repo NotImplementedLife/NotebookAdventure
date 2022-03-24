@@ -44,6 +44,11 @@ sf24 sf24::operator * (const sf24& b) const
 	return create_from_data(res);
 }
 
+sf24 sf24::operator -() const
+{
+	return create_from_data(-data);
+}
+
 void sf24::operator += (const sf24& b)
 {
 	data+=b.data;	

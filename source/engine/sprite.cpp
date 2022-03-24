@@ -1,6 +1,8 @@
 #include "sprite.hpp"
 #include "error.hpp"
 
+#include "camera.hpp"
+
 Hitbox::Hitbox()
 {
 	left = top = width = height = 0;
@@ -67,11 +69,11 @@ ObjVisual::~ObjVisual()
 }
 
 Sprite::Sprite(ObjSize size, u16 frames_count)
-{
+{		
 	id = OamPool::add_obj(ObjAttribute(size,0,0,0));
 	attr = OamPool::get_object_by_id(id);
-	hitbox = Hitbox(size);
-	visual = new ObjVisual(frames_count);	
+	hitbox = Hitbox(size);	
+	visual = new ObjVisual(frames_count);
 }
 
 void Sprite::set_hitbox(u8 left, u8 top, u8 width, u8 height)
@@ -176,14 +178,17 @@ void Sprite::update_visual()
 void Sprite::update_position(Camera* cam)
 {
 	if(cam==NULL)
-	{
+	{		
 		attr->set_x((s16)pos_x);
 		attr->set_y((s16)pos_y);		
 	}
 	else
 	{
-		attr->set_x(get_actual_x() - cam->get_x() + 240/2);
-		attr->set_y(get_actual_y() - cam->get_y() + 160/2);
+		//attr->set_x(get_actual_x() - cam->get_x() + 240/2);
+		//attr->set_y(get_actual_y() - cam->get_y() + 160/2);
+		//fatal("pr",(s16)pos_x - cam->get_x() - hitbox.left - anchx + 240/2);
+		attr->set_x((s16)pos_x - cam->get_x() - hitbox.left - anchx + 240/2);
+		attr->set_y((s16)pos_y - cam->get_y() - hitbox.top  - anchy + 160/2);		
 	}
 }
 
@@ -198,9 +203,7 @@ bool Sprite::touches(Sprite* spr)
 	sf24 x1 = spr->pos_x + spr->hitbox.left;
 	sf24 y1 = spr->pos_y + spr->hitbox.top;
 	s16 w1 = spr->hitbox.width;
-	s16 h1 = spr->hitbox.height;
-	
-	//fatal((x0+w0).to_string(),x0<x1 ? 1:0);
+	s16 h1 = spr->hitbox.height;	
 	
 	return (x0.in_range(x1,x1+w1) || x1.in_range(x0, x0+w0)) 
 	    && (y0.in_range(y1,y1+h1) || y1.in_range(y0, y0+h0));

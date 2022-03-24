@@ -19,7 +19,7 @@ public:
 		\param char_base  VRAM char block base (0..3)
 		\param map_base   VRAM screen block base (0..31)			
 	*/
-	DialogBackground(u16 id, u16 char_base, u16 map_base);
+	DialogBackground(u16 id, u16 char_base, u16 map_base);	
 protected:	
 	/*! \brief loads tileset graphics into its specific VRAM block		
 		\param source     tiles buffer data
@@ -50,7 +50,7 @@ public:
 	
 	/*! \brief builds & updates dialog interface
 	*/
-	void build_map();	
+	void build_map() override;	
 	
 	void render();
 	
@@ -120,6 +120,6 @@ public:
 	 */
 	bool launch_dialog(int dialog_id, const char* msg, u16 cooldown=0);
 		
-	~DialogBackground();
+	virtual ~DialogBackground();
 	
 };

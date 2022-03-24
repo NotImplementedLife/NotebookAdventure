@@ -156,17 +156,19 @@ namespace OamPool
 		if(__oam_ids_hash_table != NULL)
 		{
 			for(int i=0;i<__hash_magic_;i++)
-				delete[] __oam_ids_hash_table[i];			
+				delete[] __oam_ids_hash_table[i];
 		}
 		else
 		{
-			__oam_ids_hash_table = new frag_u32*[__hash_magic_];
-			for(int i=0;i<__hash_magic_;i++)
-			{
-				__oam_ids_hash_table[i] = new frag_u32[1];
-				__oam_ids_hash_table[i][0].hw1 = __oam_ids_hash_table[i][0].hw2 = 0;
-			}
+			__oam_ids_hash_table = new frag_u32*[__hash_magic_];			
 		}				
+		
+		for(int i=0;i<__hash_magic_;i++)
+		{
+			__oam_ids_hash_table[i] = new frag_u32[0+1];
+			__oam_ids_hash_table[i][0].hw1 = 0;
+			__oam_ids_hash_table[i][0].hw2 = 0;
+		}
 	}	
 	
 	void expand_row(frag_u32* &row)
@@ -217,7 +219,7 @@ namespace OamPool
 	}
 	
 	u16 add_obj(ObjAttribute objattr)
-	{
+	{		
 		if(__oam_size==128)
 		{
 			fatal(ERR_OAM_FULL);
@@ -232,7 +234,7 @@ namespace OamPool
 		u16 len = __oam_ids_hash_table[row_id][0].hw1;
 		u16 cap = __oam_ids_hash_table[row_id][0].hw2;
 		if(len>=cap)
-		{			
+		{						
 			expand_row(__oam_ids_hash_table[row_id]);
 		}
 		u16 buff_id = get_free_id();
