@@ -31,14 +31,18 @@ void Background::load_tiles(const void* source,u32 len,bool compressed, u8 palet
 		//                ^=size 
 		len = (*((u32*)source))>>8;
 	}
-	if(palette_displacement>0)
+	if(palette_displacement != 0)
 	{		
-		len/=2;
-		u32 mask = palette_displacement * 0x01010101;
+		len/=2;		
 		u32* cba = (u32*)char_base_address;
 		for(u32 i=0;i<len;i++)
 		{		
-			char_base_address[i] += mask;
+			u32 word = char_base_address[i];			
+			if(word & 0x000000FF) word += palette_displacement <<  0;				
+			if(word & 0x0000FF00) word += palette_displacement <<  8;				
+			if(word & 0x00FF0000) word += palette_displacement << 16;				
+			if(word & 0xFF000000) word += palette_displacement << 24;
+			char_base_address[i] = word;
 		}
 	}
 }

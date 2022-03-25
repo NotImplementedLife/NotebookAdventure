@@ -6,7 +6,7 @@
 
 class Camera;
 
-/*! \def LOAD_GRIT_SPRITE_TILES(res_name, tile_id)
+/*! \def LOAD_GRIT_SPRITE_TILES(res_name, tile_id, palette_start_index)
 	\brief macro to copy grit generated binary graphics into OBJ VRAM
 	\param res_name resource name (usually the image file name, without extension)
 	\param tile_id OBJ tile position 

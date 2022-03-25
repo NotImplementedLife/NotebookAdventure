@@ -22,7 +22,7 @@ public:
 	map3() : Background(3,2,31,75,105) { strcpy(magic,"map3"); }
 	
 	void init() override
-	{
+	{		
 		Background::load_tiles(notebook_sheetTiles,notebook_sheetTilesLen,true,0);
 		Background::set_map_stream_source(notebook_sheetMap);
 		dmaCopy((u8*)notebook_sheetPal,(u8*)(BG_PALETTE),notebook_sheetPalLen);
@@ -55,15 +55,15 @@ public:
 		vwf1->set_text_color(15);
 		vwf2->set_text_color(15);		
 		vwf3->set_text_color(15);
-		launch_dialog(0,"Test title 1",30);
-		launch_dialog(1,"Days go past, and days come still, All is old and all is new, What is well and what is ill, You imagine and construe Do not hope and do not fear, Waves that leap like waves must fall; Should they praise or should they jeer,Look but coldly on it all.");
+		launch_dialog(0,"Test title 1",200);
 	}	
 };
 
-class scrollmap : virtual public TextScrollMap
+class scrollmap : public TextScrollMap
 {
 private:
-	map3 *m3;
+	map0 *m0;
+	//map3 *m3;
 	Sprite *xheart1;
 	Sprite *xheart2;
 	Sprite *player;
@@ -73,13 +73,16 @@ public:
 	scrollmap() : TextScrollMap() {}
 	
 	void init() override
-	{	
-		((u32*)(VRAM))[0]++;
+	{			
 		TextScrollMap::init();
 		
-		m3 = new map3();		
-		m3->set_scroll(0,0);		
-		set_background(3, m3, 1);		
+		m0 = new map0();
+		m0->set_scroll(0,0);		
+		set_background(0, m0, 0x00);
+		
+		Background* m3 = new map3();
+		//m3->set_scroll(0,0);		
+		set_background(3, m3, 0x10);
 		
 		SPRITE_PALETTE[1]=RGB5(31,0,0);
 		
@@ -94,6 +97,7 @@ public:
 		xheart1->auto_detect_hitbox();
 		xheart1->set_anchor(ANCHOR_CENTER);
 		xheart1->set_pos(100,500);
+				
 		
 		xheart2=new Sprite(SIZE_16x16, 1);							
 		xheart2->get_visual()->set_frame(0,16);
@@ -111,11 +115,15 @@ public:
 		player->set_anchor(ANCHOR_CENTER);
 		player->set_pos(70,500);
 		
+		register_sprite(xheart1);
+		register_sprite(xheart2);
+		register_sprite(player);
+		
 		set_focus(player);
 		
-		xheart1->update_position(camera);
-		xheart2->update_position(camera);
-		player->update_position(camera);
+		//xheart1->update_position(camera);
+		//xheart2->update_position(camera);
+		//player->update_position(camera);
 		
 	}
 	
@@ -142,9 +150,6 @@ public:
 			ay-=sf24(0,1);		
 		else if(ay<0)
 			ay+=sf24(0,1);
-				
-		xheart1->update_position(camera);
-		xheart2->update_position(camera);
 		
 		if(xheart1->touches(xheart2))		
 			SPRITE_PALETTE[1]=RGB5(0,31,0);				
@@ -167,6 +172,8 @@ public:
 	}
 };
 
+#include "level.hpp"
+
 int main(void) {
 	irqInit();
 	irqEnable(IRQ_VBLANK);
@@ -174,11 +181,17 @@ int main(void) {
 		
 	OamPool::reset();
 		
-	scrollmap* sm = new scrollmap();
-	sm->init();
-	sm->run();	
+	//scrollmap* sm = new scrollmap();
+	//sm->init();
+	//sm->run();	
+	//delete sm;
 	
-	delete sm;
+	Level* lvl = new Level();
+	lvl->init();
+	lvl->run();
+	delete lvl;
+	
+	
 }
 
 

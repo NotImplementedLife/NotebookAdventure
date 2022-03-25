@@ -8,6 +8,7 @@
 #include "engine/font.hpp"
 #include "engine/oam.hpp"
 #include "engine/scriptable.hpp"
+#include "engine/scrollmap.hpp"
 #include "engine/sprite.hpp"
 #include "engine/utils.hpp"
 #include "engine/vwf.hpp"

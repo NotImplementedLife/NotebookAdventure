@@ -16,7 +16,9 @@
 # compress LZ77
 -gzl
 
+-gTfc00fc
+
 -aw600
 -ah840
 
--pn150
+-pn32

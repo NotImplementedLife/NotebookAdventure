@@ -9,6 +9,10 @@ TextScrollMap::TextScrollMap()
 		scroll_speed[i] = 0x10;
 	}
 	camera = new Camera();
+	
+	sprites_cap = 1;
+	sprites = new Sprite*[sprites_cap];
+	sprites_count=0;
 }
 
 void TextScrollMap::init() { }
@@ -46,12 +50,14 @@ void TextScrollMap::run()
 		on_key_held(keys_held);
 		on_key_up(keys_up);
 		
-		on_frame();		
+		on_frame();	
+		for(int i=0;i<sprites_count;i++)
+			sprites[i]->update_position(camera);
 						
 		for(int i=0;i<4;i++)		
 			if(bg[i])
-			{		
-				bg[i]->set_scroll(camera->get_x(), camera->get_y());
+			{						
+				bg[i]->set_scroll((camera->get_x() * scroll_speed[i])>>4, (camera->get_y() * scroll_speed[i])>>4);
 				bg[i]->build_map();
 				bg[i]->key_down(keys_down);
 				bg[i]->key_held(keys_held);
@@ -66,6 +72,21 @@ void TextScrollMap::run()
 Camera* TextScrollMap::get_camera() const
 { 
 	return camera;
+}
+
+void TextScrollMap::register_sprite(Sprite* spr)
+{
+	if(sprites_count==sprites_cap)
+	{
+		sprites_cap *= 2;
+		Sprite** container = new Sprite*[sprites_cap];
+		for(int i=0;i<sprites_count;i++)
+			container[i] = sprites[i];		
+		delete[] sprites;
+		sprites = container;
+	}
+	sprites[sprites_count++]=spr;
+	
 }
 
 TextScrollMap::~TextScrollMap()
