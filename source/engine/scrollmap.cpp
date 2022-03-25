@@ -21,6 +21,10 @@ void TextScrollMap::set_background(u8 i, Background* bgi, u8 scroll_speedi)
 
 void TextScrollMap::on_frame() { }
 
+void TextScrollMap::on_key_down(int keys) { }
+void TextScrollMap::on_key_held(int keys) { }
+void TextScrollMap::on_key_up(int keys) { } 
+
 #include "error.hpp"
 
 void TextScrollMap::run()
@@ -36,7 +40,11 @@ void TextScrollMap::run()
 		scanKeys();
 		int keys_down = keysDown();
 		int keys_held = keysHeld();
-		int keys_up = keysUp();
+		int keys_up = keysUp();		
+
+		on_key_down(keys_down);
+		on_key_held(keys_held);
+		on_key_up(keys_up);
 		
 		on_frame();		
 						

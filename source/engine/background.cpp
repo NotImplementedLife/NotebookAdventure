@@ -69,7 +69,7 @@ void Background::build_map()
 	for(int y=0;y<=20;y++)
 	{
 		u16* target_line = ((u16*)map_base_address) + (((screen_base_y+y)&31)<<5);
-		if(0<=tile_offset_y+y && tile_offset_y+y<=height+1)
+		if(0<=tile_offset_y+y && tile_offset_y+y<height)
 		{
 			u16* source_line = ((u16*)map_stream_source) + width*(tile_offset_y+y);		
 			for(int x=0;x<=30;x++)

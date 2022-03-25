@@ -43,4 +43,5 @@ public:
 	char* to_string();
 };
 
+void reindex_palette(u16* target, u32 byteslen, u8 offset);
 

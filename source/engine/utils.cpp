@@ -165,9 +165,18 @@ char* sf24::to_string()
 	return result;
 }
 
-
-
-
+void reindex_palette(u16* target, u32 byteslen, u8 offset)
+{
+	u32 len = byteslen/2;	
+	for(int i=0;i<len;i++)
+		if(target[i])
+		{
+			u16 x=target[i];
+			if(x&0xFF00) x+=offset<<8;
+			if(x&0x00FF) x+=offset;		
+			target[i]=x;
+		}
+}
 
 
 

@@ -22,6 +22,10 @@ public:
 	
 	virtual void on_frame();
 	
+	virtual void on_key_down(int keys);
+	virtual void on_key_held(int keys);
+	virtual void on_key_up(int keys);
+	
 	Camera* get_camera() const;
 	
 	virtual ~TextScrollMap();

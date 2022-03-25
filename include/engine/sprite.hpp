@@ -10,8 +10,13 @@ class Camera;
 	\brief macro to copy grit generated binary graphics into OBJ VRAM
 	\param res_name resource name (usually the image file name, without extension)
 	\param tile_id OBJ tile position 
+	\param palette_start_index paltte correction index (useful if loading different sprites with own palettes)
  */
-#define LOAD_GRIT_SPRITE_TILES(res_name, tile_id)  dmaCopy( res_name ## Tiles,(u8*)SPR_VRAM((tile_id)), res_name ## TilesLen)
+#define LOAD_GRIT_SPRITE_TILES(res_name, tile_id, palette_start_index) \
+	dmaCopy( res_name ## Tiles,(u8*)SPR_VRAM((tile_id)), res_name ## TilesLen); \
+	dmaCopy( ((u8*)(res_name ## Pal)) + 2, (u16*)(SPRITE_PALETTE)+palette_start_index, (res_name ## PalLen)-2); \
+	reindex_palette((u16*)SPR_VRAM((tile_id)), res_name ## TilesLen, (palette_start_index)-1);
+	
 
 class Hitbox
 {
