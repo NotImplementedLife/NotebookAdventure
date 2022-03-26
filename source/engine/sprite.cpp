@@ -3,6 +3,8 @@
 
 #include "camera.hpp"
 
+#include <stdarg.h>
+
 Hitbox::Hitbox()
 {
 	left = top = width = height = 0;
@@ -30,6 +32,13 @@ ObjVisual::ObjVisual(u8 frames_count)
 {
 	this->frames_count = frames_count;
 	frames = new u16[frames_count];
+	framesets = new u8[64]; // 8 animation framesets, max 8 frames each
+	
+	anim_enabled = false;
+	anim_fset=0;
+	
+	max_ticks = 1;
+	crt_ticks = 0;
 }
 
 u8 ObjVisual::get_frames_count() const
@@ -51,16 +60,70 @@ void ObjVisual::set_frame(int id, u16 obj_tile_index)
 	frames[id]=obj_tile_index;
 }
 
+void ObjVisual::set_ticks(u8 ticks)
+{
+	max_ticks = ticks;
+}
+
+void ObjVisual::set_animation_frames(u8 frameset_id, ...)
+{
+	va_list args;
+	va_start(args,frameset_id);
+	u8 k=0;
+	for(u8 x; k<8 && ((x = va_arg(args,int)) != 0xFF); k++)
+	{
+		framesets[(frameset_id<<3)+k]=x;	
+	}	
+	for(;k<8;k++) 
+	{
+		framesets[(frameset_id<<3)+k]=0xFF;
+	}	
+	
+	va_end(args);	
+}
+
+void ObjVisual::set_animation_track(u8 frameset_id)
+{
+	if(frameset_id>=8)
+		fatal(ERR_ARG_OUT_OF_RANGE, "ObjVisual::set_animation_track()");
+	
+	anim_enabled = true;
+	anim_fset=frameset_id;		
+	anim_id = (frameset_id<<3);
+}
+
 u16 ObjVisual::get_crt_gfx() const
 {
-	return frames[crt_gfx_id];
+	if(!anim_enabled)
+		return frames[crt_gfx_id];	
+	
+	return frames[framesets[anim_id]];
 }
 	
 void ObjVisual::set_crt_gfx(int frame_id)
 {
 	if(frame_id>=frames_count)
 		fatal(ERR_ARG_OUT_OF_RANGE, "ObjVisual::set_crt_gfx()");
+	anim_enabled = false;
 	crt_gfx_id=frame_id;
+}
+
+void ObjVisual::update()
+{
+	if(!anim_enabled) 
+		return;
+	crt_ticks++;
+	if(crt_ticks>=max_ticks)
+	{
+		crt_ticks=0;
+		// next anim frame 
+		u8 index = anim_id & 7;
+		anim_id &= ~7;
+		
+		index=(index+1)&7;		
+		if(framesets[anim_id | index]!=0xFF) 
+			anim_id |= index;
+	}
 }
 
 ObjVisual::~ObjVisual()
@@ -85,11 +148,11 @@ void Sprite::auto_detect_hitbox()
 {
 	u32* tileaddr = SPR_VRAM(attr->get_tile_index());	
 	bool _1D = REG_DISPCNT & OBJ_1D_MAP;
-	Hitbox hb = Hitbox(attr->get_size());
+	Hitbox hb(attr->get_size());
 	u8 wcnt = hb.width>>3;
 	u8 hcnt = hb.height>>3;
 	
-	u8 x0=hitbox.width, y0=hitbox.height, x1=0, y1=0;
+	u8 x0=hb.width, y0=hb.height, x1=0, y1=0;
 	if(_1D)
 	{
 		u8 *line = new u8[8];
@@ -102,7 +165,7 @@ void Sprite::auto_detect_hitbox()
 					*((u32*)line + 1) = *(tileaddr++);					
 					for(int x=0;x<8;x++)					
 						if(line[x]) // non-transparent pixel
-						{							
+						{													
 							u8 rx = (tx<<3)|x;
 							u8 ry = (ty<<3)|y;							
 							if(rx < x0) x0=rx;
@@ -141,7 +204,7 @@ ObjVisual* Sprite::get_visual() const
 void Sprite::set_anchor(u8 x, u8 y)
 {
 	anchx = (x * hitbox.width) >> 8;
-	anchy = (y * hitbox.height) >> 8;
+	anchy = (y * hitbox.height) >> 8;	
 }
 
 void Sprite::set_x(sf24 px) { pos_x = px; }
@@ -160,6 +223,16 @@ void Sprite::move(sf24 dx, sf24 dy)
 	pos_y += dy;
 }
 
+sf24 Sprite::get_pos_x() const
+{
+	return pos_x;
+}
+
+sf24 Sprite::get_pos_y() const
+{
+	return pos_y;
+}
+
 s16 Sprite::get_actual_x() const
 {
 	return (s16)pos_x - hitbox.left - anchx;
@@ -172,6 +245,7 @@ s16 Sprite::get_actual_y() const
 
 void Sprite::update_visual()
 {
+	visual->update();
 	attr->set_tile_index(visual->get_crt_gfx());
 }
 
@@ -183,12 +257,29 @@ void Sprite::update_position(Camera* cam)
 		attr->set_y((s16)pos_y);		
 	}
 	else
-	{
-		//attr->set_x(get_actual_x() - cam->get_x() + 240/2);
-		//attr->set_y(get_actual_y() - cam->get_y() + 160/2);		
-		attr->set_x((s16)pos_x - cam->get_x() - hitbox.left - anchx + 240/2);
-		attr->set_y((s16)pos_y - cam->get_y() - hitbox.top  - anchy + 160/2);		
+	{		
+		attr->set_x((s16)pos_x - hitbox.left - anchx - cam->get_x() + 240/2);
+		attr->set_y((s16)pos_y - hitbox.top  - anchy - cam->get_y() + 160/2);
 	}
+}
+
+sf24 Sprite::get_top_coord() const
+{
+	return pos_y - anchy;
+}
+
+sf24 Sprite::get_bottom_coord() const
+{
+	return pos_y + hitbox.height-anchy;
+}
+
+sf24 Sprite::get_left_coord() const
+{
+	return pos_x - anchx;
+}
+sf24 Sprite::get_right_coord() const
+{
+	return pos_x + hitbox.width-anchx;
 }
 
 bool Sprite::touches(Sprite* spr)

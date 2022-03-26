@@ -70,7 +70,7 @@ void DialogBackground::key_down(u16 keys)
 		
 		if(_cooldown[active_dialog_id] && caret_waiting)
 		{
-			if(_cooldown[active_dialog_id]==1)								
+			if(_cooldown[active_dialog_id]==1)
 			{
 				caret_waiting = 0;
 				obj_caret->hide();		

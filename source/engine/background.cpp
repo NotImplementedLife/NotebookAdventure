@@ -18,6 +18,7 @@ Background::Background(u16 id, u16 char_base,u16 map_base,u16 map_width, u16 map
 	height = map_height;
 	ptr_bg_hofs = PTR_BG_HOFS(id);
 	ptr_bg_vofs = PTR_BG_VOFS(id);
+	old_x=old_y=0x8000;
 }
 
 void Background::load_tiles(const void* source,u32 len,bool compressed, u8 palette_displacement)
@@ -64,35 +65,160 @@ void Background::set_scroll(s16 x,s16 y)
 
 void Background::init() { }
 
+u16 abs(s16 x) { return x<0?-x:x;}
 
 void Background::build_map()
 {		
 	u16 screen_base_x = bg_hofs>>3;
 	u16 screen_base_y = bg_vofs>>3;	
 	
-	for(int y=0;y<=20;y++)
+	if(old_x==(s16)0x8000 || (abs(old_x-scroll_x)>=30 || abs(old_y-scroll_y)>=20))
 	{
-		u16* target_line = ((u16*)map_base_address) + (((screen_base_y+y)&31)<<5);
-		if(0<=tile_offset_y+y && tile_offset_y+y<height)
+		for(int y=0;y<=20;y++)
 		{
-			u16* source_line = ((u16*)map_stream_source) + width*(tile_offset_y+y);		
-			for(int x=0;x<=30;x++)
-			{			
-				int src_offset=x+ tile_offset_x;
-				if(0<=src_offset&&src_offset<width)
-					target_line[(screen_base_x+x)&31] = source_line[src_offset];
-				else
+			u16* target_line = ((u16*)map_base_address) + (((screen_base_y+y)&31)<<5);
+			if(0<=tile_offset_y+y && tile_offset_y+y<height)
+			{
+				u16* source_line = ((u16*)map_stream_source) + width*(tile_offset_y+y);		
+				for(int x=0;x<=30;x++)
+				{			
+					int src_offset=x+ tile_offset_x;
+					if(0<=src_offset&&src_offset<width)
+						target_line[(screen_base_x+x)&31] = source_line[src_offset];
+					else
+						target_line[(screen_base_x+x)&31] = 0;
+				}
+			}
+			else
+			{
+				for(int x=0;x<=30;x++)
+				{							
 					target_line[(screen_base_x+x)&31] = 0;
-			}
+				}
+			}					
+		}		
+	}	
+	else 
+	{
+		if(old_x<scroll_x)
+		{						
+			for(int y=0;y<=20;y++)
+			{
+				int d=scroll_x-old_x+8;
+				u16* target_line = ((u16*)map_base_address) + (((screen_base_y+y)&31)<<5);				
+				if(0<=tile_offset_y+y && tile_offset_y+y<height)
+				{
+					u16* source_line = ((u16*)map_stream_source) + width*(tile_offset_y+y);												
+					for(int x=31;d>0;x--)
+					{			
+						int src_offset=x+ tile_offset_x;
+						if(0<=src_offset&&src_offset<width)
+							target_line[(screen_base_x+x)&31] = source_line[src_offset];
+						else
+							target_line[(screen_base_x+x)&31] = 0;
+						d-=8;						
+					}					
+				}
+				else
+				{
+					for(int x=0;x<=30;x++)
+					{							
+						target_line[(screen_base_x+x)&31] = 0;
+					}
+				}						
+			}			
 		}
-		else
+		else if(old_x>scroll_x)
 		{
-			for(int x=0;x<=30;x++)
-			{							
-				target_line[(screen_base_x+x)&31] = 0;
-			}
-		}					
+			for(int y=0;y<=20;y++)
+			{
+				int d=old_x-scroll_x;
+				u16* target_line = ((u16*)map_base_address) + (((screen_base_y+y)&31)<<5);				
+				if(0<=tile_offset_y+y && tile_offset_y+y<height)
+				{
+					u16* source_line = ((u16*)map_stream_source) + width*(tile_offset_y+y);												
+					for(int x=0;d>0;x++)
+					{			
+						int src_offset=x+ tile_offset_x;
+						if(0<=src_offset&&src_offset<width)
+							target_line[(screen_base_x+x)&31] = source_line[src_offset];
+						else
+							target_line[(screen_base_x+x)&31] = 0;
+						d-=8;						
+					}					
+				}
+				else
+				{
+					for(int x=0;x<=30;x++)
+					{							
+						target_line[(screen_base_x+x)&31] = 0;
+					}
+				}						
+			}	
+		}
+		
+		if(old_y<scroll_y)
+		{	
+			int d=scroll_y-old_y;
+			for(int y=20;d>0;y--)
+			{				
+				u16* target_line = ((u16*)map_base_address) + (((screen_base_y+y)&31)<<5);				
+				if(0<=tile_offset_y+y && tile_offset_y+y<height)
+				{
+					u16* source_line = ((u16*)map_stream_source) + width*(tile_offset_y+y);												
+					for(int x=0;x<=30;x++)
+					{			
+						int src_offset=x+ tile_offset_x;
+						if(0<=src_offset&&src_offset<width)
+							target_line[(screen_base_x+x)&31] = source_line[src_offset];
+						else
+							target_line[(screen_base_x+x)&31] = 0;
+						d-=8;						
+					}					
+				}
+				else
+				{
+					for(int x=0;x<=30;x++)
+					{							
+						target_line[(screen_base_x+x)&31] = 0;
+					}
+				}						
+				d-=8;
+			}	
+		}
+		else if(old_y>scroll_y)
+		{	
+			int d=old_y-scroll_y;
+			for(int y=0;d>0;y++)
+			{				
+				u16* target_line = ((u16*)map_base_address) + (((screen_base_y+y)&31)<<5);				
+				if(0<=tile_offset_y+y && tile_offset_y+y<height)
+				{
+					u16* source_line = ((u16*)map_stream_source) + width*(tile_offset_y+y);												
+					for(int x=0;x<=30;x++)
+					{			
+						int src_offset=x+ tile_offset_x;
+						if(0<=src_offset&&src_offset<width)
+							target_line[(screen_base_x+x)&31] = source_line[src_offset];
+						else
+							target_line[(screen_base_x+x)&31] = 0;
+						d-=8;						
+					}					
+				}
+				else
+				{
+					for(int x=0;x<=30;x++)
+					{							
+						target_line[(screen_base_x+x)&31] = 0;
+					}
+				}						
+				d-=8;
+			}	
+		}
 	}
+	
+	old_x=scroll_x;
+	old_y=scroll_y;
 }
 
 void Background::render() { }

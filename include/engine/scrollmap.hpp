@@ -15,7 +15,7 @@ protected:
 	Camera* camera;
 	
 	Sprite** sprites;
-	u16 sprites_count, sprites_cap;
+	u16 sprites_count, sprites_cap;	
 public:
 	TextScrollMap();
 	

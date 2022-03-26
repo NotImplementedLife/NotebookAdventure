@@ -12,10 +12,15 @@ class Camera;
 	\param tile_id OBJ tile position 
 	\param palette_start_index paltte correction index (useful if loading different sprites with own palettes)
  */
-#define LOAD_GRIT_SPRITE_TILES(res_name, tile_id, palette_start_index) \
+#define LOAD_GRIT_SPRITE_TILES(res_name, tile_id, palette_start_index) {\
 	dmaCopy( res_name ## Tiles,(u8*)SPR_VRAM((tile_id)), res_name ## TilesLen); \
-	dmaCopy( ((u8*)(res_name ## Pal)) + 2, (u16*)(SPRITE_PALETTE)+palette_start_index, (res_name ## PalLen)-2); \
-	reindex_palette((u16*)SPR_VRAM((tile_id)), res_name ## TilesLen, (palette_start_index)-1);
+	if(palette_start_index!=0) { \
+		dmaCopy( ((u8*)(res_name ## Pal)) + 2, (u16*)(SPRITE_PALETTE)+palette_start_index, (res_name ## PalLen)-2); \
+		reindex_palette((u16*)SPR_VRAM((tile_id)), res_name ## TilesLen, (palette_start_index)-1);\
+	} else  \
+		dmaCopy( ((u8*)(res_name ## Pal)), (u16*)(SPRITE_PALETTE), (res_name ## PalLen)); \
+	}
+	
 	
 
 class Hitbox
@@ -46,6 +51,15 @@ private:
 	u16* frames;
 	u8 frames_count;	
 	u8 crt_gfx_id;
+	
+	bool anim_enabled;
+	u8 anim_fset;
+	u8 anim_id;
+	
+	u8* framesets;
+	
+	u8 max_ticks;
+	u8 crt_ticks;
 public:
 	ObjVisual(u8 frames_count);	
 		
@@ -55,12 +69,29 @@ public:
 		
 	void set_frame(int id, u16 obj_tile_index);
 	
-	u16 get_crt_gfx() const;
+	void set_animation_frames(u8 frameset_id, ...);
+	
+	void set_animation_track(u8 frameset_id);	
+	
+	void set_ticks(u8 ticks);
+	
+	u16 get_crt_gfx() const;	
 	
 	void set_crt_gfx(int frame_id);
 	
+	void update();
+	
 	~ObjVisual();
 };
+
+const int ANIM_FRAMES_0 = 0;
+const int ANIM_FRAMES_1 = 0;
+const int ANIM_FRAMES_2 = 0;
+const int ANIM_FRAMES_3 = 0;
+const int ANIM_FRAMES_4 = 0;
+const int ANIM_FRAMES_5 = 0;
+const int ANIM_FRAMES_6 = 0;
+const int ANIM_FRAMES_7 = 0;
 
 class Sprite
 {
@@ -101,6 +132,9 @@ public:
 	void set_pos(sf24 px, sf24 py);
 	void move(sf24 dx, sf24 dy);
 	
+	sf24 get_pos_x() const;
+	sf24 get_pos_y() const;
+	
 	/*! \brief get sprite visual 
 		\return sprite visual
 	 */
@@ -114,6 +148,12 @@ public:
 		\return true is sprites are collided
 	 */
 	bool touches(Sprite* spr);
+	
+	sf24 get_top_coord() const;
+	sf24 get_left_coord() const;
+	sf24 get_right_coord() const;
+	sf24 get_bottom_coord() const;
+	
 	
 	~Sprite();
 };

@@ -113,7 +113,7 @@ public:
 		player->update_visual();
 		player->auto_detect_hitbox();
 		player->set_anchor(ANCHOR_CENTER);
-		player->set_pos(70,500);
+		player->set_pos(70,500);		
 		
 		register_sprite(xheart1);
 		register_sprite(xheart2);
@@ -140,7 +140,7 @@ public:
 	
 	void on_frame() override
 	{	
-		focus->move(ax, ay);
+		focus->move(ax, ay); 
 		if(ax>0)	
 			ax-=sf24(0,1);		
 		else if(ax<0)

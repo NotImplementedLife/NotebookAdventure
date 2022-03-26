@@ -52,12 +52,20 @@ void TextScrollMap::run()
 		
 		on_frame();	
 		for(int i=0;i<sprites_count;i++)
+		{
+			sprites[i]->update_visual();
 			sprites[i]->update_position(camera);
+		}
 						
 		for(int i=0;i<4;i++)		
 			if(bg[i])
 			{						
-				bg[i]->set_scroll((camera->get_x() * scroll_speed[i])>>4, (camera->get_y() * scroll_speed[i])>>4);
+				if(scroll_speed[i]==0)
+					bg[i]->set_scroll(0,0);
+				else 
+					bg[i]->set_scroll(
+						((camera->get_x() * scroll_speed[i])>>4)-240/2, 
+						((camera->get_y() * scroll_speed[i])>>4)-160/2);
 				bg[i]->build_map();
 				bg[i]->key_down(keys_down);
 				bg[i]->key_held(keys_held);
