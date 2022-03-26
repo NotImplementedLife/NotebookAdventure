@@ -4,6 +4,7 @@
 #include "camera.hpp"
 
 #include <stdarg.h>
+#include <string.h>
 
 Hitbox::Hitbox()
 {
@@ -131,12 +132,13 @@ ObjVisual::~ObjVisual()
 	delete[] frames;
 }
 
-Sprite::Sprite(ObjSize size, u16 frames_count)
+Sprite::Sprite(ObjSize size, u16 frames_count, const char* _class)
 {		
 	id = OamPool::add_obj(ObjAttribute(size,0,0,0));
 	attr = OamPool::get_object_by_id(id);
 	hitbox = Hitbox(size);	
 	visual = new ObjVisual(frames_count);
+	this->_class=_class;
 }
 
 void Sprite::set_hitbox(u8 left, u8 top, u8 width, u8 height)
@@ -284,19 +286,24 @@ sf24 Sprite::get_right_coord() const
 
 bool Sprite::touches(Sprite* spr)
 {
-	sf24 x0 = pos_x + hitbox.left;
-	sf24 y0 = pos_y + hitbox.top;
+	sf24 x0 = pos_x - anchx;
+	sf24 y0 = pos_y -anchy;
 	s16 w0 = hitbox.width;
 	s16 h0 = hitbox.height;	
 	
 	
-	sf24 x1 = spr->pos_x + spr->hitbox.left;
-	sf24 y1 = spr->pos_y + spr->hitbox.top;
+	sf24 x1 = spr->pos_x - spr->anchx;
+	sf24 y1 = spr->pos_y - spr->anchy;
 	s16 w1 = spr->hitbox.width;
 	s16 h1 = spr->hitbox.height;	
 	
 	return (x0.in_range(x1,x1+w1) || x1.in_range(x0, x0+w0)) 
 	    && (y0.in_range(y1,y1+h1) || y1.in_range(y0, y0+h0));
+}
+
+bool Sprite::is_of_class(const char *xclass)
+{
+	return !strcmp(_class, xclass);
 }
 
 Sprite::~Sprite()

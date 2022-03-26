@@ -7,6 +7,7 @@
 #include "player.h"
 #include "dialog_frame.h"
 #include "dialog_arr.h"
+#include "spikes.h"
 
 #include <string.h>
 
@@ -165,6 +166,18 @@ public:
 	}
 };
 
+class Spikes : public Sprite
+{
+public:
+	Spikes(ObjSize size) : Sprite(size, 1, "spikes")
+	{
+		get_visual()->set_frame(0,0x0280);
+		get_visual()->set_crt_gfx(0);
+		update_visual();
+		auto_detect_hitbox();
+		set_anchor(ANCHOR_BOTTOM_LEFT);
+	}
+};
 
 class LevelDialog : public DialogBackground
 {
@@ -188,9 +201,16 @@ public:
 	}	
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Level::Level(const u8* lvl_src) : TextScrollMap()
+{
+	set_blocks_data(lvl_src);
+}
+
 void Level::init() 
-{		
-	set_blocks_data(test_level_bin);
+{			
+	LOAD_GRIT_SPRITE_TILES(spikes, 0x280, 48);
 
 	LevelBackgroundBage* bg_page = new LevelBackgroundBage();
 	set_background(3, bg_page, 0x10);
@@ -215,6 +235,8 @@ void Level::init()
 	
 	//set_focus(explorer);
 	set_focus(player);
+	
+	add_spikes(330,120,9);
 }
 
 void Level::on_frame() 
@@ -257,6 +279,18 @@ void Level::on_frame()
 	}
 	
 	player->render();
+	
+	for(int i=0;i<sprites_count;i++)
+	{
+		if(sprites[i]->is_of_class("spikes"))
+		{
+			if(player->touches(sprites[i]))
+			{
+				//dialog->launch_dialog(0,"dead",10);
+				dialog->launch_dialog(0,sf24(sprites[i]->hitbox.width).to_string(),10);
+			}
+		}
+	}
 	
 	//dialog->launch_dialog(0,player->pos_y.to_string(),10);
 }
@@ -320,9 +354,9 @@ void Level::on_key_held(int keys)
 		focus->attr->set_flip_h(1);
 		
 		int on_right = get_block_data((int)(player->get_right_coord())+1,(int)focus->get_pos_y()-2);
-		on_right |= get_block_data((int)(player->get_left_coord())+1,(int)focus->get_pos_y()-10);
-		on_right |= get_block_data((int)(player->get_left_coord())+1,(int)focus->get_pos_y()-18);
-		on_right |= get_block_data((int)(player->get_left_coord())+1,(int)focus->get_pos_y()-26);
+		on_right |= get_block_data((int)(player->get_right_coord())+1,(int)focus->get_pos_y()-10);
+		on_right |= get_block_data((int)(player->get_right_coord())+1,(int)focus->get_pos_y()-18);
+		on_right |= get_block_data((int)(player->get_right_coord())+1,(int)focus->get_pos_y()-26);
 		
 		if(on_right!=1)
 			player->charge_v(sf24(2),0);
@@ -348,4 +382,35 @@ void Level::set_focus(Sprite* spr)
 	focus=spr;	
 	camera->follow(focus);	
 	focus->update_position(camera);
+}
+
+
+void Level::add_spikes(s16 x, s16 y, s8 len)
+{
+	while(len>=4)
+	{
+		Spikes* spikes = new Spikes(SIZE_32x8);
+		spikes->set_pos(x,y);
+		x+=32;
+		len-=4;
+		register_sprite(spikes);
+	}
+	while(len>=2)
+	{
+		Spikes* spikes = new Spikes(SIZE_16x8);
+		spikes->set_pos(x,y);
+		x+=16;
+		len-=2;
+		register_sprite(spikes);
+	}	
+	while(len>=1)
+	{
+		Spikes* spikes = new Spikes(SIZE_8x8);
+		spikes->set_pos(x,y);
+		x+=8;
+		len-=1;
+		register_sprite(spikes);
+	}
+	
+	
 }

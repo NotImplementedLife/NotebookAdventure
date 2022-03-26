@@ -16,9 +16,13 @@ private:
 	
 	DialogBackground* dialog;
 public:
+	Level(const u8* lvl_src);
+
 	void init() override;
 	
 	void on_frame() override;
+	
+	void add_spikes(s16 x,s16 y,s8 len);
 	
 	void set_focus(Sprite* spr);
 	
