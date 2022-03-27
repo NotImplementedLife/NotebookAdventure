@@ -12,6 +12,10 @@ private:
 	
 	Sprite* focus;
 	
+	Sprite* cat;
+	
+	Sprite* hole;
+	
 	const u8* blocks_data;
 	
 	DialogBackground* dialog;
@@ -33,6 +37,4 @@ public:
 	void set_blocks_data(const u8* src);
 	
 	u8 get_block_data(s16 x, s16 y) const;
-	
-	
 };

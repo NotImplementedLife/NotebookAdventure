@@ -8,6 +8,7 @@
 #include "dialog_frame.h"
 #include "dialog_arr.h"
 #include "spikes.h"
+#include "burned_hole.h"
 
 #include <string.h>
 
@@ -179,6 +180,19 @@ public:
 	}
 };
 
+class Hole : public Sprite
+{
+public:
+	Hole(): Sprite(SIZE_32x32,1,"hole")
+	{
+		get_visual()->set_frame(0,0x0288);
+		get_visual()->set_crt_gfx(0);
+		set_hitbox(2,2,28,28);
+		update_visual();
+		set_anchor(ANCHOR_CENTER);
+	}
+};
+
 class LevelDialog : public DialogBackground
 {
 private:
@@ -206,11 +220,13 @@ public:
 Level::Level(const u8* lvl_src) : TextScrollMap()
 {
 	set_blocks_data(lvl_src);
+	cat = NULL;
 }
 
 void Level::init() 
 {			
 	LOAD_GRIT_SPRITE_TILES(spikes, 0x280, 48);
+	LOAD_GRIT_SPRITE_TILES(burned_hole, 0x288, 64);
 
 	LevelBackgroundBage* bg_page = new LevelBackgroundBage();
 	set_background(3, bg_page, 0x10);
@@ -228,15 +244,57 @@ void Level::init()
 	register_sprite(explorer);
 	
 	player = new Player();	
-	player->set_pos(100,100);
+	
+		
+	u8* lvldat = (u8*)blocks_data+75*105;
 	
 	
+	u16 px=0, py=0;
+	px = (*(lvldat++));
+	px |= (*(lvldat++))<<8;
+	
+	py = (*(lvldat++));
+	py |= (*(lvldat++))<<8;
+	
+	player->set_pos(px, py);		
 	register_sprite(player);
+		
+	hole = new Hole();	
 	
-	//set_focus(explorer);
+	u16 fx=0, fy=0;	
+	fx = (*(lvldat++));
+	fx |= (*(lvldat++))<<8;
+	
+	fy = (*(lvldat++));
+	fy |= (*(lvldat++))<<8;
+	
+	hole->set_pos(fx,fy);
+	
+	register_sprite(hole);
+	
+	bool has_cat = (*(lvldat++)!=0);
+	
+	if(has_cat)
+	{
+		u16 cx=0, cy=0;	
+		cx = (*(lvldat++));
+		cx |= (*(lvldat++))<<8;
+		
+		cy = (*(lvldat++));
+		cy |= (*(lvldat++))<<8;
+	}
+		
+	u8 spkcnt = *(lvldat++);
+	for(int i=0;i<spkcnt;i++)
+	{
+		u8 spkx = *(lvldat++);
+		u8 spky = *(lvldat++);
+		u8 spkl = *(lvldat++);
+		
+		add_spikes(spkx<<3, (spky+1)<<3, spkl);
+	}
+	
 	set_focus(player);
-	
-	add_spikes(330,120,9);
 }
 
 void Level::on_frame() 
@@ -285,9 +343,12 @@ void Level::on_frame()
 		if(sprites[i]->is_of_class("spikes"))
 		{
 			if(player->touches(sprites[i]))
+			{				
+				dialog->launch_dialog(0,"dead",10);
+			}
+			else if(player->touches(hole))
 			{
-				//dialog->launch_dialog(0,"dead",10);
-				dialog->launch_dialog(0,sf24(sprites[i]->hitbox.width).to_string(),10);
+				dialog->launch_dialog(0,"good",10);
 			}
 		}
 	}

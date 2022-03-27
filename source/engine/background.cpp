@@ -35,7 +35,6 @@ void Background::load_tiles(const void* source,u32 len,bool compressed, u8 palet
 	if(palette_displacement != 0)
 	{		
 		len/=2;		
-		u32* cba = (u32*)char_base_address;
 		for(u32 i=0;i<len;i++)
 		{		
 			u32 word = char_base_address[i];			
