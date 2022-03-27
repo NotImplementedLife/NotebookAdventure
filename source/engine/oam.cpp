@@ -292,7 +292,7 @@ namespace OamPool
 		if(p==-1) 
 		{
 			fatal(ERR_OAM_INVALID_ID);
-		}				
+		}						
 		unlock_id(p);
 		u32* ptr = (u32*)&__oam_buffer[p];			
 		ptr[0] = ptr[1] = 0x00000000;		

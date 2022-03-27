@@ -132,5 +132,17 @@ public:
 	
 public:		
 	virtual ~DialogBackground();
+
+public:
+	u16 *opt_x, *opt_y;
+	u8 opt_len;	
+	u8 opt_crt_sel;
+	
+	u8 opt_result[8];
+	u8 opt_rescnt;
+	
+	static void vwf_option_report(void* target,int x,int y);
+public:
+	u8 get_option(u32 n) const;
 	
 };

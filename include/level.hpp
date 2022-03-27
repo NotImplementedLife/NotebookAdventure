@@ -2,6 +2,10 @@
 
 #include "engine.hpp"
 
+const int LVL_NEXT = 1;
+const int LVL_MENU = 2;
+const int LVL_RETRY = 3;
+
 class PhysicalObject;
 
 class Level : public TextScrollMap
@@ -20,7 +24,8 @@ private:
 	
 	DialogBackground* dialog;
 	
-	bool rendering;
+	u8 completed;
+	int jump_timeout=0;
 public:
 	Level(const u8* lvl_src);	
 
@@ -29,6 +34,8 @@ public:
 	void on_frame() override;
 	
 	void add_spikes(s16 x,s16 y,s8 len);
+	
+	void add_trampoline(s16 x, s16 y);
 	
 	void set_focus(Sprite* spr);
 	
@@ -42,4 +49,5 @@ public:
 	
 	static int dialog_controlled_jump(void* sender);
 	static int game_over_dialog_finished(void* sender);
+	static int level_completed_dialog_finished(void* sender);
 };

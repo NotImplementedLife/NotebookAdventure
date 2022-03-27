@@ -27,6 +27,7 @@ Font816::Font816(const void* font_gfx)
 		}		
 		charw[i]=(u8)(chsize+1);
 	}				
+	charw[1] = 8;   // dialog seletor
 	charw[' '] = 3; // default space size
 }
 

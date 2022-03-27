@@ -29,6 +29,11 @@ void TextScrollMap::on_key_down(int keys) { }
 void TextScrollMap::on_key_held(int keys) { }
 void TextScrollMap::on_key_up(int keys) { } 
 
+bool TextScrollMap::input_locked() const
+{
+	return lock!=-1;
+}
+
 void TextScrollMap::lock_input(int lock_id)
 {
 	lock = lock_id;
@@ -40,7 +45,7 @@ void TextScrollMap::unlock_input()
 
 #include "error.hpp"
 
-void TextScrollMap::run()
+u8 TextScrollMap::run()
 {	
 	for(int i=0;i<4;i++)
 		if(bg[i])
@@ -50,6 +55,10 @@ void TextScrollMap::run()
 	while(1)
 	{
 		VBlankIntrWait();
+		if(exit_flag) 
+		{
+			break;
+		}
 		scanKeys();
 		int keys_down = keysDown();
 		int keys_held = keysHeld();
@@ -90,7 +99,14 @@ void TextScrollMap::run()
 			}		
 			
 		OamPool::deploy();
-	}
+	}	
+	
+	return exit_flag;
+}
+
+void TextScrollMap::exit(u8 code)
+{
+	exit_flag=code;
 }
 
 Camera* TextScrollMap::get_camera() const
@@ -119,5 +135,12 @@ TextScrollMap::~TextScrollMap()
 		if(bg[i])
 			delete bg[i];
 	delete camera;
+	
+	for(int i=0;i<sprites_count;i++)
+	{
+		delete sprites[i];
+	}
+	delete[] sprites;
+	
 	OamPool::reset();
 }

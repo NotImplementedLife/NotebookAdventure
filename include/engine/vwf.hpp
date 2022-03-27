@@ -8,6 +8,8 @@
 
 #include "font.hpp"
 
+typedef void (*DialogOptionReport)(void*,int,int);
+
 /*! \class Vwf
 	\brief variable width font processor
  */
@@ -20,7 +22,10 @@ private:
 	u16 width, height;
 	u8 text_color;
 	u16 px_offset,crt_row, crt_col;
-public:
+	
+	DialogOptionReport opt_report_dialog;
+	void* opt_report_dest;
+public:	
 	/*! \brief creates a Vwf processor
 		\param font the rendered text font
 	 */
@@ -49,5 +54,7 @@ public:
 	void set_text_color(u8 color_id);
 	
 	void reset();
+	
+	void set_option_report(DialogOptionReport report,void* target);
 };
 

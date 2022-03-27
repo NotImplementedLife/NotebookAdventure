@@ -19,7 +19,13 @@ int main(void) {
 	lvl->run();
 	delete lvl;
 	
+	lvl = new Level(test_level_bin);
+	lvl->init();
+	lvl->run();
+	delete lvl;
 	
+	
+	return 0;
 }
 
 

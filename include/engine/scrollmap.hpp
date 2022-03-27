@@ -20,15 +20,18 @@ protected:
 	u16 sprites_count, sprites_cap;	
 	
 	s8 lock=-1;
+	u8 exit_flag=0;
 public:
 	TextScrollMap();
 	
+	bool input_locked() const;
 	void lock_input(int lock_id);
 	void unlock_input();
 	
 	virtual void init();
 	
-	void run();
+	u8 run();
+	void exit(u8 code);
 	void set_background(u8 i, Background* bgi, u8 scroll_speedi=0x10);
 	
 	virtual void on_frame();

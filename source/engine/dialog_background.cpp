@@ -17,6 +17,14 @@ DialogBackground::DialogBackground(u16 id, u16 char_base, u16 map_base) : Backgr
 	}
 	obj_caret = NULL;
 	caret_waiting = 0;
+	
+	opt_x = new u16[8];
+	opt_y = new u16[8];
+	
+	opt_len=0;
+	opt_crt_sel=0;
+	opt_rescnt=0;
+	for(int i=0;i<8;i++) opt_result[i]=0xFF;
 }
 
 void DialogBackground::load_tiles(const void* source, u8 palette_displacement)
@@ -53,11 +61,31 @@ void DialogBackground::key_down(u16 keys)
 {
 	if(active_dialog_id!=4)
 	{
+		if(opt_len>0)
+		{
+			if(keys & (KEY_RIGHT | KEY_DOWN))
+			{
+				if(opt_crt_sel<opt_len-1) opt_crt_sel++;
+			}
+			else if(keys & (KEY_LEFT | KEY_UP))
+			{
+				if(opt_crt_sel>0) opt_crt_sel--;
+			}
+			
+			obj_caret->show();
+			obj_caret->set_x(opt_x[opt_crt_sel]);
+			obj_caret->set_y(opt_y[opt_crt_sel]);
+		}
+		
 		if(!_cooldown[active_dialog_id] && caret_waiting && (keys & KEY_A))
 		{		
-			caret_waiting = 0;		
+			caret_waiting = 0;					
 			obj_caret->hide();		
-				
+									
+			opt_result[opt_rescnt++]=opt_crt_sel;						
+			opt_crt_sel=0;
+			opt_len=0;
+			
 			if(caret_release_action & DIALOG_CLEAR)
 			{
 				dialogs[active_dialog_id]->clear();								
@@ -251,10 +279,22 @@ int DialogBackground::create_dialog_box(u8 left, u8 top, u8 width, u8 height, Vw
 
 bool DialogBackground::launch_dialog(int dialog_id, const char* msg, u16 cooldown)
 {
-	get_dialog(dialog_id); // just to check if the dialog exists
+	DialogBox* dlg = get_dialog(dialog_id); // also check if the dialog exists
 	if(awaiting_text[dialog_id]!=NULL)
 		// fatal("Dialog box can't run two texts simultaneously",123);
 		return false;
+	if(cooldown==0)
+	{
+		dlg->vwf->set_option_report(vwf_option_report,this);
+		opt_crt_sel=0;
+		opt_len=0;		
+		opt_rescnt=0;
+	}
+	else
+	{
+		dlg->vwf->set_option_report(0,NULL);
+	}		
+	
 	awaiting_text[dialog_id]=(char*)msg;
 	_cooldown[dialog_id]=cooldown;
 	return true;
@@ -272,3 +312,34 @@ DialogBackground::~DialogBackground()
 		delete dialogs[i];
 	OamPool::remove_obj(obj_caret_id);
 }
+
+void DialogBackground::vwf_option_report(void* target,int x,int y)
+{
+	DialogBackground* bg = (DialogBackground*)target;
+	if(bg->opt_len==8)
+	{
+		fatal(ERR_ARG_OUT_OF_RANGE,"DialogBackground::vwf_option_report()");
+	}
+	DialogBox* adlg = bg->get_dialog(bg->active_dialog_id);	
+	
+	bg->opt_x[bg->opt_len] = (adlg->left<<3) + x + 8;
+	bg->opt_y[bg->opt_len] = (adlg->top<<3) + y - 4;	
+	bg->opt_len++;	
+}
+
+u8 DialogBackground::get_option(u32 n) const
+{
+	if(n>=opt_rescnt) 
+	{
+		fatal(ERR_ARG_OUT_OF_RANGE,"DialogBackground::get_option()");
+	}
+	return ((u8*)&opt_result)[n];
+}
+
+
+
+
+
+
+
+

@@ -319,6 +319,7 @@ bool Sprite::is_of_class(const char *xclass)
 
 Sprite::~Sprite()
 {
-	OamPool::remove_obj(id);
-	delete visual;
+	OamPool::remove_obj(id);	
+	delete visual;	
+	//((u32*)VRAM)[0]++;
 }

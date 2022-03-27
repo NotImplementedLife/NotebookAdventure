@@ -48,18 +48,21 @@ public:
 	sf24 vx, vy;
 	sf24 fx, fy;	
 	sf24 air_ymin, air_ymax;
-	bool use_air_limits=false;
+	bool use_air_limits=false;	
 public:
 	PhysicalObject(ObjSize size, u16 frames_count) : Sprite(size, frames_count) 
 	{
 		vx = 0;
-		vy = 0;
+		vy = 0;	
 		
 		fx = sf24(2,0);
 		fy = sf24(3,0);
 		
 		air_ymin=0;
 		air_ymax=840;
+		
+		ax = 0;
+		ay = 0;
 	}
 	
 	void set_air_limits(s16 ymin, s16 ymax)
@@ -254,6 +257,7 @@ Level::Level(const u8* lvl_src) : TextScrollMap()
 {
 	set_blocks_data(lvl_src);
 	cat = NULL;	
+	completed=false;
 }
 
 void Level::init() 
@@ -270,16 +274,8 @@ void Level::init()
 	
 	dialog = new LevelDialog();
 	set_background(0, dialog, 0x00);	
-	dialog->run_on_dialog_finished(2, game_over_dialog_finished, this);
 	
-	dialog->run_on_dialog_finished(1, dialog_controlled_jump, this);	
-	
-	Trampoline* tr = new Trampoline();
-	tr->set_pos(390,120);
-	
-	register_sprite(tr);
-	
-	
+	dialog->run_on_dialog_finished(1, dialog_controlled_jump, this);		
 	
 	REG_BLDCNT = (1<<2) | (1<<6) | (1<<11);
 	REG_BLDALPHA = 13 | (3<<8);
@@ -338,11 +334,26 @@ void Level::init()
 		add_spikes(spkx<<3, (spky+1)<<3, spkl);
 	}
 	
+	
+	u8 trpcnt = *(lvldat++);
+	for(int i=0;i<trpcnt;i++)
+	{
+		u8 trpx = *(lvldat++);
+		u8 trpy = *(lvldat++);
+		
+		add_trampoline(trpx<<2, (trpy+1)<<3);
+	}
+	
 	set_focus(player);
 }
 
 void Level::on_frame() 
 {	
+	if(completed)
+	{
+		this->exit(completed);
+		return;
+	}
 	u8 bdata = get_block_data((int)focus->get_pos_x(), (int)focus->get_pos_y());	
 	if(bdata==0)
 	{		
@@ -387,8 +398,13 @@ void Level::on_frame()
 		if(sprites[i]->is_of_class("spikes"))
 		{
 			if(player->touches(sprites[i]))
-			{								
-				//dialog->launch_dialog(1,"i",10);
+			{		
+				if(!input_locked())
+				{
+					lock_input(0);
+					dialog->run_on_dialog_finished(2, game_over_dialog_finished, this);
+					dialog->launch_dialog(2, "Game over!\n                 \x01Retry            \01Menu", 0);				
+				}
 			}			
 						
 		}
@@ -403,11 +419,14 @@ void Level::on_frame()
 		
 		else if(player->touches(hole))
 		{
-			dialog->launch_dialog(0,"good",10);
+			if(!input_locked())
+			{
+				lock_input(0);
+				dialog->run_on_dialog_finished(2, level_completed_dialog_finished, this);
+				dialog->launch_dialog(2, "Well played!\n                  \x01Next            \01Menu", 0);				
+			}
 		}
-	}
-	
-	//dialog->launch_dialog(0,player->pos_y.to_string(),10);
+	}	
 }
 
 void Level::on_key_down(int keys)
@@ -416,7 +435,7 @@ void Level::on_key_down(int keys)
 	{
 		s16 px=(int)player->get_pos_x();
 		s16 py=(int)player->get_pos_y();
-		u8 ddata = get_block_data(px, py+8);
+		//u8 ddata = get_block_data(px, py+8);
 		u8 bdata = get_block_data(px, py);
 		u8 udata = get_block_data(px, py-8);
 		if(bdata!=0 && udata==0)			
@@ -443,7 +462,7 @@ void Level::on_key_held(int keys)
 	else if(keys & KEY_UP)  
 	{
 		int upper = get_block_data((int)(player->pos_x),(int)focus->get_pos_y()-1);
-		int above = get_block_data((int)(player->pos_x),(int)focus->get_pos_y()-64);		
+		//int above = get_block_data((int)(player->pos_x),(int)focus->get_pos_y()-64);		
 		if(upper==2)
 		{			
 			focus->move(0,-1);
@@ -461,8 +480,7 @@ void Level::on_key_held(int keys)
 		on_left |= get_block_data((int)(player->get_left_coord())-1,(int)focus->get_pos_y()-26);
 		
 		if(on_left!=1)
-			player->charge_v(-sf24(2),0);
-		//dialog->launch_dialog(0,player->get_top_coord().to_string(),10);
+			player->charge_v(-sf24(2),0);		
 	}
 	else if(keys & KEY_RIGHT) 
 	{
@@ -474,10 +492,7 @@ void Level::on_key_held(int keys)
 		on_right |= get_block_data((int)(player->get_right_coord())+1,(int)focus->get_pos_y()-26);
 		
 		if(on_right!=1)
-			player->charge_v(sf24(2),0);
-				
-		//dialog->launch_dialog(0,focus->get_pos_x().to_string(),10);
-		//dialog->launch_dialog(0,sf24(get_block_data((int)focus->get_pos_x(), (int)focus->get_pos_y())).to_string(),10);
+			player->charge_v(sf24(2),0);		
 	}
 		
 }
@@ -528,17 +543,51 @@ void Level::add_spikes(s16 x, s16 y, s8 len)
 	}	
 }
 
+void Level::add_trampoline(s16 x, s16 y)
+{
+	Trampoline* tr = new Trampoline();
+	tr->set_pos(x,y);
+	register_sprite(tr);
+}
+
 int Level::dialog_controlled_jump(void* sender)
 {
-	Level* lvl=(Level*)sender;
-	lvl->player->charge_a(0,-4);
+	Level* lvl=(Level*)sender;	
+	if(lvl->jump_timeout<=0) // prevent callback 2 frames in a row
+	{		
+		lvl->player->charge_a(0, - 4);
+		lvl->jump_timeout=1;
+	}	
+	else lvl->jump_timeout--;
 	return 1; // Missing this line results in Undefined Opcode!
 }
+
+int Level::level_completed_dialog_finished(void* sender)
+{		
+	Level* lvl=(Level*)sender;
+	lvl->unlock_input();	
+	
+	u8 option=lvl->dialog->get_option(0);
+	
+	if(option==1)
+		lvl->completed=LVL_MENU;
+	else 
+		lvl->completed=LVL_NEXT;
+	return 1;
+}
+
 
 int Level::game_over_dialog_finished(void* sender)
 {		
 	Level* lvl=(Level*)sender;
 	lvl->unlock_input();
+	lvl->completed=true;	
 	
-	return 1; 
+	u8 option=lvl->dialog->get_option(0);
+	
+	if(option==1)
+		lvl->completed=LVL_MENU;
+	else
+		lvl->completed=LVL_RETRY;
+	return 1;
 }

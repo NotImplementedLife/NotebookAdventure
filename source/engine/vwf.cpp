@@ -12,6 +12,9 @@ void Vwf::set_render_space(u32* address, int box_width, int box_height)
 	height = box_height;  // keep height in tiles
 	crt_row = crt_col= 0;
 	px_offset = 0;
+	
+	opt_report_dialog=0;
+	opt_report_dest=NULL;;
 }
 
 void Vwf::reset()
@@ -73,7 +76,7 @@ int Vwf::draw_text(const char* text)
 }
 
 int Vwf::put_char(char c)
-{	
+{		
 	if(c=='\n')
 	{		
 		if(crt_row+2>=height)		
@@ -93,6 +96,14 @@ int Vwf::put_char(char c)
 		crt_row+=2;
 		crt_col=px_offset=0;
 	}	
+	
+	if(c==1)
+	{
+		if(opt_report_dialog)
+		{						
+			opt_report_dialog(opt_report_dest, (crt_col<<3) | px_offset, crt_row<<4);
+		}
+	}
 	
 	u8* tmp=new u8[16];
 	for(int i=0;i<16;i++) tmp[i]=0;		
@@ -124,11 +135,18 @@ int Vwf::put_char(char c)
 	px_offset+=sz;
 	crt_col+=px_offset>>3;
 	px_offset&=7;
+	
 	return 1;
 }
 
 void Vwf::set_text_color(u8 color_id)
 {
 	text_color = color_id;
+}
+
+void Vwf::set_option_report(DialogOptionReport report,void* target)
+{
+	opt_report_dialog = report;
+	opt_report_dest = target;
 }
 
