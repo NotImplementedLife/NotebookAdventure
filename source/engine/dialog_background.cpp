@@ -12,6 +12,8 @@ DialogBackground::DialogBackground(u16 id, u16 char_base, u16 map_base) : Backgr
 		allocated[i]=0;
 		awaiting_text[i]=0;
 		_cooldown[i]=0;
+		dialog_finished_callback[i]=0;
+		dialog_finished_args[i]=NULL;
 	}
 	obj_caret = NULL;
 	caret_waiting = 0;
@@ -63,7 +65,8 @@ void DialogBackground::key_down(u16 keys)
 			if(caret_release_action & DIALOG_HIDE)
 			{		
 				hide_dialog_box(active_dialog_id);
-				active_dialog_id=4;				
+				pending_event_id=active_dialog_id;		
+				active_dialog_id = 4;
 			}						
 			caret_release_action=0;			
 		}	
@@ -82,7 +85,8 @@ void DialogBackground::key_down(u16 keys)
 				if(caret_release_action & DIALOG_HIDE)
 				{		
 					hide_dialog_box(active_dialog_id);
-					active_dialog_id=4;				
+					pending_event_id=active_dialog_id;
+					active_dialog_id=4;													
 				}						
 				caret_release_action=0;		
 			}			
@@ -101,6 +105,14 @@ void DialogBackground::key_up(u16 keys)
 
 void DialogBackground::render()
 {
+	if(pending_event_id!=-1)
+	{		
+		if(dialog_finished_callback[pending_event_id])
+		{
+			dialog_finished_callback[pending_event_id](dialog_finished_args[pending_event_id]);
+			pending_event_id=-1;
+		}
+	}
 	if(caret_waiting)
 	{
 		caret_waiting++;
@@ -139,6 +151,7 @@ void DialogBackground::render()
 			awaiting_text[active_dialog_id]=NULL;
 			obj_caret->hide();			
 			caret_release_action |= DIALOG_HIDE;
+			
 		}
 		caret_waiting = 1;		
 	}
@@ -245,6 +258,12 @@ bool DialogBackground::launch_dialog(int dialog_id, const char* msg, u16 cooldow
 	awaiting_text[dialog_id]=(char*)msg;
 	_cooldown[dialog_id]=cooldown;
 	return true;
+}
+
+void DialogBackground::run_on_dialog_finished(int id, DialogCompletedCallback callback, void* callback_arg)
+{
+	dialog_finished_callback[id]=callback;
+	dialog_finished_args[id]=callback_arg;
 }
 
 DialogBackground::~DialogBackground()

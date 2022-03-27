@@ -36,6 +36,7 @@ ObjVisual::ObjVisual(u8 frames_count)
 	framesets = new u8[64]; // 8 animation framesets, max 8 frames each
 	
 	anim_enabled = false;
+	anim_loop = false;
 	anim_fset=0;
 	
 	max_ticks = 1;
@@ -83,7 +84,7 @@ void ObjVisual::set_animation_frames(u8 frameset_id, ...)
 	va_end(args);	
 }
 
-void ObjVisual::set_animation_track(u8 frameset_id)
+void ObjVisual::set_animation_track(u8 frameset_id, bool loop)
 {
 	if(frameset_id>=8)
 		fatal(ERR_ARG_OUT_OF_RANGE, "ObjVisual::set_animation_track()");
@@ -91,6 +92,7 @@ void ObjVisual::set_animation_track(u8 frameset_id)
 	anim_enabled = true;
 	anim_fset=frameset_id;		
 	anim_id = (frameset_id<<3);
+	anim_loop = loop;
 }
 
 u16 ObjVisual::get_crt_gfx() const
@@ -119,11 +121,20 @@ void ObjVisual::update()
 		crt_ticks=0;
 		// next anim frame 
 		u8 index = anim_id & 7;
-		anim_id &= ~7;
+		anim_id &= ~7;		
+		
+		if(index==7 && !anim_loop)
+		{
+			anim_enabled=false;
+		}
 		
 		index=(index+1)&7;		
 		if(framesets[anim_id | index]!=0xFF) 
 			anim_id |= index;
+		else if(!anim_loop)
+		{
+			anim_enabled=false;
+		}			
 	}
 }
 

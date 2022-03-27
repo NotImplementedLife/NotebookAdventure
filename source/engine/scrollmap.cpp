@@ -29,6 +29,15 @@ void TextScrollMap::on_key_down(int keys) { }
 void TextScrollMap::on_key_held(int keys) { }
 void TextScrollMap::on_key_up(int keys) { } 
 
+void TextScrollMap::lock_input(int lock_id)
+{
+	lock = lock_id;
+}
+void TextScrollMap::unlock_input()
+{
+	lock = -1;
+}
+
 #include "error.hpp"
 
 void TextScrollMap::run()
@@ -46,11 +55,15 @@ void TextScrollMap::run()
 		int keys_held = keysHeld();
 		int keys_up = keysUp();		
 
-		on_key_down(keys_down);
-		on_key_held(keys_held);
-		on_key_up(keys_up);
+		if(lock==-1 || (lock==4))
+		{
+			on_key_down(keys_down);
+			on_key_held(keys_held);
+			on_key_up(keys_up);
+		}
+			
+		on_frame();
 		
-		on_frame();	
 		for(int i=0;i<sprites_count;i++)
 		{
 			sprites[i]->update_visual();
@@ -67,9 +80,12 @@ void TextScrollMap::run()
 						((camera->get_x() * scroll_speed[i])>>4)-240/2, 
 						((camera->get_y() * scroll_speed[i])>>4)-160/2);
 				bg[i]->build_map();
-				bg[i]->key_down(keys_down);
-				bg[i]->key_held(keys_held);
-				bg[i]->key_up(keys_up);
+				if(lock==-1 || lock==i)
+				{
+					bg[i]->key_down(keys_down);
+					bg[i]->key_held(keys_held);
+					bg[i]->key_up(keys_up);
+				}
 				bg[i]->render();
 			}		
 			

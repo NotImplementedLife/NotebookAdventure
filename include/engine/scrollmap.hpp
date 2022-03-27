@@ -8,6 +8,8 @@
 
 class TextScrollMap
 {
+private:
+	char magic[8]="ScrollM";
 protected:
 	Background* bg[4];
 	u8 scroll_speed[4]; // fixed 4.4, background's scroll relative to camera position
@@ -16,8 +18,13 @@ protected:
 	
 	Sprite** sprites;
 	u16 sprites_count, sprites_cap;	
+	
+	s8 lock=-1;
 public:
 	TextScrollMap();
+	
+	void lock_input(int lock_id);
+	void unlock_input();
 	
 	virtual void init();
 	

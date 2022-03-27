@@ -7,6 +7,8 @@
 #include "dialogbox.hpp"
 #include "oam.hpp"
 
+typedef int (*DialogCompletedCallback)(void*);
+
 class DialogBackground : public Background
 {		
 	friend class DialogBox;
@@ -76,7 +78,7 @@ private:
 	
 	const int DIALOG_NOTHING = 0;
 	const int DIALOG_CLEAR   = 1<<0;
-	const int DIALOG_HIDE    = 1<<1;
+	const int DIALOG_HIDE    = 1<<1;	
 	
 protected:
 	void show_dialog_box(u32 id);
@@ -119,7 +121,16 @@ public:
 		\endcode
 	 */
 	bool launch_dialog(int dialog_id, const char* msg, u16 cooldown=0);
-		
+	
+private:
+	int pending_event_id = -1;
+	DialogCompletedCallback dialog_finished_callback[4];
+	void* dialog_finished_args[4];
+	
+public:
+	void run_on_dialog_finished(int id, DialogCompletedCallback callback, void* callback_arg);
+	
+public:		
 	virtual ~DialogBackground();
 	
 };

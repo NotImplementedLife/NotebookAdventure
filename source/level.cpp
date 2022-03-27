@@ -9,6 +9,7 @@
 #include "dialog_arr.h"
 #include "spikes.h"
 #include "burned_hole.h"
+#include "trampoline.h"
 
 #include <string.h>
 
@@ -193,25 +194,57 @@ public:
 	}
 };
 
+class Trampoline : public Sprite
+{
+public:
+	Trampoline() : Sprite(SIZE_16x16, 2, "tram")
+	{
+		get_visual()->set_frame(0,0x02A8);
+		get_visual()->set_frame(1,0x02B0);
+		get_visual()->set_crt_gfx(0);
+		update_visual();
+		auto_detect_hitbox();
+		set_anchor(ANCHOR_BOTTOM);		
+		
+		get_visual()->set_ticks(25);
+		
+		get_visual()->set_animation_frames(ANIM_FRAMES_0, 0, 1, 0, -1);		
+	}
+};
+
 class LevelDialog : public DialogBackground
 {
 private:
 	Vwf *vwf;
+	Vwf *vwf_j;
+	Vwf *vwf_g;
 public:
 	LevelDialog() : DialogBackground(0, 1, 28) { strcpy(magic,"LvlDialog"); }
 	
 	void init() override
-	{
-		load_tiles(dialog_frameTiles);
+	{		
 		clear_map();
+		load_tiles(dialog_frameTiles);		
+		dmaCopy(dialog_arrTiles, (u8*)(VRAM + 0x10000 + 0x64*64), 64);						
+		set_caret(0xC8);
+		
+		// Dialog 0: use to display level title
 		vwf = new Vwf(defaultFont816);
-		create_dialog_box(1, 1, 16, 4, vwf);
-		
-		dmaCopy(dialog_arrTiles, (u8*)(VRAM + 0x10000 + 0x64*64), 64);
-		set_caret(0xC8);		
-		
 		vwf->set_text_color(0xA2);		
-		launch_dialog(0,"Test title 1",200);
+		create_dialog_box(1, 1, 16, 4, vwf);		
+		
+		// Dialog 1: use dialog timings to control jumping on sprites
+		// uses:
+		// - trampoline (jump on short sprites)
+		// - floating object simulation (jump on tall sprites)
+		vwf_j = new Vwf(defaultFont816);
+		create_dialog_box(0, 22, 3, 4, vwf_j);
+		
+		// Dialog 2: general purpose user-involving dialog
+		// used to display the "game over" message
+		
+		vwf_g = new Vwf(defaultFont816);
+		create_dialog_box(1,14,28,6, vwf_g);		
 	}	
 };
 
@@ -220,13 +253,14 @@ public:
 Level::Level(const u8* lvl_src) : TextScrollMap()
 {
 	set_blocks_data(lvl_src);
-	cat = NULL;
+	cat = NULL;	
 }
 
 void Level::init() 
 {			
 	LOAD_GRIT_SPRITE_TILES(spikes, 0x280, 48);
 	LOAD_GRIT_SPRITE_TILES(burned_hole, 0x288, 64);
+	LOAD_GRIT_SPRITE_TILES(trampoline, 0x2A8, 56);
 
 	LevelBackgroundBage* bg_page = new LevelBackgroundBage();
 	set_background(3, bg_page, 0x10);
@@ -235,7 +269,17 @@ void Level::init()
 	set_background(2, dungeon, 0x10);
 	
 	dialog = new LevelDialog();
-	set_background(0, dialog, 0x00);
+	set_background(0, dialog, 0x00);	
+	dialog->run_on_dialog_finished(2, game_over_dialog_finished, this);
+	
+	dialog->run_on_dialog_finished(1, dialog_controlled_jump, this);	
+	
+	Trampoline* tr = new Trampoline();
+	tr->set_pos(390,120);
+	
+	register_sprite(tr);
+	
+	
 	
 	REG_BLDCNT = (1<<2) | (1<<6) | (1<<11);
 	REG_BLDALPHA = 13 | (3<<8);
@@ -298,7 +342,7 @@ void Level::init()
 }
 
 void Level::on_frame() 
-{
+{	
 	u8 bdata = get_block_data((int)focus->get_pos_x(), (int)focus->get_pos_y());	
 	if(bdata==0)
 	{		
@@ -343,13 +387,23 @@ void Level::on_frame()
 		if(sprites[i]->is_of_class("spikes"))
 		{
 			if(player->touches(sprites[i]))
-			{				
-				dialog->launch_dialog(0,"dead",10);
-			}
-			else if(player->touches(hole))
-			{
-				dialog->launch_dialog(0,"good",10);
-			}
+			{								
+				//dialog->launch_dialog(1,"i",10);
+			}			
+						
+		}
+		else if(sprites[i]->is_of_class("tram"))
+		{
+			if(player->touches(sprites[i]))
+			{	
+				sprites[i]->get_visual()->set_animation_track(ANIM_FRAMES_0,false);
+				dialog->launch_dialog(1,"i",10);
+			}	
+		}
+		
+		else if(player->touches(hole))
+		{
+			dialog->launch_dialog(0,"good",10);
 		}
 	}
 	
@@ -471,7 +525,20 @@ void Level::add_spikes(s16 x, s16 y, s8 len)
 		x+=8;
 		len-=1;
 		register_sprite(spikes);
-	}
+	}	
+}
+
+int Level::dialog_controlled_jump(void* sender)
+{
+	Level* lvl=(Level*)sender;
+	lvl->player->charge_a(0,-4);
+	return 1; // Missing this line results in Undefined Opcode!
+}
+
+int Level::game_over_dialog_finished(void* sender)
+{		
+	Level* lvl=(Level*)sender;
+	lvl->unlock_input();
 	
-	
+	return 1; 
 }

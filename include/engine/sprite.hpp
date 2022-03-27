@@ -52,6 +52,7 @@ private:
 	u8 frames_count;	
 	u8 crt_gfx_id;
 	
+	bool anim_loop;
 	bool anim_enabled;
 	u8 anim_fset;
 	u8 anim_id;
@@ -59,7 +60,7 @@ private:
 	u8* framesets;
 	
 	u8 max_ticks;
-	u8 crt_ticks;
+	u8 crt_ticks;	
 public:
 	ObjVisual(u8 frames_count);	
 		
@@ -71,7 +72,7 @@ public:
 	
 	void set_animation_frames(u8 frameset_id, ...);
 	
-	void set_animation_track(u8 frameset_id);	
+	void set_animation_track(u8 frameset_id, bool loop=true);
 	
 	void set_ticks(u8 ticks);
 	

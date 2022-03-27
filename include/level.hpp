@@ -6,7 +6,7 @@ class PhysicalObject;
 
 class Level : public TextScrollMap
 {
-private:	
+private:		
 	PhysicalObject* player;
 	Sprite* explorer; // invisible sprite to explore surroundings
 	
@@ -19,8 +19,10 @@ private:
 	const u8* blocks_data;
 	
 	DialogBackground* dialog;
+	
+	bool rendering;
 public:
-	Level(const u8* lvl_src);
+	Level(const u8* lvl_src);	
 
 	void init() override;
 	
@@ -37,4 +39,7 @@ public:
 	void set_blocks_data(const u8* src);
 	
 	u8 get_block_data(s16 x, s16 y) const;
+	
+	static int dialog_controlled_jump(void* sender);
+	static int game_over_dialog_finished(void* sender);
 };
