@@ -1,10 +1,7 @@
 #pragma once
 
 #include "engine.hpp"
-
-const int LVL_NEXT = 1;
-const int LVL_MENU = 2;
-const int LVL_RETRY = 3;
+#include "screen_msg.hpp"
 
 class PhysicalObject;
 
