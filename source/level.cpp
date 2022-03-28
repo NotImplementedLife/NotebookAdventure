@@ -5,6 +5,7 @@
 #include "test_level.h"
 #include "test_level_bin.h"
 #include "player.h"
+#include "cat.h"
 #include "dialog_frame.h"
 #include "dialog_arr.h"
 #include "spikes.h"
@@ -171,6 +172,40 @@ public:
 	}
 };
 
+class Cat : public PhysicalObject
+{
+private:
+
+public:
+	Cat() : PhysicalObject(SIZE_16x16, 16)
+	{
+		LOAD_GRIT_SPRITE_TILES(cat, 0x120, 128);
+			
+		get_visual()->set_frame(0,0x0120);		
+		
+		get_visual()->set_ticks(16);
+		
+		get_visual()->set_crt_gfx(0);	
+		get_visual()->set_animation_frames(ANIM_FRAMES_0, 0, -1);
+		get_visual()->set_animation_track(ANIM_FRAMES_0);
+		update_visual();		
+		set_hitbox(3,0,9,16);
+		set_anchor(ANCHOR_BOTTOM);
+	}
+};
+
+class Explorer : public Sprite
+{
+public:
+	Explorer() : Sprite(SIZE_8x8, 1, "explorer")
+	{
+		get_visual()->set_frame(0,0);
+		get_visual()->set_crt_gfx(0);
+		update_visual();		
+		set_anchor(ANCHOR_CENTER);
+	}
+};
+
 class Spikes : public Sprite
 {
 public:
@@ -219,7 +254,7 @@ class LevelDialog : public DialogBackground
 {
 private:
 	Vwf *vwf;
-	Vwf *vwf_j;
+	Vwf *vwf_jp, *vwf_jc;
 	Vwf *vwf_g;
 public:
 	LevelDialog() : DialogBackground(0, 1, 28) { strcpy(magic,"LvlDialog"); }
@@ -240,14 +275,18 @@ public:
 		// uses:
 		// - trampoline (jump on short sprites)
 		// - floating object simulation (jump on tall sprites)
-		vwf_j = new Vwf(defaultFont816);
-		create_dialog_box(0, 22, 3, 4, vwf_j);
+		vwf_jp = new Vwf(defaultFont816);
+		create_dialog_box(0, 22, 3, 4, vwf_jp);
 		
 		// Dialog 2: general purpose user-involving dialog
 		// used to display the "game over" message
 		
 		vwf_g = new Vwf(defaultFont816);
-		create_dialog_box(1,14,28,6, vwf_g);		
+		create_dialog_box(1,14,28,6, vwf_g);
+
+		// Dialog 3: jump dialog, for cat
+		vwf_jc = new Vwf(defaultFont816);
+		create_dialog_box(5, 22, 3, 4, vwf_jc);		
 	}	
 };
 
@@ -275,12 +314,13 @@ void Level::init()
 	dialog = new LevelDialog();
 	set_background(0, dialog, 0x00);	
 	
-	dialog->run_on_dialog_finished(1, dialog_controlled_jump, this);		
+	dialog->run_on_dialog_finished(1, dialog_controlled_jump_p, this);		
+	dialog->run_on_dialog_finished(3, dialog_controlled_jump_c, this);
 	
 	REG_BLDCNT = (1<<2) | (1<<6) | (1<<11);
 	REG_BLDALPHA = 13 | (3<<8);
 	
-	explorer = new Sprite(SIZE_8x8,1);
+	explorer = new Explorer();
 	register_sprite(explorer);
 	
 	player = new Player();	
@@ -323,6 +363,10 @@ void Level::init()
 		cy = (*(lvldat++));
 		cy |= (*(lvldat++))<<8;
 	}
+	
+	cat	= new Cat();
+	cat->set_pos(100,100);
+	register_sprite(cat);
 		
 	u8 spkcnt = *(lvldat++);
 	for(int i=0;i<spkcnt;i++)
@@ -344,22 +388,17 @@ void Level::init()
 		add_trampoline(trpx<<2, (trpy+1)<<3);
 	}
 	
-	set_focus(player);
+	set_focus(player);	
 }
 
-void Level::on_frame() 
-{	
-	if(completed)
-	{
-		this->exit(completed);
-		return;
-	}
-	u8 bdata = get_block_data((int)focus->get_pos_x(), (int)focus->get_pos_y());	
+void Level::update_actor(PhysicalObject* obj)
+{
+	u8 bdata = get_block_data((int)obj->get_pos_x(), (int)obj->get_pos_y());	
 	if(bdata==0)
 	{		
-		u8 y0=((int)focus->get_pos_y())>>3;
+		u8 y0=((int)obj->get_pos_y())>>3;
 		u8 ymin=y0, ymax=y0;
-		u8 x0=((int)focus->get_pos_x())>>3;
+		u8 x0=((int)obj->get_pos_x())>>3;
 				
 		for(int y=y0;y<104;y++)
 			if(blocks_data[y*75+x0])
@@ -373,25 +412,37 @@ void Level::on_frame()
 				ymin=y;
 				break;
 			}							
-		player->set_air_limits((ymin+1)<<3,ymax<<3);							
-		player->apply_g();
+		obj->set_air_limits((ymin+1)<<3,ymax<<3);							
+		obj->apply_g();
 	}
 	else
 	{		
-		u8 udata = get_block_data((int)player->get_pos_x(), (int)player->get_pos_y()-1);		
-		player->ignore_air_limits();		
+		u8 udata = get_block_data((int)obj->get_pos_x(), (int)obj->get_pos_y()-1);		
+		obj->ignore_air_limits();		
 		if(bdata==1 || (bdata==0 && udata==2))
 		{
 			// 8 multiple correction
-			player->pos_y = ((int)player->pos_y)&(~7);
+			obj->pos_y = ((int)obj->pos_y)&(~7);
 		}
 		if(bdata==2)
 		{
-			player->ay=0;
+			obj->ay=0;
 		}		
 	}
 	
-	player->render();
+	obj->render();
+}
+
+void Level::on_frame() 
+{	
+	if(completed)
+	{
+		this->exit(completed);
+		return;
+	}
+
+	update_actor(player);
+	update_actor(cat);
 	
 	for(int i=0;i<sprites_count;i++)
 	{
@@ -415,6 +466,11 @@ void Level::on_frame()
 				sprites[i]->get_visual()->set_animation_track(ANIM_FRAMES_0,false);
 				dialog->launch_dialog(1,"i",10);
 			}	
+			if(cat->touches(sprites[i]))
+			{
+				sprites[i]->get_visual()->set_animation_track(ANIM_FRAMES_0,false);
+				dialog->launch_dialog(3,"i",10);
+			}
 		}
 		
 		else if(player->touches(hole))
@@ -431,70 +487,121 @@ void Level::on_frame()
 
 void Level::on_key_down(int keys)
 {
-	if(keys & KEY_UP) 
-	{
-		s16 px=(int)player->get_pos_x();
-		s16 py=(int)player->get_pos_y();
-		//u8 ddata = get_block_data(px, py+8);
-		u8 bdata = get_block_data(px, py);
-		u8 udata = get_block_data(px, py-8);
-		if(bdata!=0 && udata==0)			
-			player->charge_a(0,-sf24(3,160));
-	}
-	
-	if(keys & KEY_B)
-	{
-		player->ignore_air_limits();
-		player->set_pos(100,100);
+	if(focus!=explorer)
+	{		
+		if(keys & KEY_UP) 
+		{
+			s16 px=(int)xfocus->get_pos_x();
+			s16 py=(int)xfocus->get_pos_y();
+			//u8 ddata = get_block_data(px, py+8);
+			u8 bdata = get_block_data(px, py);
+			u8 udata = get_block_data(px, py-8);
+			if(bdata!=0 && udata==0)			
+				xfocus->charge_a(0,-sf24(3,160));
+		}
+		
+		if(keys & KEY_B)
+		{
+			xfocus->ignore_air_limits();
+			xfocus->set_pos(100,100);
+		}
+		
+		if(keys & KEY_L)
+		{
+			set_focus(focus==cat ? player:cat);		
+		}
+		if(keys & KEY_R)
+		{
+			explorer->set_pos(xfocus->pos_x,xfocus->pos_y);
+			set_focus(explorer);
+		}
 	}
 }
 
 void Level::on_key_held(int keys)
 {		
-	if(keys & KEY_DOWN)  
-	{	
-		int block = get_block_data((int)(player->pos_x),(int)focus->get_pos_y());
-		if(block==2)
-		{				
-			focus->move(0,1);
+	if(focus!=explorer)
+	{		
+		if(keys & KEY_DOWN)  
+		{	
+			int block = get_block_data((int)(xfocus->pos_x),(int)xfocus->get_pos_y());
+			if(block==2)
+			{				
+				xfocus->move(0,1);
+			}
+		}
+		else if(keys & KEY_UP)  
+		{
+			int upper = get_block_data((int)(xfocus->pos_x),(int)xfocus->get_pos_y()-1);		
+			if(upper==2)
+			{			
+				xfocus->move(0,-1);
+			}
+		}
+		
+		
+		if(keys & KEY_LEFT) 
+		{
+			xfocus->attr->set_flip_h(0);		
+			
+			int on_left = get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->get_pos_y()-2);
+			on_left |= get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->get_pos_y()-10);
+			if(xfocus==player)
+			{
+				on_left |= get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->get_pos_y()-18);
+				on_left |= get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->get_pos_y()-26);
+			}
+			
+			if(on_left!=1)
+				xfocus->charge_v(-sf24(2),0);		
+		}
+		else if(keys & KEY_RIGHT) 
+		{
+			xfocus->attr->set_flip_h(1);
+			
+			int on_right = get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->get_pos_y()-2);
+			on_right |= get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->get_pos_y()-10);
+			if(xfocus==player)
+			{
+				on_right |= get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->get_pos_y()-18);
+				on_right |= get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->get_pos_y()-26);
+			}
+			
+			if(on_right!=1)
+				xfocus->charge_v(sf24(2),0);		
+		}	
+	}	
+	else
+	{
+		if(keys & KEY_DOWN)  
+		{
+			explorer->move(0,2);
+		}
+		else if(keys & KEY_UP)
+		{
+			explorer->move(0,-2);
+		}
+		
+		if(keys & KEY_LEFT)  
+		{
+			explorer->move(-2,0);
+		}
+		else if(keys & KEY_RIGHT)
+		{
+			explorer->move(2,0);
 		}
 	}
-	else if(keys & KEY_UP)  
+}
+
+void Level::on_key_up(int keys)
+{
+	if(focus==explorer)
 	{
-		int upper = get_block_data((int)(player->pos_x),(int)focus->get_pos_y()-1);
-		//int above = get_block_data((int)(player->pos_x),(int)focus->get_pos_y()-64);		
-		if(upper==2)
-		{			
-			focus->move(0,-1);
+		if(keys & KEY_R)
+		{
+			set_focus(xfocus);
 		}
 	}
-	
-	
-	if(keys & KEY_LEFT) 
-	{
-		focus->attr->set_flip_h(0);		
-		
-		int on_left = get_block_data((int)(player->get_left_coord())-1,(int)focus->get_pos_y()-2);
-		on_left |= get_block_data((int)(player->get_left_coord())-1,(int)focus->get_pos_y()-10);
-		on_left |= get_block_data((int)(player->get_left_coord())-1,(int)focus->get_pos_y()-18);
-		on_left |= get_block_data((int)(player->get_left_coord())-1,(int)focus->get_pos_y()-26);
-		
-		if(on_left!=1)
-			player->charge_v(-sf24(2),0);		
-	}
-	else if(keys & KEY_RIGHT) 
-	{
-		focus->attr->set_flip_h(1);
-		
-		int on_right = get_block_data((int)(player->get_right_coord())+1,(int)focus->get_pos_y()-2);
-		on_right |= get_block_data((int)(player->get_right_coord())+1,(int)focus->get_pos_y()-10);
-		on_right |= get_block_data((int)(player->get_right_coord())+1,(int)focus->get_pos_y()-18);
-		on_right |= get_block_data((int)(player->get_right_coord())+1,(int)focus->get_pos_y()-26);
-		
-		if(on_right!=1)
-			player->charge_v(sf24(2),0);		
-	}
-		
 }
 
 void Level::set_blocks_data(const u8* src)
@@ -510,8 +617,12 @@ u8 Level::get_block_data(s16 x, s16 y) const
 void Level::set_focus(Sprite* spr)
 {	
 	focus=spr;	
+	if(focus==player || focus==cat)
+	{
+		xfocus=(PhysicalObject*)spr;
+	}
 	camera->follow(focus);	
-	focus->update_position(camera);
+	focus->update_position(camera);	
 }
 
 
@@ -550,7 +661,7 @@ void Level::add_trampoline(s16 x, s16 y)
 	register_sprite(tr);
 }
 
-int Level::dialog_controlled_jump(void* sender)
+int Level::dialog_controlled_jump_p(void* sender)
 {
 	Level* lvl=(Level*)sender;	
 	if(lvl->jump_timeout<=0) // prevent callback 2 frames in a row
@@ -562,14 +673,26 @@ int Level::dialog_controlled_jump(void* sender)
 	return 1; // Missing this line results in Undefined Opcode!
 }
 
+int Level::dialog_controlled_jump_c(void* sender)
+{
+	Level* lvl=(Level*)sender;	
+	if(lvl->jump_timeout<=0) // prevent callback 2 frames in a row
+	{		
+		lvl->cat->charge_a(0, - 4);
+		lvl->jump_timeout=1;
+	}	
+	else lvl->jump_timeout--;
+	return 1; // Missing this line results in Undefined Opcode!
+}
+
 int Level::level_completed_dialog_finished(void* sender)
 {		
 	Level* lvl=(Level*)sender;
 	lvl->unlock_input();	
 	
-	u8 option=lvl->dialog->get_option(0);
+	u8 option=lvl->dialog->get_option(0);	
 	
-	if(option==1)
+	if(option==1)	
 		lvl->completed=LVL_MENU;
 	else 
 		lvl->completed=LVL_NEXT;
@@ -588,6 +711,6 @@ int Level::game_over_dialog_finished(void* sender)
 	if(option==1)
 		lvl->completed=LVL_MENU;
 	else
-		lvl->completed=LVL_RETRY;
+		lvl->completed=LVL_ENTER;
 	return 1;
 }

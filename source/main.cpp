@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "engine.hpp"
 
+#include "game_dat.hpp"
 #include "level.hpp"
 #include "title_screen.hpp"
 
@@ -15,19 +16,18 @@ int main(void) {
 		
 	OamPool::reset();
 	
-	int screen_result=0;
-	TextScrollMap* screen = new TitleScreen();
+	load_user_data();	
+	
+	int screen_result = LVL_MENU;
+	TextScrollMap* screen = NULL;	
 		
 	while(1)
-	{
-		screen->init();
-		screen_result = screen->run();
-		delete screen;		
-		
+	{		
 		switch(screen_result&3)
 		{
 			case LVL_MENU:
-			{
+			{								
+				save_user_data();				
 				screen = new TitleScreen();
 				break;
 			}
@@ -36,7 +36,10 @@ int main(void) {
 				screen = new Level(test_level_bin);
 				break;
 			}
-		}				
+		}	
+		screen->init();
+		screen_result = screen->run();
+		delete screen;					
 	}
 	TitleScreen* ts = new TitleScreen();
 	ts->init();
