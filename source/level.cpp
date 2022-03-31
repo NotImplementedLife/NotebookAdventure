@@ -1,5 +1,7 @@
 #include "level.hpp"
 
+#include "game_dat.hpp"
+
 
 #include "notebook-sheet.h"
 #include "test_level.h"
@@ -9,7 +11,6 @@
 #include "dialog_frame.h"
 #include "dialog_arr.h"
 #include "spikes.h"
-#include "burned_hole.h"
 #include "trampoline.h"
 
 #include <string.h>
@@ -20,7 +21,7 @@ public:
 	LevelBackgroundBage() : Background(3,2,31,75,105) { strcpy(magic,"LevelBgPage"); }
 	
 	void init() override
-	{
+	{		
 		Background::load_tiles(notebook_sheetTiles,notebook_sheetTilesLen, true, 0);
 		Background::set_map_stream_source(notebook_sheetMap);
 		dmaCopy((u8*)notebook_sheetPal,(u8*)(BG_PALETTE),notebook_sheetPalLen);
@@ -219,19 +220,6 @@ public:
 	}
 };
 
-class Hole : public Sprite
-{
-public:
-	Hole(): Sprite(SIZE_32x32,1,"hole")
-	{
-		get_visual()->set_frame(0,0x0288);
-		get_visual()->set_crt_gfx(0);
-		set_hitbox(2,2,28,28);
-		update_visual();
-		set_anchor(ANCHOR_CENTER);
-	}
-};
-
 class Trampoline : public Sprite
 {
 public:
@@ -261,6 +249,7 @@ public:
 	
 	void init() override
 	{		
+		set_priority(0);
 		clear_map();
 		load_tiles(dialog_frameTiles);		
 		dmaCopy(dialog_arrTiles, (u8*)(VRAM + 0x10000 + 0x64*64), 64);						
@@ -301,8 +290,7 @@ Level::Level(const u8* lvl_src) : TextScrollMap()
 
 void Level::init() 
 {			
-	LOAD_GRIT_SPRITE_TILES(spikes, 0x280, 48);
-	LOAD_GRIT_SPRITE_TILES(burned_hole, 0x288, 64);
+	LOAD_GRIT_SPRITE_TILES(spikes, 0x280, 48);	
 	LOAD_GRIT_SPRITE_TILES(trampoline, 0x2A8, 56);
 
 	LevelBackgroundBage* bg_page = new LevelBackgroundBage();
@@ -323,10 +311,9 @@ void Level::init()
 	explorer = new Explorer();
 	register_sprite(explorer);
 	
-	player = new Player();	
-	
+	player = new Player();		
 		
-	u8* lvldat = (u8*)blocks_data+75*105;
+	u8* lvldat = (u8*)blocks_data+75*105+16;
 	
 	
 	u16 px=0, py=0;
@@ -337,35 +324,17 @@ void Level::init()
 	py |= (*(lvldat++))<<8;
 	
 	player->set_pos(px, py);		
-	register_sprite(player);
+	register_sprite(player);			
 		
-	hole = new Hole();	
-	
-	u16 fx=0, fy=0;	
-	fx = (*(lvldat++));
-	fx |= (*(lvldat++))<<8;
-	
-	fy = (*(lvldat++));
-	fy |= (*(lvldat++))<<8;
-	
-	hole->set_pos(fx,fy);
-	
-	register_sprite(hole);
-	
-	bool has_cat = (*(lvldat++)!=0);
-	
-	if(has_cat)
-	{
-		u16 cx=0, cy=0;	
-		cx = (*(lvldat++));
-		cx |= (*(lvldat++))<<8;
+	u16 cx=0, cy=0;	
+	cx = (*(lvldat++));
+	cx |= (*(lvldat++))<<8;
 		
-		cy = (*(lvldat++));
-		cy |= (*(lvldat++))<<8;
-	}
+	cy = (*(lvldat++));
+	cy |= (*(lvldat++))<<8;	
 	
 	cat	= new Cat();
-	cat->set_pos(100,100);
+	cat->set_pos(cx,cy);
 	register_sprite(cat);
 		
 	u8 spkcnt = *(lvldat++);
@@ -440,7 +409,14 @@ void Level::on_frame()
 		this->exit(completed);
 		return;
 	}
-
+	
+	if(focus==player) {
+		UserData.time_played_as_human++;
+	}
+	else if(focus==cat) {
+		UserData.time_played_as_cat++;
+	}
+	
 	update_actor(player);
 	update_actor(cat);
 	
@@ -473,13 +449,13 @@ void Level::on_frame()
 			}
 		}
 		
-		else if(player->touches(hole))
+		else if(player->touches(cat))
 		{
 			if(!input_locked())
 			{
 				lock_input(0);
 				dialog->run_on_dialog_finished(2, level_completed_dialog_finished, this);
-				dialog->launch_dialog(2, "Well played!\n                  \x01Next            \01Menu", 0);				
+				dialog->launch_dialog(2, "Well played!\n                  \x01Next            \01Menu", 0);			
 			}
 		}
 	}	
@@ -489,7 +465,7 @@ void Level::on_key_down(int keys)
 {
 	if(focus!=explorer)
 	{		
-		if(keys & KEY_UP) 
+		if(keys & KEY_A) 
 		{
 			s16 px=(int)xfocus->get_pos_x();
 			s16 py=(int)xfocus->get_pos_y();
@@ -500,10 +476,14 @@ void Level::on_key_down(int keys)
 				xfocus->charge_a(0,-sf24(3,160));
 		}
 		
-		if(keys & KEY_B)
+		if(keys & KEY_START)
 		{
-			xfocus->ignore_air_limits();
-			xfocus->set_pos(100,100);
+			//xfocus->ignore_air_limits();
+			//xfocus->set_pos(100,100);			
+			lock_execution(0);
+			dialog->run_on_dialog_finished(2, pause_dialog_finished, this);
+			dialog->launch_dialog(2, "Game paused\n                  \x01Resume            \01Menu", 0);
+			
 		}
 		
 		if(keys & KEY_L)
@@ -516,6 +496,11 @@ void Level::on_key_down(int keys)
 			set_focus(explorer);
 		}
 	}
+}
+
+void Level::on_loaded()
+{
+	dialog->launch_dialog(0,(const char*)blocks_data+75*105, 60);	
 }
 
 void Level::on_key_held(int keys)
@@ -712,5 +697,18 @@ int Level::game_over_dialog_finished(void* sender)
 		lvl->completed=LVL_MENU;
 	else
 		lvl->completed=LVL_ENTER;
+	return 1;
+}
+
+int Level::pause_dialog_finished(void* sender)
+{
+	Level* lvl=(Level*)sender;
+	lvl->unlock_execution();
+	u8 option=lvl->dialog->get_option(0);
+	if(option==0)
+	{
+		return 1;
+	}
+	fatal("PAUSE");
 	return 1;
 }

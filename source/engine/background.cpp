@@ -9,6 +9,7 @@
 
 Background::Background(u16 id, u16 char_base,u16 map_base,u16 map_width, u16 map_height)
 {	
+	m_id=id&3;
 	REG_DISPCNT |= BG_ON(id);
 	REG_BG_CNT(id)  = BG_256_COLOR | BG_SIZE_0 |  BG_MAP_BASE(map_base) | CHAR_BASE(char_base);
 	char_base_address = (u16*)(CHAR_BASE_ADR(char_base));
@@ -19,6 +20,13 @@ Background::Background(u16 id, u16 char_base,u16 map_base,u16 map_width, u16 map
 	ptr_bg_hofs = PTR_BG_HOFS(id);
 	ptr_bg_vofs = PTR_BG_VOFS(id);
 	old_x=old_y=0x8000;
+	set_priority(m_id);
+}
+
+void Background::set_priority(u8 priority)
+{
+	REG_BG_CNT(m_id) &= ~3;
+	REG_BG_CNT(m_id) |= priority&3;
 }
 
 void Background::load_tiles(const void* source,u32 len,bool compressed, u8 palette_displacement)

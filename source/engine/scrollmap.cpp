@@ -31,17 +31,36 @@ void TextScrollMap::on_key_up(int keys) { }
 
 bool TextScrollMap::input_locked() const
 {
-	return lock!=-1;
+	return lock_i!=-1;
 }
 
 void TextScrollMap::lock_input(int lock_id)
 {
-	lock = lock_id;
+	lock_i = lock_id;
 }
 void TextScrollMap::unlock_input()
 {
-	lock = -1;
+	lock_i = -1;
 }
+
+bool TextScrollMap::execution_locked() const
+{
+	return lock_e!=-1;
+}
+
+void TextScrollMap::lock_execution(int lock_id)
+{
+	lock_e=lock_id;
+	lock_input(lock_id);
+}
+
+void TextScrollMap::unlock_execution()
+{
+	lock_e=-1;
+	unlock_input();
+}
+
+void TextScrollMap::on_loaded() { }
 
 #include "error.hpp"
 
@@ -52,6 +71,7 @@ u8 TextScrollMap::run()
 		{			
 			bg[i]->init();	
 		}	
+	on_loaded();
 	while(1)
 	{
 		VBlankIntrWait();
@@ -64,23 +84,25 @@ u8 TextScrollMap::run()
 		int keys_held = keysHeld();
 		int keys_up = keysUp();		
 
-		if(lock==-1 || (lock==4))
+		if(lock_i==-1 || (lock_i==4))
 		{
 			on_key_down(keys_down);
 			on_key_held(keys_held);
 			on_key_up(keys_up);
-		}
-			
-		on_frame();
-		
-		for(int i=0;i<sprites_count;i++)
-		{
-			sprites[i]->update_visual();
-			sprites[i]->update_position(camera);
+		}		
+				
+		if(lock_e==-1)
+		{			
+			on_frame();
+			for(int i=0;i<sprites_count;i++)
+			{
+				sprites[i]->update_visual();
+				sprites[i]->update_position(camera);
+			}
 		}
 						
 		for(int i=0;i<4;i++)		
-			if(bg[i])
+			if(bg[i] && (lock_e==-1 || lock_e==i))
 			{						
 				if(scroll_speed[i]==0)
 					bg[i]->set_scroll(0,0);
@@ -89,7 +111,7 @@ u8 TextScrollMap::run()
 						((camera->get_x() * scroll_speed[i])>>4)-240/2, 
 						((camera->get_y() * scroll_speed[i])>>4)-160/2);
 				bg[i]->build_map();
-				if(lock==-1 || lock==i)
+				if(lock_i==-1 || lock_i==i)
 				{
 					bg[i]->key_down(keys_down);
 					bg[i]->key_held(keys_held);

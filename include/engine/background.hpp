@@ -8,7 +8,8 @@
 class Background
 {
 protected:	
-	char magic[16] = "Background";
+	char magic[15] = "Background";	
+	u8 m_id;
 	u16 *char_base_address, *map_base_address;
 	u16 width, height;
 	u16 *map_stream_source;	
@@ -16,7 +17,7 @@ protected:
 	s16 tile_offset_x, tile_offset_y;
 	u16 *ptr_bg_hofs, *ptr_bg_vofs;
 	u16 bg_hofs, bg_vofs;
-	s16 old_x=0x8000, old_y=0x8000;
+	s16 old_x=0x8000, old_y=0x8000;	
 	
 protected:
 	/*! \brief loads tileset graphics into its specific VRAM block
@@ -44,6 +45,8 @@ public:
 		\param map_height tilemap height in tiles
 	 */
 	Background(u16 id, u16 char_base,u16 map_base,u16 map_width, u16 map_height);
+	
+	void set_priority(u8 priority);
 	
 	virtual void init();
 		

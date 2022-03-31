@@ -19,7 +19,8 @@ protected:
 	Sprite** sprites;
 	u16 sprites_count, sprites_cap;	
 	
-	s8 lock=-1;
+	s8 lock_i=-1;
+	s8 lock_e=-1;
 	u8 exit_flag=0;
 public:
 	TextScrollMap();
@@ -27,6 +28,10 @@ public:
 	bool input_locked() const;
 	void lock_input(int lock_id);
 	void unlock_input();
+	
+	bool execution_locked() const;
+	void lock_execution(int lock_id);
+	void unlock_execution();
 	
 	virtual void init();
 	
@@ -43,6 +48,8 @@ public:
 	Camera* get_camera() const;
 	
 	void register_sprite(Sprite* spr);
+	
+	virtual void on_loaded();
 	
 	
 	virtual ~TextScrollMap();

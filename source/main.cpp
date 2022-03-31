@@ -36,6 +36,12 @@ int main(void) {
 				screen = new Level(test_level_bin);
 				break;
 			}
+			case LVL_NEXT:
+			{
+				save_user_data();				
+				screen = new TitleScreen();
+				break;
+			}
 		}	
 		screen->init();
 		screen_result = screen->run();

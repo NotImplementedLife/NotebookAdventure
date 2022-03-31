@@ -150,6 +150,7 @@ Sprite::Sprite(ObjSize size, u16 frames_count, const char* _class)
 	hitbox = Hitbox(size);	
 	visual = new ObjVisual(frames_count);
 	this->_class=_class;
+	attr->set_priority(1);
 }
 
 void Sprite::set_hitbox(u8 left, u8 top, u8 width, u8 height)
