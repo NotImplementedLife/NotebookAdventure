@@ -24,7 +24,7 @@ public:
 	void init() override
 	{
 		u32 _0 = 0;
-		CpuFastSet(&_0, BG_PALETTE, 128 | FILL);
+		//CpuFastSet(&_0, BG_PALETTE, 128 | FILL);
 		CpuFastSet(&_0, (void*)VRAM, (0x10000 / 4) | FILL);
 		clear_map();
 		Vwf vwf=Vwf(defaultFont816);

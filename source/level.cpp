@@ -7,9 +7,10 @@
 
 #include "level_1_bin.h"
 #include "level_2_bin.h"
+#include "level_3_bin.h"
 //...
 
-const int LEVELS_COUNT = 2;
+const int LEVELS_COUNT = all_levelsMapLen/(2*75*105);
 
 const void* get_level_map(u32 no)
 {	
@@ -19,7 +20,7 @@ const void* get_level_map(u32 no)
 }
 
 
-const u8* levels_bin[] = { NULL, level_1_bin, level_2_bin };
+const u8* levels_bin[] = { NULL, level_1_bin, level_2_bin, level_3_bin };
 
 #include "notebook-sheet.h"
 #include "player.h"
@@ -40,7 +41,7 @@ public:
 	{		
 		Background::load_tiles(notebook_sheetTiles,notebook_sheetTilesLen, true, 0);
 		Background::set_map_stream_source(notebook_sheetMap);
-		dmaCopy((u8*)notebook_sheetPal,(u8*)(BG_PALETTE),notebook_sheetPalLen);
+		dmaCopy((u8*)notebook_sheetPal,(u8*)(BG_PALETTE),notebook_sheetPalLen);		
 	}	
 };
 
@@ -270,13 +271,13 @@ public:
 	{		
 		set_priority(0);
 		clear_map();
-		load_tiles(dialog_frameTiles);		
-		dmaCopy(dialog_arrTiles, (u8*)(VRAM + 0x10000 + 0x64*64), 64);						
+		load_tiles(dialog_frameTiles);
+		dmaCopy(dialog_arrTiles, (u8*)(VRAM + 0x10000 + 0x64*64), 64);
 		set_caret(0xC8);
 		
 		// Dialog 0: use to display level title
 		vwf = new Vwf(defaultFont816);
-		vwf->set_text_color(0xA2);		
+		vwf->set_text_color(0x62);
 		create_dialog_box(1, 1, 16, 4, vwf);		
 		
 		// Dialog 1: use dialog timings to control jumping on sprites
@@ -291,10 +292,13 @@ public:
 		
 		vwf_g = new Vwf(defaultFont816);
 		create_dialog_box(1,14,28,6, vwf_g);
+		vwf_g->set_text_color(0x62);
 
 		// Dialog 3: jump dialog, for cat
 		vwf_jc = new Vwf(defaultFont816);
-		create_dialog_box(5, 22, 3, 4, vwf_jc);		
+		create_dialog_box(5, 22, 3, 4, vwf_jc);			
+		
+		BG_PALETTE[0x62] = 0x7FFF;
 	}	
 };
 
@@ -719,9 +723,9 @@ int Level::game_over_dialog_finished(void* sender)
 	u8 option=lvl->dialog->get_option(0);
 	
 	if(option==1)
-		lvl->completed=LVL_MENU;
+		lvl->completed=LVL_MENU; // Quit
 	else
-		lvl->completed=LVL_ENTER;
+		lvl->completed=LVL_ENTER_CODE(lvl->id); // Retry
 	return 1;
 }
 
