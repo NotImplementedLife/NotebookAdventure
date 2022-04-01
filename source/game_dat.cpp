@@ -18,6 +18,7 @@ void load_user_data()
 		//CpuFastSet(&_0, &UserData, (sizeof(UserData)/sizeof(u16)) | FILL | COPY16); // breaks level???
 		for(u32 i=0;i<sizeof(UserData);i++)
 			((u8*)&UserData)[i]=0;
+		UserData.current_level=1;
 	}
 }
 

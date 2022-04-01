@@ -6,6 +6,7 @@
 #include "title.h"
 #include "title_text.h"
 #include "title_crayon.h"
+#include "game_dat.hpp"
 
 class TitleBackgroundPage : public Background
 {
@@ -96,7 +97,13 @@ void TitleScreen::on_key_down(int keys)
 	}
 	else if(keys & KEY_A)
 	{
-		exit(crt_option==1 ? LVL_ENTER : LVL_ENTER);
+		if(crt_option==0) // new game
+		{
+			UserData.current_level = 1;
+			UserData.time_played_as_human = 0;
+			UserData.time_played_as_cat = 0;
+		}
+		exit(crt_option==1 ? LVL_ENTER_CODE(UserData.current_level) : LVL_ENTER_CODE(1));
 	}
 }
 

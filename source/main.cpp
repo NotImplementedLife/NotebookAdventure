@@ -28,6 +28,10 @@ int main(void) {
 	int screen_result = LVL_MENU;
 	TextScrollMap* screen = NULL;	
 		
+	u16 last_enter_id=0;
+	
+	//fatal("",UserData.current_level);
+	
 	while(1)
 	{		
 		switch(screen_result&3)
@@ -40,19 +44,23 @@ int main(void) {
 			}
 			case LVL_ENTER:
 			{
-				screen = new Level(1);
+				last_enter_id = screen_result>>2;
+				screen = new Level(last_enter_id);						
 				break;
 			}
 			case LVL_NEXT:
 			{
-				save_user_data();				
-				screen = new TitleScreen();
+				last_enter_id++;					
+				screen = new Level((u32)last_enter_id);
 				break;
 			}
-		}	
+		}			
 		screen->init();
-		screen_result = screen->run();
-		delete screen;					
+		screen_result = screen->run();		
+		delete screen;			
+		if(last_enter_id+1>UserData.current_level)
+			UserData.current_level = last_enter_id+1;
+		save_user_data();
 	}
 	TitleScreen* ts = new TitleScreen();
 	ts->init();

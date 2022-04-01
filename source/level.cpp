@@ -9,8 +9,12 @@
 #include "level_2_bin.h"
 //...
 
-const void* get_level_map(int no)
-{
+const int LEVELS_COUNT = 2;
+
+const void* get_level_map(u32 no)
+{	
+	if(no>LEVELS_COUNT)
+		fatal("Wrong level id");
 	return (u16*)(all_levelsMap) + 75*105*(no-1);
 }
 
@@ -304,7 +308,10 @@ Level::Level(const void* lvl_map, const u8* lvl_src) : TextScrollMap()
 	completed=false;
 }
 
-Level::Level(int level_no) : Level(get_level_map(level_no), levels_bin[level_no]) { }
+Level::Level(u32 level_no) : Level(get_level_map(level_no), levels_bin[level_no]) 
+{
+	id = level_no;
+}
 
 void Level::init() 
 {			
@@ -725,16 +732,16 @@ int Level::pause_dialog_finished(void* sender)
 	u8 option=lvl->dialog->get_option(0);
 	if(option==0)
 	{
-		return 1;
+		return 1; // Resume
 	}	
 	if(option==1)
 	{
-		lvl->completed=LVL_ENTER;
+		lvl->completed=LVL_ENTER_CODE(lvl->id); // Retry
 		return 1;
 	}
 	if(option==2)
 	{
-		lvl->completed=LVL_MENU;
+		lvl->completed=LVL_MENU; // Quit
 		return 1;
 	}
 	fatal("Undefined option");
