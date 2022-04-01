@@ -3,9 +3,21 @@
 #include "game_dat.hpp"
 
 
+#include "all_levels.h"
+
+#include "level_1_bin.h"
+#include "level_2_bin.h"
+//...
+
+const void* get_level_map(int no)
+{
+	return (u16*)(all_levelsMap) + 75*105*(no-1);
+}
+
+
+const u8* levels_bin[] = { NULL, level_1_bin, level_2_bin };
+
 #include "notebook-sheet.h"
-#include "test_level.h"
-#include "test_level_bin.h"
 #include "player.h"
 #include "cat.h"
 #include "dialog_frame.h"
@@ -31,13 +43,16 @@ public:
 class LevelDungeon : public Background
 {
 public:
-	LevelDungeon() : Background(2,0,29,75,105) { strcpy(magic,"LevelDungeon"); }
+	LevelDungeon(const void* level_map) : Background(2,0,29,75,105)
+	{ 
+		strcpy(magic,"LevelDungeon"); 
+		Background::set_map_stream_source(level_map);
+	}
 	
 	void init() override
-	{		
-		Background::load_tiles(test_levelTiles,test_levelTilesLen, true, 160);
-		Background::set_map_stream_source(test_levelMap);			
-		dmaCopy((u8*)test_levelPal,(u16*)(BG_PALETTE)+160, test_levelPalLen);
+	{				
+		Background::load_tiles(all_levelsTiles, all_levelsTilesLen, true, 160);
+		dmaCopy((u8*)all_levelsPal,(u16*)(BG_PALETTE)+160, all_levelsPalLen);
 	}	
 };
 
@@ -281,12 +296,15 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-Level::Level(const u8* lvl_src) : TextScrollMap()
+Level::Level(const void* lvl_map, const u8* lvl_src) : TextScrollMap()
 {
+	map_source = lvl_map;
 	set_blocks_data(lvl_src);
 	cat = NULL;	
 	completed=false;
 }
+
+Level::Level(int level_no) : Level(get_level_map(level_no), levels_bin[level_no]) { }
 
 void Level::init() 
 {			
@@ -296,13 +314,13 @@ void Level::init()
 	LevelBackgroundBage* bg_page = new LevelBackgroundBage();
 	set_background(3, bg_page, 0x10);
 	
-	LevelDungeon* dungeon = new LevelDungeon();
+	LevelDungeon* dungeon = new LevelDungeon(map_source);
 	set_background(2, dungeon, 0x10);
 	
 	dialog = new LevelDialog();
 	set_background(0, dialog, 0x00);	
 	
-	dialog->run_on_dialog_finished(1, dialog_controlled_jump_p, this);		
+	dialog->run_on_dialog_finished(1, dialog_controlled_jump_p, this);
 	dialog->run_on_dialog_finished(3, dialog_controlled_jump_c, this);
 	
 	REG_BLDCNT = (1<<2) | (1<<6) | (1<<11);
@@ -482,7 +500,7 @@ void Level::on_key_down(int keys)
 			//xfocus->set_pos(100,100);			
 			lock_execution(0);
 			dialog->run_on_dialog_finished(2, pause_dialog_finished, this);
-			dialog->launch_dialog(2, "Game paused\n                  \x01Resume            \01Menu", 0);
+			dialog->launch_dialog(2, "Game paused\n    \x01Resume          \01Retry          \01Menu", 0);
 			
 		}
 		
@@ -708,7 +726,17 @@ int Level::pause_dialog_finished(void* sender)
 	if(option==0)
 	{
 		return 1;
+	}	
+	if(option==1)
+	{
+		lvl->completed=LVL_ENTER;
+		return 1;
 	}
-	fatal("PAUSE");
+	if(option==2)
+	{
+		lvl->completed=LVL_MENU;
+		return 1;
+	}
+	fatal("Undefined option");
 	return 1;
 }

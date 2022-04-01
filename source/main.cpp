@@ -7,12 +7,19 @@
 #include "level.hpp"
 #include "title_screen.hpp"
 
-#include "test_level_bin.h"
+
+#include "level_1_bin.h"
+#include "level_2_bin.h"
+#include "all_levels.h"
+
 
 int main(void) {
 	irqInit();
 	irqEnable(IRQ_VBLANK);
 	SetMode(MODE_0 | OBJ_ENABLE | OBJ_1D_MAP);
+		
+	
+	//while(1) VBlankIntrWait();
 		
 	OamPool::reset();
 	
@@ -33,7 +40,7 @@ int main(void) {
 			}
 			case LVL_ENTER:
 			{
-				screen = new Level(test_level_bin);
+				screen = new Level(1);
 				break;
 			}
 			case LVL_NEXT:
@@ -53,12 +60,12 @@ int main(void) {
 	delete ts;
 	
 	
-	Level* lvl = new Level(test_level_bin);
+	Level* lvl = new Level(1);
 	lvl->init();	
 	lvl->run();
 	delete lvl;
 	
-	lvl = new Level(test_level_bin);
+	lvl = new Level(1);
 	lvl->init();
 	lvl->run();
 	delete lvl;

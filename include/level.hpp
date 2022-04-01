@@ -3,6 +3,8 @@
 #include "engine.hpp"
 #include "screen_msg.hpp"
 
+const void* get_level_map(int no);
+
 class PhysicalObject;
 
 class Level : public TextScrollMap
@@ -24,10 +26,12 @@ private:
 	DialogBackground* dialog;
 	
 	u8 completed;
+	const void* map_source;
 	int jump_timeout=0;
 	void update_actor(PhysicalObject* obj);
 public:
-	Level(const u8* lvl_src);	
+	Level(const void* lvl_map, const u8* lvl_src);
+	Level(int level_no);
 
 	void init() override;
 	
