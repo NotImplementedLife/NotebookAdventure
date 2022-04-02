@@ -3,6 +3,8 @@
 #include "engine.hpp"
 #include "screen_msg.hpp"
 
+extern const u16 mul_75[]; // quick multiplication table
+
 extern const int LEVELS_COUNT;
 
 class PhysicalObject;
@@ -30,6 +32,10 @@ private:
 	int jump_timeout=0;
 	void update_actor(PhysicalObject* obj);
 	u16 id;
+	
+	u16 qopt_size=0;
+	u16* quick_obstacle_pos_table = NULL;
+	
 	Level(const void* lvl_map, const u8* lvl_src);
 public:	
 	Level() = default;
@@ -45,7 +51,7 @@ public:
 	
 	void add_trampoline(s16 x, s16 y);
 	
-	void add_obstacle(u8 id, u8 orientation, s16 x, s16 y);
+	void add_obstacle(u8 id, u8 orientation, s16 x, s16 y, u16 qops_id);
 	
 	void add_obstacle_activator(u8 id, s16 x, s16 y);
 	
@@ -62,6 +68,10 @@ public:
 	void set_blocks_data(const u8* src);
 	
 	u8 get_block_data(s16 x, s16 y) const;
+	
+	u8 get_block_data_tiled(u8 x, u8 y) const;
+	
+	s8 obst_status[14];
 	
 	~Level();
 	
