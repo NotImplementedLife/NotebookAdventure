@@ -7,6 +7,7 @@
 #include "title_text.h"
 #include "title_crayon.h"
 #include "game_dat.hpp"
+#include "audio.hpp"
 
 class TitleBackgroundPage : public Background
 {
@@ -85,6 +86,9 @@ void TitleScreen::init()
 	options[0]=opt_new;
 	options[1]=opt_cont;
 	
+	play_bgm(MOD_NADV_INTRO);
+	mmSetModuleVolume(128);
+	mmSetModulePitch(512+256);
 }
 
 void TitleScreen::on_key_down(int keys)
@@ -97,14 +101,31 @@ void TitleScreen::on_key_down(int keys)
 	}
 	else if(keys & KEY_A)
 	{
+		//stop_bgm();
+		play_sfx(&sfx_enter_lvl);		
+		for(int k=60;k--;)
+		{
+			VBlankIntrWait();
+			mmFrame();
+		}
 		if(crt_option==0) // new game
 		{
 			UserData.current_level = 1;
 			UserData.time_played_as_human = 0;
 			UserData.time_played_as_cat = 0;
-		}
+		}		
 		exit(crt_option==1 ? LVL_ENTER_CODE(UserData.current_level) : LVL_ENTER_CODE(1));
 	}
+}
+
+void TitleScreen::on_frame()
+{
+	mmFrame();
+}
+
+TitleScreen::~TitleScreen()
+{		
+	stop_bgm();
 }
 
 

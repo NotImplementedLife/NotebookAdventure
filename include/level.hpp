@@ -32,6 +32,7 @@ private:
 	u16 id;
 	Level(const void* lvl_map, const u8* lvl_src);
 public:	
+	Level() = default;
 	Level(u32 level_no);
 
 	void init() override;
@@ -55,6 +56,8 @@ public:
 	void set_blocks_data(const u8* src);
 	
 	u8 get_block_data(s16 x, s16 y) const;
+	
+	~Level();
 	
 	static int dialog_controlled_jump_p(void* sender);
 	static int dialog_controlled_jump_c(void* sender);

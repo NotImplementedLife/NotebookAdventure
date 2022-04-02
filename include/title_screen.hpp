@@ -16,4 +16,8 @@ public:
 	void init() override;
 
 	void on_key_down(int keys) override;
+	
+	void on_frame() override;
+	
+	~TitleScreen();
 };

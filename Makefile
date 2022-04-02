@@ -30,7 +30,7 @@ SOURCES		:= source source/engine
 INCLUDES	:= include include/engine
 GRAPHICS    := gfx
 DATA		:= data
-#MUSIC		:= audio
+MUSIC		:= audio
 
 #---------------------------------------------------------------------------------
 # options for code generation

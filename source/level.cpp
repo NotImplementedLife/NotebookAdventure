@@ -1,5 +1,7 @@
 #include "level.hpp"
 
+#include "audio.hpp"
+
 #include "game_dat.hpp"
 
 
@@ -387,6 +389,10 @@ void Level::init()
 	}
 	
 	set_focus(player);	
+	
+	play_bgm(MOD_NADV_LEVEL);
+	mmSetModuleVolume(1024);
+	mmSetModulePitch(1024);
 }
 
 void Level::update_actor(PhysicalObject* obj)
@@ -525,6 +531,7 @@ void Level::on_key_down(int keys)
 			set_focus(explorer);
 		}
 	}
+	mmFrame();
 }
 
 void Level::on_loaded()
@@ -673,6 +680,11 @@ void Level::add_trampoline(s16 x, s16 y)
 	Trampoline* tr = new Trampoline();
 	tr->set_pos(x,y);
 	register_sprite(tr);
+}
+
+Level::~Level()
+{
+	stop_bgm();
 }
 
 int Level::dialog_controlled_jump_p(void* sender)

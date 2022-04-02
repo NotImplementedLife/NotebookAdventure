@@ -6,6 +6,7 @@
 #include "game_dat.hpp"
 #include "level.hpp"
 #include "title_screen.hpp"
+#include "audio.hpp"
 
 
 #include "level_1_bin.h"
@@ -18,7 +19,7 @@ int main(void) {
 	irqEnable(IRQ_VBLANK);
 	SetMode(MODE_0 | OBJ_ENABLE | OBJ_1D_MAP);
 		
-	
+	init_sound();
 	//while(1) VBlankIntrWait();
 		
 	OamPool::reset();
