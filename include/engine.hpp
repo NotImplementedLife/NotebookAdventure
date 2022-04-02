@@ -2,6 +2,7 @@
 
 #include "engine/background.hpp"
 #include "engine/camera.hpp"
+#include "engine/colors.hpp"
 #include "engine/dialogbox.hpp"
 #include "engine/dialog_background.hpp"
 #include "engine/error.hpp"

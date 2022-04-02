@@ -39,9 +39,15 @@ public:
 	
 	void on_frame() override;
 	
+	void on_end_frame() override;
+	
 	void add_spikes(s16 x,s16 y,s8 len);
 	
 	void add_trampoline(s16 x, s16 y);
+	
+	void add_obstacle(u8 id, u8 orientation, s16 x, s16 y);
+	
+	void add_obstacle_activator(u8 id, s16 x, s16 y);
 	
 	void set_focus(Sprite* spr);
 	

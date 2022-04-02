@@ -119,12 +119,14 @@ u8 TextScrollMap::run()
 				}
 				bg[i]->render();
 			}		
-			
+		on_end_frame();	
 		OamPool::deploy();
 	}	
 	
 	return exit_flag;
 }
+
+void TextScrollMap::on_end_frame() { };
 
 void TextScrollMap::exit(u8 code)
 {

@@ -37,7 +37,7 @@ MUSIC		:= audio
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork
 
-CFLAGS	:=	-g -Wall -ffast-math -O3 -fomit-frame-pointer\
+CFLAGS	:=	-g -Wall -ffast-math -O3 -fomit-frame-pointer \
 		-mcpu=arm7tdmi -mtune=arm7tdmi\
 		$(ARCH)
 

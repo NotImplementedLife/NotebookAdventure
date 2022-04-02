@@ -32,6 +32,10 @@ const u8* levels_bin[] = { NULL, level_1_bin, level_2_bin, level_3_bin };
 #include "spikes.h"
 #include "trampoline.h"
 
+#include "obstacle_activator.h"
+#include "obstacle_horizontal.h"
+#include "obstacle_vertical.h"
+
 #include <string.h>
 
 class LevelBackgroundBage : public Background
@@ -234,7 +238,7 @@ class Spikes : public Sprite
 public:
 	Spikes(ObjSize size) : Sprite(size, 1, "spikes")
 	{
-		get_visual()->set_frame(0,0x0280);
+		get_visual()->set_frame(0,0x0200);
 		get_visual()->set_crt_gfx(0);
 		update_visual();
 		auto_detect_hitbox();
@@ -247,8 +251,8 @@ class Trampoline : public Sprite
 public:
 	Trampoline() : Sprite(SIZE_16x16, 2, "tram")
 	{
-		get_visual()->set_frame(0,0x02A8);
-		get_visual()->set_frame(1,0x02B0);
+		get_visual()->set_frame(0,0x0208);
+		get_visual()->set_frame(1,0x0210);
 		get_visual()->set_crt_gfx(0);
 		update_visual();
 		auto_detect_hitbox();
@@ -304,6 +308,53 @@ public:
 	}	
 };
 
+enum ObstacleOrientation
+{
+	horizontal_to_left  = 0x00,
+	horizontal_to_right = 0x80,
+	vertical_to_top     = 0x01,
+	vertical_to_bottom  = 0x81
+};
+
+class Obstacle : public Sprite
+{
+private:
+	u8 id; 
+	u8 orientation;
+public:
+	Obstacle(u8 id, ObstacleOrientation orientation) : Sprite(((orientation & 1) == 0) ? SIZE_32x8 : SIZE_8x32, 1)
+	{
+		this->id = id;
+		this->orientation = orientation;
+		get_visual()->set_frame(0,0x240 + 0x20*id + 8*(((u8)orientation) & 0x01));
+		get_visual()->set_crt_gfx(0);
+		update_visual();
+		switch(orientation)
+		{
+			case horizontal_to_left: set_anchor(28*8, 128); break;
+			case horizontal_to_right: set_anchor(4*8, 128); break;
+			case vertical_to_top: set_anchor(128, 28*8); break;
+			case vertical_to_bottom: set_anchor(128, 4*8); break;
+		}		
+	}				
+};
+
+class ObstacleActivator : public Sprite
+{
+private:
+	u8 id;	
+public:
+	ObstacleActivator(u8 id) : Sprite(SIZE_16x8, 2)
+	{
+		this->id = id;		
+		get_visual()->set_frame(0,0x240 + 0x20*id + 0x10);
+		get_visual()->set_frame(0,0x240 + 0x20*id + 0x14);
+		get_visual()->set_crt_gfx(0);
+		update_visual();
+		set_anchor(ANCHOR_BOTTOM);
+	}				
+};
+
 //////////////////////////////////////////////////////////////////////////////////////////
 
 Level::Level(const void* lvl_map, const u8* lvl_src) : TextScrollMap()
@@ -321,8 +372,8 @@ Level::Level(u32 level_no) : Level(get_level_map(level_no), levels_bin[level_no]
 
 void Level::init() 
 {			
-	LOAD_GRIT_SPRITE_TILES(spikes, 0x280, 48);	
-	LOAD_GRIT_SPRITE_TILES(trampoline, 0x2A8, 56);
+	LOAD_GRIT_SPRITE_TILES(spikes, 0x200, 48);
+	LOAD_GRIT_SPRITE_TILES(trampoline, 0x208, 56);	
 
 	LevelBackgroundBage* bg_page = new LevelBackgroundBage();
 	set_background(3, bg_page, 0x10);
@@ -391,8 +442,82 @@ void Level::init()
 	set_focus(player);	
 	
 	play_bgm(MOD_NADV_LEVEL);
-	mmSetModuleVolume(1024);
+	mmSetModuleVolume(512+256);
 	mmSetModulePitch(1024);
+	
+	// load obstacles
+	
+	for(int i=0;i<16;i++)
+	{
+		SPRITE_PALETTE[0xD0+i]=SYS_COLORS[i];
+		SPRITE_PALETTE[0xE0+i]=cl_brighten(SYS_COLORS[i],8);
+		SPRITE_PALETTE[0xF0+i]=cl_brighten(SYS_COLORS[i],14);
+	}
+			
+	for(int i=0;i<14;i++)
+	{
+		u32 obj_id = 0x240+0x20*i;
+		dmaCopy( obstacle_horizontalTiles,(u8*)SPR_VRAM(obj_id), obstacle_horizontalTilesLen);
+		dmaCopy( obstacle_verticalTiles,(u8*)SPR_VRAM(obj_id+0x08), obstacle_verticalTilesLen);
+		dmaCopy( obstacle_activatorTiles,(u8*)SPR_VRAM(obj_id+0x10), obstacle_activatorTilesLen);
+		u32* obj_addr = SPR_VRAM(obj_id);
+		for(int j=0;j<0x80;j++)
+		{			
+			u32 val = obj_addr[j];
+			u32 res = 0;
+			
+			for(int k=0;val>0;k++)
+			{				
+				u8 b = val&0xFF;
+				val>>=8;
+				if(b>0)
+				{
+					b<<=4;
+					b= 0x100-b+i+1;
+				}		
+				res|=(b<<(k<<3));				
+			}
+			
+			obj_addr[j]=res;			
+		}
+		
+		obj_addr+=0x80;
+		for(int j=0;j<0x40;j++)
+		{			
+			u32 val = obj_addr[j];
+			u32 res = 0;
+			
+			for(int k=0;val>0;k++)
+			{				
+				u8 b = val&0xFF;
+				val>>=8;
+				switch(b)
+				{
+					case 0: break;
+					case 1: b=0xD0; break;
+					case 3: b=0xFF; break;
+					default:
+					{
+						b<<=4;
+						b= 0x100-b+i+1;
+					}					
+				}				
+				res|=(b<<(k<<3));				
+			}
+			
+			obj_addr[j]=res;			
+		}
+	}
+	
+	u8 obscnt = *(lvldat++);
+	for(int i=0;i<obscnt;i++)
+	{
+		u8 obsid = *(lvldat++);
+		u8 obso = *(lvldat++);
+		u8 obsx = *(lvldat++);
+		u8 obsy = *(lvldat++);		
+		add_obstacle(obsid,obso,(obsx<<3)+4,(obsy<<3)+4);
+	}	
 }
 
 void Level::update_actor(PhysicalObject* obj)
@@ -465,10 +590,10 @@ void Level::on_frame()
 				{
 					lock_input(0);
 					dialog->run_on_dialog_finished(2, game_over_dialog_finished, this);
-					dialog->launch_dialog(2, "Game over!\n                 \x01Retry            \01Menu", 0);				
+					dialog->launch_dialog(2, "Game over!\n                 \x01Retry            \01Menu", 0);
+					mmStop();
 				}
-			}			
-						
+			}												
 		}
 		else if(sprites[i]->is_of_class("tram"))
 		{
@@ -491,9 +616,15 @@ void Level::on_frame()
 				lock_input(0);
 				dialog->run_on_dialog_finished(2, level_completed_dialog_finished, this);
 				dialog->launch_dialog(2, "Well played!\n                  \x01Next            \01Menu", 0);			
+				mmStop();
 			}
 		}
 	}	
+}
+
+void Level::on_end_frame()
+{	
+	mmFrame();
 }
 
 void Level::on_key_down(int keys)
@@ -518,6 +649,7 @@ void Level::on_key_down(int keys)
 			lock_execution(0);
 			dialog->run_on_dialog_finished(2, pause_dialog_finished, this);
 			dialog->launch_dialog(2, "Game paused\n    \x01Resume          \01Retry          \01Menu", 0);
+			mmPause();
 			
 		}
 		
@@ -530,8 +662,7 @@ void Level::on_key_down(int keys)
 			explorer->set_pos(xfocus->pos_x,xfocus->pos_y);
 			set_focus(explorer);
 		}
-	}
-	mmFrame();
+	}	
 }
 
 void Level::on_loaded()
@@ -682,6 +813,20 @@ void Level::add_trampoline(s16 x, s16 y)
 	register_sprite(tr);
 }
 
+void Level::add_obstacle(u8 id, u8 orientation, s16 x, s16 y)
+{
+	Obstacle* o=new Obstacle(id, (ObstacleOrientation)orientation);
+	o->set_pos(x,y);
+	register_sprite(o);
+}
+
+void Level::add_obstacle_activator(u8 id, s16 x, s16 y)
+{
+	ObstacleActivator* a = new ObstacleActivator(id);
+	a->set_pos(x,y);
+	register_sprite(a);
+}
+
 Level::~Level()
 {
 	stop_bgm();
@@ -748,6 +893,7 @@ int Level::pause_dialog_finished(void* sender)
 	u8 option=lvl->dialog->get_option(0);
 	if(option==0)
 	{
+		mmResume();
 		return 1; // Resume
 	}	
 	if(option==1)

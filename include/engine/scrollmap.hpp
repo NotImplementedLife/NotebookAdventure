@@ -40,6 +40,7 @@ public:
 	void set_background(u8 i, Background* bgi, u8 scroll_speedi=0x10);
 	
 	virtual void on_frame();
+	virtual void on_end_frame();
 	
 	virtual void on_key_down(int keys);
 	virtual void on_key_held(int keys);
