@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/background.hpp"
+#include "engine/base.hpp"
 #include "engine/camera.hpp"
 #include "engine/colors.hpp"
 #include "engine/dialogbox.hpp"

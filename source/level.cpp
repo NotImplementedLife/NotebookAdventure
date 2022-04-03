@@ -305,6 +305,14 @@ public:
 		
 		BG_PALETTE[0x62] = 0x7FFF;
 	}	
+	
+	~LevelDialog()
+	{		
+		delete vwf;
+		delete vwf_jp;
+		delete vwf_jc;
+		delete vwf_g;
+	}
 };
 
 enum ObstacleOrientation

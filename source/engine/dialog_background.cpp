@@ -1,4 +1,6 @@
 #include "dialog_background.hpp"
+
+#include "base.hpp"
 #include "error.hpp"
 #include <string.h>
 

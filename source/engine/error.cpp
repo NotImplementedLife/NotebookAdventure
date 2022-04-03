@@ -1,5 +1,6 @@
 #include "error.hpp"
 
+#include "base.hpp"
 #include "engine/scrollmap.hpp"
 
 const char* __str_err_intro = "Execution stopped due to a fatal error.\nError message:\n\n";

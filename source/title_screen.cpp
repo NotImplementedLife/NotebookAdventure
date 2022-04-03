@@ -35,6 +35,60 @@ public:
 	}	
 };
 
+class TitleDebugMessage : public DialogBackground
+{
+private:
+	Vwf *vwf = NULL;
+		
+	char message[200]="Debug ON\nMem:0x000000/0x000000";
+	
+public:
+	TitleDebugMessage() : DialogBackground(0,0,28) {}
+	void init() override
+	{		
+		set_caret(0xC8);
+		set_priority(0);
+		clear_map();		
+		
+		vwf = new Vwf(defaultFont816);
+		vwf->set_text_color(0xFF);
+		create_dialog_box(1, 7, 20, 8, vwf);
+		
+		u32 _0 =0;
+		CpuFastSet(&_0, (void*)VRAM, (0x1000) | FILL);
+		
+		u32 maxall = get_max_allocated_memory();
+		u32 crtall = get_crt_allocated_memory();
+			
+
+		char* dest = message+20;
+		
+		for(int i=0;i<6;i++)
+		{			
+			*dest = HEX_DIGIT[crtall & 0xF];
+			crtall>>=4;
+			dest--;
+		}
+		
+		dest = message+29;
+		
+		for(int i=0;i<6;i++)
+		{
+			*dest = HEX_DIGIT[maxall & 0xF];
+			maxall>>=4;
+			dest--;
+		}
+		
+		BG_PALETTE[0xFF] = Red;
+		
+		launch_dialog(0,message,1000);
+	}
+	
+	~TitleDebugMessage()
+	{
+		delete vwf;
+	}
+};
 
 TitleScreen::TitleScreen() { }
 
@@ -45,6 +99,9 @@ void TitleScreen::init()
 	
 	TitleForegroundPage* fg_page = new TitleForegroundPage();
 	set_background(2, fg_page, 0x00);	
+	
+	TitleDebugMessage* dbg_msg = new TitleDebugMessage();
+	set_background(0, dbg_msg, 0x00);	
 	
 	camera->move(300,146);
 	

@@ -1,5 +1,7 @@
 #include "engine/scrollmap.hpp"
 
+#include "base.hpp"
+
 TextScrollMap::TextScrollMap()
 {
 	OamPool::reset();

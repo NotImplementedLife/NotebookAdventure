@@ -1,5 +1,7 @@
 #include "oam.hpp"
 
+#include "base.hpp"
+
 #include "error.hpp"
 
 ObjAttribute::ObjAttribute()
@@ -222,12 +224,12 @@ namespace OamPool
 	{		
 		if(__oam_size==128)
 		{
-			fatal(ERR_OAM_FULL);
+			fatal(ERR_OAM_FULL, "OamPool::add_obj()");
 		}
 		u16 id = __oam_id_cnt++;
 		if(__oam_id_cnt==0)
 		{
-			fatal(ERR_OAM_ID_OVERFLOW);
+			fatal(ERR_OAM_ID_OVERFLOW,  "OamPool::add_obj()");
 		}		
 		
 		u16 row_id = id & (__hash_magic_ - 1);
@@ -267,7 +269,7 @@ namespace OamPool
 			{				
 				return &__oam_buffer[row[i].hw2];
 			}						
-		fatal(ERR_OAM_INVALID_ID);
+		fatal(ERR_OAM_INVALID_ID,  "OamPool::get_object_by_id()");
 		return NULL;
 	}
 	
@@ -291,7 +293,7 @@ namespace OamPool
 		}		
 		if(p==-1) 
 		{
-			fatal(ERR_OAM_INVALID_ID);
+			fatal(ERR_OAM_INVALID_ID,  "OamPool::remove_obj()");
 		}						
 		unlock_id(p);
 		u32* ptr = (u32*)&__oam_buffer[p];			

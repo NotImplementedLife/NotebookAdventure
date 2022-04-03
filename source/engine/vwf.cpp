@@ -1,5 +1,7 @@
 #include "vwf.hpp"
 
+#include "base.hpp"
+
 Vwf::Vwf(const Font816& _font) : font(_font)
 {
 	text_color = 1;

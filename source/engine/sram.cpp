@@ -1,9 +1,11 @@
+#include "SRAM.hpp"
+
 #include <gba.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstring>
 
-#include "SRAM.hpp"
+#include "base.hpp"
 
 #define REG_WAITCNT_NV *(u16*)(REG_BASE + 0x0204)
 #define BIT_SET(y, flag)	( y |=  (flag) )

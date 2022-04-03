@@ -1,5 +1,6 @@
 #include "camera.hpp"
 
+#include "base.hpp"
 #include "sprite.hpp"
 
 Camera::Camera()
