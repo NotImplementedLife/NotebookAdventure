@@ -1,7 +1,5 @@
 #include "font.hpp"
 
-#include "base.hpp"
-
 Font816::Font816(const void* font_gfx)
 {	
 	source = (u8*)font_gfx;

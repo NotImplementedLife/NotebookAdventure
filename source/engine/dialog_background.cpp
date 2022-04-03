@@ -1,6 +1,4 @@
 #include "dialog_background.hpp"
-
-#include "base.hpp"
 #include "error.hpp"
 #include <string.h>
 
@@ -313,6 +311,8 @@ DialogBackground::~DialogBackground()
 	for(int i=0;i<4;i++)
 		delete dialogs[i];
 	OamPool::remove_obj(obj_caret_id);
+	delete[] opt_x;
+	delete[] opt_y;
 }
 
 void DialogBackground::vwf_option_report(void* target,int x,int y)

@@ -1,8 +1,6 @@
 #include "sprite.hpp"
 #include "error.hpp"
 
-#include "base.hpp"
-
 #include "camera.hpp"
 
 #include <stdarg.h>
@@ -143,6 +141,7 @@ void ObjVisual::update()
 ObjVisual::~ObjVisual()
 {	
 	delete[] frames;
+	delete[] framesets;
 }
 
 Sprite::Sprite(ObjSize size, u16 frames_count, const char* _class)

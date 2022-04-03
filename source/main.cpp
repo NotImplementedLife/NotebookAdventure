@@ -31,10 +31,7 @@ int main(void) {
 		
 	u16 last_enter_id=0;
 	
-	/*u8* x=new u8[0x10000];
-	x[0]=LVL_MENU;
-	screen_result=x[0];
-	delete[] x;*/	
+	//fatal("",UserData.current_level);
 	
 	while(1)
 	{		
@@ -66,6 +63,23 @@ int main(void) {
 			UserData.current_level = last_enter_id+1;
 		save_user_data();
 	}
+	TitleScreen* ts = new TitleScreen();
+	ts->init();
+	fatal("result",ts->run());
+	delete ts;
+	
+	
+	Level* lvl = new Level(1);
+	lvl->init();	
+	lvl->run();
+	delete lvl;
+	
+	lvl = new Level(1);
+	lvl->init();
+	lvl->run();
+	delete lvl;
+	
+	
 	return 0;
 }
 

@@ -307,7 +307,7 @@ public:
 	}	
 	
 	~LevelDialog()
-	{		
+	{
 		delete vwf;
 		delete vwf_jp;
 		delete vwf_jc;

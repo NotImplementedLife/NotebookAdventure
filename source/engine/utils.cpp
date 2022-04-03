@@ -1,7 +1,5 @@
 #include "utils.hpp"
 
-#include "base.hpp"
-
 sf24::sf24() {}
 
 sf24::sf24(s16 x) : sf24(x,0) {	}

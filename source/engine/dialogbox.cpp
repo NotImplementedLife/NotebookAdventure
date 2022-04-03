@@ -1,6 +1,5 @@
 #include "dialogbox.hpp"
 
-#include "base.hpp"
 	
 DialogBox::DialogBox(u8 _left, u8 _top, u8 _width, u8 _height, Vwf* _vwf) : vwf(_vwf),
                                                                             left(_left), top(_top), width(_width), height(_height)																				
