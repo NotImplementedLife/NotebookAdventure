@@ -185,11 +185,16 @@ public:
 		get_visual()->set_frame(1,0x0028);
 		get_visual()->set_frame(2,0x0048);
 		get_visual()->set_frame(3,0x0068);
+		get_visual()->set_frame(4,0x0088);
+		get_visual()->set_frame(5,0x00A8);
+		get_visual()->set_frame(6,0x00C8);
+		get_visual()->set_frame(7,0x00E8);
 		
 		get_visual()->set_ticks(16);
 		
 		get_visual()->set_crt_gfx(0);	
 		get_visual()->set_animation_frames(ANIM_FRAMES_0, 0,1,2,3, -1);
+		get_visual()->set_animation_frames(ANIM_FRAMES_1, 0,4,5,6,7, -1);
 		get_visual()->set_animation_track(ANIM_FRAMES_0);
 		update_visual();
 		//set_hitbox(10,0,14,30);
@@ -208,11 +213,18 @@ public:
 		LOAD_GRIT_SPRITE_TILES(cat, 0x120, 128);
 			
 		get_visual()->set_frame(0,0x0120);		
+		get_visual()->set_frame(1,0x0128);		
+		get_visual()->set_frame(2,0x0130);		
+		get_visual()->set_frame(3,0x0138);		
+		get_visual()->set_frame(4,0x0140);		
+		get_visual()->set_frame(5,0x0148);		
+		get_visual()->set_frame(6,0x0150);
 		
 		get_visual()->set_ticks(16);
 		
 		get_visual()->set_crt_gfx(0);	
-		get_visual()->set_animation_frames(ANIM_FRAMES_0, 0, -1);
+		get_visual()->set_animation_frames(ANIM_FRAMES_0, 0, 1, 2, 3, -1);
+		get_visual()->set_animation_frames(ANIM_FRAMES_1, 0, 4, 5, 6, -1);
 		get_visual()->set_animation_track(ANIM_FRAMES_0);
 		update_visual();		
 		set_hitbox(3,0,9,16);
@@ -725,7 +737,7 @@ void Level::on_end_frame()
 }
 
 void Level::on_key_down(int keys)
-{
+{	
 	if(focus!=explorer)
 	{		
 		if(keys & KEY_A) 
@@ -759,6 +771,11 @@ void Level::on_key_down(int keys)
 			explorer->set_pos(xfocus->pos_x,xfocus->pos_y);
 			set_focus(explorer);
 		}
+		
+		if(keys & (KEY_LEFT|KEY_RIGHT)) 
+		{
+			xfocus->get_visual()->set_animation_track(ANIM_FRAMES_1);			
+		}
 	}	
 }
 
@@ -790,8 +807,8 @@ void Level::on_key_held(int keys)
 		
 		
 		if(keys & KEY_LEFT) 
-		{
-			xfocus->attr->set_flip_h(0);		
+		{			
+			xfocus->attr->set_flip_h(0);					
 			
 			int on_left = get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->get_pos_y()-2);
 			on_left |= get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->get_pos_y()-10);
@@ -805,7 +822,7 @@ void Level::on_key_held(int keys)
 				xfocus->charge_v(-sf24(2),0);		
 		}
 		else if(keys & KEY_RIGHT) 
-		{
+		{			
 			xfocus->attr->set_flip_h(1);
 			
 			int on_right = get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->get_pos_y()-2);
@@ -843,12 +860,19 @@ void Level::on_key_held(int keys)
 }
 
 void Level::on_key_up(int keys)
-{
+{	
 	if(focus==explorer)
 	{
 		if(keys & KEY_R)
 		{
 			set_focus(xfocus);
+		}
+	}
+	else 
+	{
+		if(keys & (KEY_LEFT | KEY_RIGHT))
+		{
+			xfocus->get_visual()->set_animation_track(ANIM_FRAMES_0);
 		}
 	}
 }

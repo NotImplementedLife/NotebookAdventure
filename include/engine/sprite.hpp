@@ -86,13 +86,13 @@ public:
 };
 
 const int ANIM_FRAMES_0 = 0;
-const int ANIM_FRAMES_1 = 0;
-const int ANIM_FRAMES_2 = 0;
-const int ANIM_FRAMES_3 = 0;
-const int ANIM_FRAMES_4 = 0;
-const int ANIM_FRAMES_5 = 0;
-const int ANIM_FRAMES_6 = 0;
-const int ANIM_FRAMES_7 = 0;
+const int ANIM_FRAMES_1 = 1;
+const int ANIM_FRAMES_2 = 2;
+const int ANIM_FRAMES_3 = 3;
+const int ANIM_FRAMES_4 = 4;
+const int ANIM_FRAMES_5 = 5;
+const int ANIM_FRAMES_6 = 6;
+const int ANIM_FRAMES_7 = 7;
 
 class Sprite
 {
