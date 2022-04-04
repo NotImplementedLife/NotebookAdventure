@@ -164,7 +164,10 @@ TextScrollMap::~TextScrollMap()
 	{
 		delete sprites[i];
 	}
-	delete[] sprites;
+	delete[] sprites;	
 	
 	OamPool::reset();
+	
+	//((u16*)VRAM)[0]=1;
+	//for(int i=0;i<60;i++) VBlankIntrWait();
 }

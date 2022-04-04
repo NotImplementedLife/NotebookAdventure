@@ -143,7 +143,8 @@ namespace OamPool
 		u16 hw2; // row capacity | sprite index in OAM buffer
 	};		
 	
-	const int __hash_exp_ = 5;
+	const int __hash_exp_ = 3; // changing this value may cause crash OamPool::reset()
+	                           // further investigation needed
 	const int __hash_magic_ = (1<<__hash_exp_);
 	
 	frag_u32** __oam_ids_hash_table = NULL;

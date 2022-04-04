@@ -267,7 +267,8 @@ class LevelDialog : public DialogBackground
 {
 private:
 	Vwf *vwf;
-	Vwf *vwf_jp, *vwf_jc;
+	Vwf *vwf_jp;
+	Vwf *vwf_jc;
 	Vwf *vwf_g;
 public:
 	LevelDialog() : DialogBackground(0, 1, 28) { strcpy(magic,"LvlDialog"); }
@@ -306,12 +307,15 @@ public:
 		BG_PALETTE[0x62] = 0x7FFF;
 	}	
 	
-	~LevelDialog()
+	virtual ~LevelDialog()
 	{
-		delete vwf;
+		// deleting all four vwf-s crashes execution when trying to exit from level 3 (wtff)
+		// and apparently breaks the OAM pool reset methods
+
+		delete vwf;  //???			
 		delete vwf_jp;
-		delete vwf_jc;
 		delete vwf_g;
+		delete vwf_jc;
 	}
 };
 
@@ -437,10 +441,10 @@ void Level::init()
 	set_background(3, bg_page, 0x10);
 	
 	LevelDungeon* dungeon = new LevelDungeon(map_source);
-	set_background(2, dungeon, 0x10);
+	set_background(2, dungeon, 0x10);	
 	
 	dialog = new LevelDialog();
-	set_background(0, dialog, 0x00);	
+	set_background(0, dialog, 0x00);
 	
 	dialog->run_on_dialog_finished(1, dialog_controlled_jump_p, this);
 	dialog->run_on_dialog_finished(3, dialog_controlled_jump_c, this);
@@ -712,7 +716,7 @@ void Level::on_frame()
 				mmStop();
 			}
 		}
-	}	
+	}
 }
 
 void Level::on_end_frame()

@@ -21,6 +21,7 @@ protected:
 	
 	s8 lock_i=-1;
 	s8 lock_e=-1;
+public:
 	u8 exit_flag=0;
 public:
 	TextScrollMap();

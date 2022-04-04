@@ -31,7 +31,24 @@ int main(void) {
 		
 	u16 last_enter_id=0;
 	
-	//fatal("",UserData.current_level);
+	// quick level playthrough test
+	/*int lvl=1;
+	while(1)
+	{
+		screen = new TitleScreen();
+		screen->exit_flag=1;
+		screen->init();
+		screen->run();
+		delete screen;						
+		screen = new Level(lvl);
+		((Level*)screen)->completed=LVL_MENU; // Quit
+		screen->init();
+		screen->run();
+		delete screen;			
+
+		lvl++;
+		if(lvl==4) lvl=1;
+	}*/
 	
 	while(1)
 	{		
@@ -52,32 +69,17 @@ int main(void) {
 			case LVL_NEXT:
 			{
 				last_enter_id++;					
-				screen = new Level((u32)last_enter_id);
+				screen = new Level((u32)last_enter_id);				
 				break;
 			}
 		}			
 		screen->init();
-		screen_result = screen->run();		
+		screen_result = screen->run();
 		delete screen;			
 		if(last_enter_id+1>UserData.current_level)
 			UserData.current_level = last_enter_id+1;
 		save_user_data();
-	}
-	TitleScreen* ts = new TitleScreen();
-	ts->init();
-	fatal("result",ts->run());
-	delete ts;
-	
-	
-	Level* lvl = new Level(1);
-	lvl->init();	
-	lvl->run();
-	delete lvl;
-	
-	lvl = new Level(1);
-	lvl->init();
-	lvl->run();
-	delete lvl;
+	}	
 	
 	
 	return 0;

@@ -114,7 +114,7 @@ void TitleScreen::on_key_down(int keys)
 			UserData.time_played_as_human = 0;
 			UserData.time_played_as_cat = 0;
 		}		
-		exit(crt_option==1 ? LVL_ENTER_CODE(UserData.current_level) : LVL_ENTER_CODE(1));
+		this->exit(crt_option==1 ? LVL_ENTER_CODE(UserData.current_level) : LVL_ENTER_CODE(1));
 	}
 }
 

@@ -11,7 +11,7 @@ class PhysicalObject;
 
 class Level : public TextScrollMap
 {
-private:		
+public:		
 	PhysicalObject* player;
 	PhysicalObject* cat;
 	

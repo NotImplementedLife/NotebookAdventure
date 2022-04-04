@@ -312,7 +312,7 @@ DialogBackground::~DialogBackground()
 		delete dialogs[i];
 	OamPool::remove_obj(obj_caret_id);
 	delete[] opt_x;
-	delete[] opt_y;
+	delete[] opt_y;	
 }
 
 void DialogBackground::vwf_option_report(void* target,int x,int y)
