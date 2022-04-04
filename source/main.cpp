@@ -80,10 +80,10 @@ int main(void) {
 		if(screen_result & LVL_COMPLETE)
 		{
 			screen_result &= ~LVL_COMPLETE;			
-			if(last_enter_id+1>UserData.current_level && last_enter_id<LEVELS_COUNT)
-				UserData.current_level = last_enter_id+1;
-			save_user_data();
+			if(last_enter_id+1>UserData.current_level && last_enter_id<LEVELS_COUNT)				
+				UserData.current_level = last_enter_id+1;			
 		}		
+		save_user_data();
 	}	
 	
 	

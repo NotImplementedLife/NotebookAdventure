@@ -9,6 +9,7 @@
 #include "level_1_bin.h"
 #include "level_2_bin.h"
 #include "level_3_bin.h"
+#include "level_4_bin.h"
 //...
 
 const int LEVELS_COUNT = all_levelsMapLen/(2*75*105);
@@ -21,7 +22,7 @@ const void* get_level_map(u32 no)
 }
 
 
-const u8* levels_bin[] = { NULL, level_1_bin, level_2_bin, level_3_bin };
+const u8* levels_bin[] = { NULL, level_1_bin, level_2_bin, level_3_bin, level_4_bin };
 
 #include "notebook-sheet.h"
 #include "player.h"
@@ -217,7 +218,7 @@ public:
 		get_visual()->set_frame(2,0x0130);		
 		get_visual()->set_frame(3,0x0138);		
 		get_visual()->set_frame(4,0x0140);		
-		get_visual()->set_frame(5,0x0148);		
+		get_visual()->set_frame(5,0x0148);
 		get_visual()->set_frame(6,0x0150);
 		
 		get_visual()->set_ticks(16);
@@ -672,7 +673,7 @@ void Level::on_frame()
 	{
 		if(sprites[i]->is_of_class("spikes"))
 		{
-			if(player->touches(sprites[i]))
+			if(player->touches(sprites[i]) || cat->touches(sprites[i]))
 			{		
 				if(!input_locked())
 				{
@@ -739,7 +740,7 @@ void Level::on_end_frame()
 void Level::on_key_down(int keys)
 {	
 	if(focus!=explorer)
-	{		
+	{				
 		if(keys & KEY_A) 
 		{
 			s16 px=(int)xfocus->get_pos_x();
@@ -764,7 +765,12 @@ void Level::on_key_down(int keys)
 		
 		if(keys & KEY_L)
 		{
+			xfocus->get_visual()->set_animation_track(ANIM_FRAMES_0);
 			set_focus(focus==cat ? player:cat);		
+			if(keysHeld() & (KEY_LEFT|KEY_RIGHT))
+			{
+				xfocus->get_visual()->set_animation_track(ANIM_FRAMES_1);
+			}
 		}
 		if(keys & KEY_R)
 		{
