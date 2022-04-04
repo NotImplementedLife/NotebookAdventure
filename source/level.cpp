@@ -278,8 +278,8 @@ public:
 		set_priority(0);
 		clear_map();
 		load_tiles(dialog_frameTiles);
-		dmaCopy(dialog_arrTiles, (u8*)(VRAM + 0x10000 + 0x64*64), 64);
-		set_caret(0xC8);
+		dmaCopy(dialog_arrTiles, SPR_VRAM(0x21E), 64);
+		set_caret(0x21E);
 		
 		// Dialog 0: use to display level title
 		vwf = new Vwf(defaultFont816);
