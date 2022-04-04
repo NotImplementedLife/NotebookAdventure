@@ -979,9 +979,14 @@ int Level::level_completed_dialog_finished(void* sender)
 	u8 option=lvl->dialog->get_option(0);	
 	
 	if(option==1)	
-		lvl->completed=LVL_MENU;
+		lvl->completed=LVL_COMPLETE | LVL_MENU;
 	else 
-		lvl->completed=LVL_NEXT;
+	{
+		if(lvl->id==LEVELS_COUNT)
+			lvl->completed=LVL_COMPLETE | LVL_MENU;
+		else
+			lvl->completed=LVL_COMPLETE | LVL_NEXT;
+	}
 	return 1;
 }
 

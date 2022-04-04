@@ -4,6 +4,7 @@
 
 #include "notebook-sheet.h"
 #include "title.h"
+#include "digits.h"
 #include "title_text.h"
 #include "title_crayon.h"
 #include "game_dat.hpp"
@@ -35,8 +36,36 @@ public:
 	}	
 };
 
+class Digit : public Sprite
+{
+public:
+	Digit() : Sprite(SIZE_8x16, 1)
+	{		
+		get_visual()->set_frame(0,0x120);
+		get_visual()->set_crt_gfx(0);
+		update_visual();
+		set_anchor(ANCHOR_CENTER);
+	}	
+	void set_digit(u8 dig)
+	{
+		get_visual()->set_frame(0,0x120+4*dig);		
+	}
+};
+
 
 TitleScreen::TitleScreen() { }
+
+void TitleScreen::update_sel_level(s8 d)
+{	
+	sel_level+=d;	
+	u8 max_level=UserData.current_level;
+	if(((s8)sel_level)>=max_level)
+		sel_level = max_level;
+	if(((s8)sel_level)<1)
+		sel_level = 1;
+	digit1->set_digit(sel_level/10);
+	digit2->set_digit(sel_level%10);
+}
 
 void TitleScreen::init()
 {
@@ -50,6 +79,7 @@ void TitleScreen::init()
 	
 	LOAD_GRIT_SPRITE_TILES(title_text, 0x0008, 0);
 	LOAD_GRIT_SPRITE_TILES(title_crayon, 0x0100, 68);
+	LOAD_GRIT_SPRITE_TILES(digits, 0x0120, 0x50);	
 	
 	Sprite* opt_new = new Sprite(SIZE_64x32,1);
 	opt_new->get_visual()->set_frame(0,0x008);
@@ -66,6 +96,14 @@ void TitleScreen::init()
 	opt_cont->set_anchor(ANCHOR_LEFT);		
 	opt_cont->set_pos(350,168);
 	register_sprite(opt_cont);
+	
+	Sprite* opt_level = new Sprite(SIZE_64x32,1);
+	opt_level->get_visual()->set_frame(0,0x088);
+	opt_level->get_visual()->set_crt_gfx(0);
+	opt_level->update_visual();	
+	opt_level->set_anchor(ANCHOR_LEFT);		
+	opt_level->set_pos(350,192);
+	register_sprite(opt_level);
 	
 	crayon = new Sprite(SIZE_16x16,3);
 	
@@ -85,6 +123,18 @@ void TitleScreen::init()
 	
 	options[0]=opt_new;
 	options[1]=opt_cont;
+	options[2]=opt_level;
+	
+	digit1 = new Digit();
+	digit1->set_pos(392, 192);
+	digit2 = new Digit();
+	digit2->set_pos(400, 192);
+	
+	register_sprite(digit1);
+	register_sprite(digit2);
+	
+	sel_level=UserData.current_level;
+	update_sel_level(0);
 	
 	play_bgm(MOD_NADV_INTRO);
 	mmSetModuleVolume(128);
@@ -93,28 +143,66 @@ void TitleScreen::init()
 
 void TitleScreen::on_key_down(int keys)
 {
-	if(keys & (KEY_DOWN | KEY_UP))
-	{
-		crt_option^=1;
-		Sprite* opt = options[crt_option];
-		crayon->set_pos(opt->pos_x,opt->pos_y);
+	if(keys &  KEY_UP)
+	{		
+		if(crt_option>0) 
+		{			
+			if(crt_option==2 || crt_option==3)
+				swap_digits_rb();
+			crt_option--;		
+			Sprite* opt = options[crt_option];
+			crayon->set_pos(opt->pos_x,opt->pos_y);
+		}
+	}
+	else if(keys & KEY_DOWN)
+	{		
+		if(crt_option<options_cnt-1)
+		{	
+			if(crt_option==1 || crt_option==2)
+				swap_digits_rb();
+			crt_option++;
+			Sprite* opt = options[crt_option];
+			crayon->set_pos(opt->pos_x,opt->pos_y);
+		}
+	}
+	else if(keys & KEY_LEFT) 
+	{		
+		if(crt_option==2) update_sel_level(-1);
+	}
+	else if(keys & KEY_RIGHT)
+	{		
+		if(crt_option==2) update_sel_level(+1);
+	}
+	else if(keys & KEY_L) 
+	{		
+		if(crt_option==2) update_sel_level(-10);
+	}
+	else if(keys & KEY_R)
+	{		
+		if(crt_option==2) update_sel_level(+10);
 	}
 	else if(keys & KEY_A)
-	{
-		//stop_bgm();
-		play_sfx(&sfx_enter_lvl);		
+	{		
+		//mmSetModuleVolume(64);
+		play_sfx(&sfx_enter_lvl);
 		for(int k=60;k--;)
 		{
 			VBlankIntrWait();
 			mmFrame();
-		}
-		if(crt_option==0) // new game
+		}			
+		switch(crt_option)
 		{
-			UserData.current_level = 1;
-			UserData.time_played_as_human = 0;
-			UserData.time_played_as_cat = 0;
-		}		
-		this->exit(crt_option==1 ? LVL_ENTER_CODE(UserData.current_level) : LVL_ENTER_CODE(1));
+			case 0: // New Game
+			{
+				UserData.current_level = 1;
+				UserData.time_played_as_human = 0;
+				UserData.time_played_as_cat = 0;
+				this->exit(LVL_ENTER_CODE(1)); break;
+			}
+			case 1: this->exit(LVL_ENTER_CODE(UserData.current_level)); break;
+			case 2: this->exit(LVL_ENTER_CODE(sel_level)); break;
+			default: fatal("Unrecognized menu option");
+		}				
 	}
 }
 
@@ -128,6 +216,18 @@ TitleScreen::~TitleScreen()
 	stop_bgm();
 }
 
+void TitleScreen::swap_digits_rb()
+{
+	u16* pal=((u16*)SPRITE_PALETTE) + 0x50;
+	for(int i=0;i<15;i++)
+	{
+		u16 cl=pal[i];
+		u16 r = cl&0x1F;
+		u16 g = (cl>>5)&0x1F;
+		u16 b = (cl>>10)&0x1F;
+		pal[i]=RGB5(b,g,r);
+	}
+}
 
 
 

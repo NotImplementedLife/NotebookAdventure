@@ -68,7 +68,7 @@ int main(void) {
 			}
 			case LVL_NEXT:
 			{
-				last_enter_id++;					
+				last_enter_id++;		
 				screen = new Level((u32)last_enter_id);				
 				break;
 			}
@@ -76,9 +76,14 @@ int main(void) {
 		screen->init();
 		screen_result = screen->run();
 		delete screen;			
-		if(last_enter_id+1>UserData.current_level)
-			UserData.current_level = last_enter_id+1;
-		save_user_data();
+		
+		if(screen_result & LVL_COMPLETE)
+		{
+			screen_result &= ~LVL_COMPLETE;			
+			if(last_enter_id+1>UserData.current_level && last_enter_id<LEVELS_COUNT)
+				UserData.current_level = last_enter_id+1;
+			save_user_data();
+		}		
 	}	
 	
 	
