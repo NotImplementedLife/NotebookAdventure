@@ -18,10 +18,11 @@ public:
 	Sprite* explorer; // invisible sprite to explore surroundings
 	
 	Sprite* focus;
+	Sprite* goddess_crown;
 	PhysicalObject* xfocus;
-		
-	
-	Sprite* hole;
+	Sprite* goddess_star;
+
+	bool goddess_mode = false;
 	
 	const u8* blocks_data;
 	

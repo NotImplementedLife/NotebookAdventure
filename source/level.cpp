@@ -27,12 +27,16 @@ const void* get_level_map(u32 no)
 
 const u8* levels_bin[] = { NULL, level_1_bin, level_2_bin, level_3_bin, level_4_bin, level_5_bin };
 
+u32 choose_star_pos(const u8* level_map);
+
 #include "notebook-sheet.h"
 #include "player.h"
+#include "goddess_form.h"
 #include "cat.h"
 #include "dialog_frame.h"
 #include "dialog_arr.h"
 #include "spikes.h"
+#include "star.h"
 #include "trampoline.h"
 
 #include "obstacle_activator.h"
@@ -234,6 +238,35 @@ public:
 		set_hitbox(3,0,9,16);
 		set_anchor(ANCHOR_BOTTOM);
 	}
+};
+
+class GoddessCrown : public Sprite
+{
+public:
+	GoddessCrown() : Sprite(SIZE_64x32,1,"goddess")
+	{
+		get_visual()->set_frame(0,0x180);
+		get_visual()->set_crt_gfx(0);
+		update_visual();		
+		set_anchor(ANCHOR_BOTTOM);
+		attr->set_flip_h(1);
+		attr->hide();
+	}
+	
+};
+
+class GoddessStar : public Sprite
+{
+public:
+	GoddessStar() : Sprite(SIZE_16x16,1,"gstar")
+	{
+		get_visual()->set_frame(0,0x1C0);
+		get_visual()->set_crt_gfx(0);
+		update_visual();		
+		set_anchor(ANCHOR_CENTER);		
+		attr->hide();
+	}
+	
 };
 
 class Explorer : public Sprite
@@ -456,6 +489,8 @@ void Level::init()
 {			
 	LOAD_GRIT_SPRITE_TILES(spikes, 0x200, 48);
 	LOAD_GRIT_SPRITE_TILES(trampoline, 0x208, 56);	
+	LOAD_GRIT_SPRITE_TILES(goddess_form, 0x180, 0x50);
+	LOAD_GRIT_SPRITE_TILES(star, 0x1C0, 0xA5);
 
 	LevelBackgroundBage* bg_page = new LevelBackgroundBage();
 	set_background(3, bg_page, 0x10);
@@ -532,6 +567,21 @@ void Level::init()
 	mmSetModuleVolume(512+256);
 	mmSetModulePitch(1024);
 	
+	goddess_crown = new GoddessCrown();
+	register_sprite(goddess_crown);
+	
+	if(id%5==0)
+	{		
+		goddess_star = new GoddessStar();
+		register_sprite(goddess_star);
+		u32 star_pos = choose_star_pos(levels_bin[id]);
+		u16 s_pos_y = star_pos & 0xFFFF;
+		u16 s_pos_x = (star_pos>>16) & 0xFFFF;
+		goddess_star->set_pos(s_pos_x,s_pos_y);
+		goddess_star->attr->show();
+	}
+	else goddess_star = NULL;
+		
 	// load obstacles
 	
 	for(int i=0;i<16;i++)
@@ -681,6 +731,8 @@ void Level::on_frame()
 	update_actor(player);
 	update_actor(cat);
 	
+	goddess_crown->set_pos(player->pos_x,player->pos_y-20);
+	
 	for(int i=0;i<sprites_count;i++)
 	{
 		if(sprites[i]->is_of_class("spikes"))
@@ -827,6 +879,8 @@ void Level::on_key_held(int keys)
 		if(keys & KEY_LEFT) 
 		{			
 			xfocus->attr->set_flip_h(0);					
+			if(xfocus==player)
+				goddess_crown->attr->set_flip_h(1);
 			
 			int on_left = get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->get_pos_y()-2);
 			on_left |= get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->get_pos_y()-10);
@@ -842,6 +896,8 @@ void Level::on_key_held(int keys)
 		else if(keys & KEY_RIGHT) 
 		{			
 			xfocus->attr->set_flip_h(1);
+			if(xfocus==player)
+				goddess_crown->attr->set_flip_h(0);
 			
 			int on_right = get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->get_pos_y()-2);
 			on_right |= get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->get_pos_y()-10);
@@ -1075,6 +1131,17 @@ int Level::pause_dialog_finished(void* sender)
 	}
 	fatal("Undefined option");
 	return 1;
+}
+
+u32 choose_star_pos(const u8* level_map)
+{
+	u16 x=rand()%75;
+	u16 y=rand()%105;
+		
+	x=8*x+4;
+	y=8*y+4;
+	
+	return (x<<16)|y;
 }
 
 const u16 mul_75[] = 
