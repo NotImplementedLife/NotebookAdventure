@@ -1,5 +1,7 @@
 #include "game_dat.hpp"
 
+#include "debug.hpp"
+
 #include "engine/sram.hpp"
 
 const int LevelsCount = 1;

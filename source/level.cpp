@@ -1,5 +1,7 @@
 #include "level.hpp"
 
+#include "debug.hpp"
+
 #include "audio.hpp"
 
 #include "game_dat.hpp"
@@ -295,6 +297,7 @@ public:
 		set_caret(0x21E);
 		
 		// Dialog 0: use to display level title
+		dbg_ctx="Vwf";
 		vwf = new Vwf(defaultFont816);
 		vwf->set_text_color(0x62);
 		create_dialog_box(1, 1, 16, 4, vwf);		
@@ -303,17 +306,19 @@ public:
 		// uses:
 		// - trampoline (jump on short sprites)
 		// - floating object simulation (jump on tall sprites)
+		dbg_ctx="Vwf";
 		vwf_jp = new Vwf(defaultFont816);
 		create_dialog_box(0, 22, 3, 4, vwf_jp);
 		
 		// Dialog 2: general purpose user-involving dialog
 		// used to display the "game over" message
-		
+		dbg_ctx="Vwf";
 		vwf_g = new Vwf(defaultFont816);
 		create_dialog_box(1,14,28,6, vwf_g);
 		vwf_g->set_text_color(0x62);
 
 		// Dialog 3: jump dialog, for cat
+		dbg_ctx="Vwf";
 		vwf_jc = new Vwf(defaultFont816);
 		create_dialog_box(5, 22, 3, 4, vwf_jc);			
 		
@@ -321,13 +326,14 @@ public:
 	}	
 	
 	virtual ~LevelDialog()
-	{
-		// deleting all four vwf-s crashes execution when trying to exit from level 3 (wtff)
-		// and apparently breaks the OAM pool reset methods
-
-		delete vwf;  //???			
+	{		
+		dbg_ctx="Vwf";
+		delete vwf;  
+		dbg_ctx="Vwf";
 		delete vwf_jp;
+		dbg_ctx="Vwf";
 		delete vwf_g;
+		dbg_ctx="Vwf";
 		delete vwf_jc;
 	}
 };
@@ -456,6 +462,7 @@ void Level::init()
 	LevelDungeon* dungeon = new LevelDungeon(map_source);
 	set_background(2, dungeon, 0x10);	
 	
+	dbg_ctx="LevelDialog";
 	dialog = new LevelDialog();
 	set_background(0, dialog, 0x00);
 	
@@ -465,9 +472,11 @@ void Level::init()
 	REG_BLDCNT = (1<<2) | (1<<6) | (1<<11);
 	REG_BLDALPHA = 13 | (3<<8);
 	
+	dbg_ctx="Explorer";
 	explorer = new Explorer();
 	register_sprite(explorer);
 	
+	dbg_ctx="Player";
 	player = new Player();		
 		
 	u8* lvldat = (u8*)blocks_data+75*105+16;
@@ -490,17 +499,20 @@ void Level::init()
 	cy = (*(lvldat++));
 	cy |= (*(lvldat++))<<8;	
 	
+	dbg_ctx="Cat";
 	cat	= new Cat();
 	cat->set_pos(cx,cy);
 	register_sprite(cat);
 		
 	u8 spkcnt = *(lvldat++);
+	DEBUG_MSG("SPIKESCNT = %i\n", spkcnt);
 	for(int i=0;i<spkcnt;i++)
 	{
 		u8 spkx = *(lvldat++);
 		u8 spky = *(lvldat++);
 		u8 spkl = *(lvldat++);
-		
+		DEBUG_MSG("%i %i %i", spkx, spky, spkl);
+		mmSetModuleVolume(spkx+spky+spkl);
 		add_spikes(spkx<<3, (spky+1)<<3, spkl);
 	}
 	
@@ -509,8 +521,7 @@ void Level::init()
 	for(int i=0;i<trpcnt;i++)
 	{
 		u8 trpx = *(lvldat++);
-		u8 trpy = *(lvldat++);
-		
+		u8 trpy = *(lvldat++);		
 		add_trampoline(trpx<<2, (trpy+1)<<3);
 	}
 	
@@ -610,7 +621,7 @@ void Level::init()
 }
 
 void Level::update_actor(PhysicalObject* obj)
-{
+{	
 	u8 bdata = get_block_data((int)obj->get_pos_x(), (int)obj->get_pos_y());	
 	if(bdata==0)
 	{		
@@ -658,7 +669,7 @@ void Level::on_frame()
 		this->exit(completed);
 		return;
 	}
-	
+		
 	if(focus==player) {
 		UserData.time_played_as_human++;
 	}
@@ -791,7 +802,7 @@ void Level::on_loaded()
 }
 
 void Level::on_key_held(int keys)
-{		
+{			
 	if(focus!=explorer)
 	{		
 		if(keys & KEY_DOWN)  
@@ -866,7 +877,7 @@ void Level::on_key_held(int keys)
 }
 
 void Level::on_key_up(int keys)
-{	
+{		
 	if(focus==explorer)
 	{
 		if(keys & KEY_R)
@@ -924,6 +935,7 @@ void Level::add_spikes(s16 x, s16 y, s8 len)
 {
 	while(len>=4)
 	{
+		dbg_ctx="Spikes";
 		Spikes* spikes = new Spikes(SIZE_32x8);
 		spikes->set_pos(x,y);
 		x+=32;
@@ -932,6 +944,7 @@ void Level::add_spikes(s16 x, s16 y, s8 len)
 	}
 	while(len>=2)
 	{
+		dbg_ctx="Spikes";
 		Spikes* spikes = new Spikes(SIZE_16x8);
 		spikes->set_pos(x,y);
 		x+=16;
@@ -940,6 +953,7 @@ void Level::add_spikes(s16 x, s16 y, s8 len)
 	}	
 	while(len>=1)
 	{
+		dbg_ctx="Spikes";
 		Spikes* spikes = new Spikes(SIZE_8x8);
 		spikes->set_pos(x,y);
 		x+=8;
@@ -950,6 +964,7 @@ void Level::add_spikes(s16 x, s16 y, s8 len)
 
 void Level::add_trampoline(s16 x, s16 y)
 {
+	dbg_ctx="Trampoline";
 	Trampoline* tr = new Trampoline();
 	tr->set_pos(x,y);
 	register_sprite(tr);
@@ -957,6 +972,7 @@ void Level::add_trampoline(s16 x, s16 y)
 
 void Level::add_obstacle(u8 id, u8 orientation, s16 x, s16 y, u16 qopt_id)
 {
+	dbg_ctx="Obstacle";
 	Obstacle* o=new Obstacle(id, (ObstacleOrientation)orientation);
 	o->set_pos(x,y);
 	o->qopt_id=qopt_id;
@@ -966,6 +982,7 @@ void Level::add_obstacle(u8 id, u8 orientation, s16 x, s16 y, u16 qopt_id)
 
 void Level::add_obstacle_activator(u8 id, s16 x, s16 y)
 {
+	dbg_ctx="Activator";
 	ObstacleActivator* a = new ObstacleActivator(id);
 	a->set_pos(x,y);
 	register_sprite(a);

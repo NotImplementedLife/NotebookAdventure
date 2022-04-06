@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include "engine.hpp"
 
+#include "debug.hpp"
+
 #include "game_dat.hpp"
 #include "level.hpp"
 #include "title_screen.hpp"
@@ -22,7 +24,7 @@ int main(void) {
 	init_sound();
 	//while(1) VBlankIntrWait();
 		
-	OamPool::reset();
+	OamPool::init();
 	
 	load_user_data();	
 	
@@ -35,19 +37,24 @@ int main(void) {
 	/*int lvl=1;
 	while(1)
 	{
+		dbg_ctx="TitleScreen";
 		screen = new TitleScreen();
 		screen->exit_flag=1;
 		screen->init();
 		screen->run();
-		delete screen;						
+		dbg_ctx="TitleScreen";
+		delete screen;
+		
+		dbg_ctx="Level";
 		screen = new Level(lvl);
 		((Level*)screen)->completed=LVL_MENU; // Quit
 		screen->init();
 		screen->run();
+		dbg_ctx="TitleScreen";
 		delete screen;			
 
 		lvl++;
-		if(lvl==4) lvl=1;
+		if(lvl==3) lvl=1;
 	}*/
 	
 	while(1)

@@ -2,6 +2,8 @@
 
 #include <string.h>
 
+#include "debug.hpp"
+
 #include "notebook-sheet.h"
 #include "title.h"
 #include "digits.h"
@@ -10,29 +12,31 @@
 #include "game_dat.hpp"
 #include "audio.hpp"
 
+#include "debug.hpp"
+
 class TitleBackgroundPage : public Background
 {
 public:
-	TitleBackgroundPage() : Background(3,2,31,75,105) { strcpy(magic,"TitleBgPage"); }
+	TitleBackgroundPage() : Background(3,2,31,75,105) { strcpy(magic,"TitleBgPage"); DEBUG_MSG("iTBG\n"); }
 	
 	void init() override
 	{
 		Background::load_tiles(notebook_sheetTiles,notebook_sheetTilesLen, true, 0);
 		Background::set_map_stream_source(notebook_sheetMap);
-		dmaCopy((u8*)notebook_sheetPal,(u8*)(BG_PALETTE),notebook_sheetPalLen);
+		dmaCopy((u8*)notebook_sheetPal,(u8*)(BG_PALETTE),notebook_sheetPalLen);		
 	}	
 };
 
 class TitleForegroundPage : public Background
 {
 public:
-	TitleForegroundPage() : Background(2,1,30,30,20) { strcpy(magic,"TitleFgPage"); }
+	TitleForegroundPage() : Background(2,1,30,30,20) { strcpy(magic,"TitleFgPage"); DEBUG_MSG("iTFG\n");}
 	
 	void init() override
 	{
 		Background::load_tiles(titleTiles,titleTilesLen, true, 160);
 		Background::set_map_stream_source(titleMap);
-		dmaCopy((u8*)titlePal,(u8*)(BG_PALETTE)+2*160,titlePalLen);
+		dmaCopy((u8*)titlePal,(u8*)(BG_PALETTE)+2*160,titlePalLen);		
 	}	
 };
 
@@ -139,6 +143,7 @@ void TitleScreen::init()
 	play_bgm(MOD_NADV_INTRO);
 	mmSetModuleVolume(128);
 	mmSetModulePitch(512+256);
+	DEBUG_MSG("HERE\n");
 }
 
 void TitleScreen::on_key_down(int keys)

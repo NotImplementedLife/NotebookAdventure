@@ -1,6 +1,7 @@
 #include "camera.hpp"
 
 #include "sprite.hpp"
+#include "debug.hpp"
 
 Camera::Camera()
 {

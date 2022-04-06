@@ -1,6 +1,7 @@
 #include "background.hpp"
 
 #include "error.hpp"
+#include "debug.hpp"
 
 #define REG_BG_CNT(i) *((vu16 *)(REG_BASE + 0x08 + 0x02*(i)))
 #define BG_ON(i) BIT(8+(i))

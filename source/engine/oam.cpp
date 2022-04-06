@@ -2,6 +2,8 @@
 
 #include "error.hpp"
 
+#include "debug.hpp"
+
 ObjAttribute::ObjAttribute()
 {
 	attr1=attr2=attr3=0;
@@ -136,65 +138,37 @@ namespace OamPool
 	u16 __oam_size = 0;
 	u16 __oam_id_cnt = 0;	
 	
-		
-	struct frag_u32
+	struct frag32
 	{
-		u16 hw1; // row length   | sprite id
-		u16 hw2; // row capacity | sprite index in OAM buffer
-	};		
+		u16 hw1;
+		u16 hw2;
+	};
 	
-	const int __hash_exp_ = 3; // changing this value may cause crash OamPool::reset()
-	                           // further investigation needed
-	const int __hash_magic_ = (1<<__hash_exp_);
+	frag32* obj_addr = NULL;
+	u16 obj_cap=0;
+	u16 obj_len=0;
 	
-	frag_u32** __oam_ids_hash_table = NULL;
+	void init()
+	{
+		__oam_size = __oam_id_cnt = 0;
+		for(int i=0;i<32;i++) __oam_busy[i]=0;	
+		obj_cap=1;
+		obj_len=0;	
+		dbg_ctx="obj_addr";
+		obj_addr=new frag32[obj_cap];
+	}	
 	
 	void reset()
 	{
 		__oam_size = __oam_id_cnt = 0;
 		for(int i=0;i<32;i++) __oam_busy[i]=0;	
 		
-		if(__oam_ids_hash_table != NULL)
-		{
-			for(int i=0;i<__hash_magic_;i++)
-				delete[] __oam_ids_hash_table[i];
-		}
-		else
-		{
-			__oam_ids_hash_table = new frag_u32*[__hash_magic_];			
-		}				
+		dbg_ctx="obj_addr";
+		delete[] obj_addr;
+		obj_cap=obj_len=0;
 		
-		for(int i=0;i<__hash_magic_;i++)
-		{
-			__oam_ids_hash_table[i] = new frag_u32[0+1];
-			__oam_ids_hash_table[i][0].hw1 = 0;
-			__oam_ids_hash_table[i][0].hw2 = 0;
-		}
+		init();
 	}	
-	
-	void expand_row(frag_u32* &row)
-	{
-		if(row[0].hw2 == 0)
-		{
-			frag_u32* new_row = new frag_u32[1+1];
-			new_row[0].hw1=0;
-			new_row[0].hw2=1;
-			delete[] row;
-			row = new_row;
-			return;
-		}			
-		u16 len = row[0].hw1;
-		u16 cap = row[0].hw2;		
-		frag_u32* new_row = new frag_u32[1+2*cap];
-		new_row[0].hw1 = len;
-		new_row[0].hw2 = 2*cap;
-		for(int i=1;i<=len;i++)
-		{
-			new_row[i]=row[i];
-		}			
-		delete[] row;
-		row = new_row;
-	}
 	
 	u16 get_free_id()
 	{
@@ -230,69 +204,70 @@ namespace OamPool
 		{
 			fatal(ERR_OAM_ID_OVERFLOW);
 		}		
-		
-		u16 row_id = id & (__hash_magic_ - 1);
-		u16 len = __oam_ids_hash_table[row_id][0].hw1;
-		u16 cap = __oam_ids_hash_table[row_id][0].hw2;
-		if(len>=cap)
-		{						
-			expand_row(__oam_ids_hash_table[row_id]);
+				
+		if(obj_len>=obj_cap)
+		{					
+			obj_cap<<=1;
+			dbg_ctx="redim(obj_addr)";
+			frag32* container = new frag32[obj_cap];
+			for(int i=0;i<obj_len;i++)
+				container[i]=obj_addr[i];
+			dbg_ctx="del_old(obj_addr)";
+			delete[] obj_addr;
+			obj_addr=container;
+			
 		}
 		u16 buff_id = get_free_id();
 		
-		len++;
-		__oam_ids_hash_table[row_id][len].hw1 = id;
-		__oam_ids_hash_table[row_id][len].hw2 = buff_id;
+		obj_addr[obj_len].hw1=id;
+		obj_addr[obj_len].hw2=buff_id;
+		obj_len++;		
 		
+		//__oam_buffer[buff_id] = objattr;
 		u16* dst = (u16*)(&__oam_buffer[buff_id]);
 		u16* src = (u16*)(&objattr);
 		dst[0]=src[0];		
 		dst[1]=src[1];		
 		dst[2]=src[2];
 		
-		__oam_ids_hash_table[row_id][0].hw1++;
-		
 		lock_id(buff_id);		
 		__oam_size++;
 				
-		
+		DEBUG_MSG("  add %i\n",id);
 		return id;
 	}
 	
 	ObjAttribute* get_object_by_id(u16 id)
 	{		
-		const frag_u32* row = __oam_ids_hash_table[id & (__hash_magic_-1)];
-		u16 len = row[0].hw1;		
-		for(int i=1;i<=len;i++)
-			if(row[i].hw1==id)
-			{				
-				return &__oam_buffer[row[i].hw2];
-			}						
-		fatal(ERR_OAM_INVALID_ID);
+		for(u16 i=0;i<obj_len;i++)
+		{
+			if(obj_addr[i].hw1==id)
+				return &__oam_buffer[obj_addr[i].hw2];
+		}
+		
+		fatal(ERR_OAM_INVALID_ID,"get_object_by_id()");
 		return NULL;
 	}
 	
 	void remove_obj(u16 id)
 	{		
-		frag_u32* row = __oam_ids_hash_table[id & (__hash_magic_-1)];
-		u16 len = row[0].hw1;
-		int p=-1;
-		for(int i=1;i<=len;i++)
+		DEBUG_MSG("  rem %i\n",id);		
+		u16 p=-1;
+		for(u16 i=0;i<obj_len;i++)
 		{
-			if(row[i].hw1==id)
+			if(obj_addr[i].hw1==id)
 			{
-				p=row[i].hw2;				
+				p=obj_addr[i].hw2;
 				
-				for(int j=i;j<len;j++)
-					row[j]=row[j+1];				
-				
-				row[0].hw1--;
+				for(int j=i;j<obj_len-1;j++)
+					obj_addr[j]=obj_addr[j+1];								
+				obj_len--;
 				break;
 			}
-		}		
+		}				
 		if(p==-1) 
 		{
-			fatal(ERR_OAM_INVALID_ID);
+			fatal(ERR_OAM_INVALID_ID, "remove_obj()");
 		}						
 		unlock_id(p);
 		u32* ptr = (u32*)&__oam_buffer[p];			

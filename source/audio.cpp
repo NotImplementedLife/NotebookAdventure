@@ -1,5 +1,7 @@
 #include "audio.hpp"
 
+#include "debug.hpp"
+
 #include "soundbank_bin.h"
 
 #define assign_sfx(sfx_name, sfx_id,rate) mm_sound_effect sfx_name = { \

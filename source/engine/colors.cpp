@@ -1,4 +1,5 @@
 #include "colors.hpp"
+#include "debug.hpp"
 
 const u16 SYS_COLORS[] =
 { 

@@ -167,6 +167,8 @@ namespace OamPool
 	 */
 	void reset();
 	
+	void init();
+	
 	/*! \fn deploy
 		\brief updates the on screen sprites state
 	 */

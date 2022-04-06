@@ -1,4 +1,5 @@
 #include "engine/scrollmap.hpp"
+#include "debug.hpp"
 
 TextScrollMap::TextScrollMap()
 {
@@ -8,11 +9,15 @@ TextScrollMap::TextScrollMap()
 		bg[i] = NULL;
 		scroll_speed[i] = 0x10;
 	}
+	dbg_ctx="Camera";
 	camera = new Camera();
 	
-	sprites_cap = 1;
-	sprites = new Sprite*[sprites_cap];
-	sprites_count=0;
+	sprites_cap = 128;
+	sprites_cap = 128;
+	sprites_count = 0;
+	dbg_ctx="TSM:Sprite*";
+	sprites = new Sprite*[sprites_cap];	
+	DEBUG_MSG("+SCR\n");
 }
 
 void TextScrollMap::init() { }
@@ -141,32 +146,46 @@ Camera* TextScrollMap::get_camera() const
 void TextScrollMap::register_sprite(Sprite* spr)
 {
 	if(sprites_count==sprites_cap)
-	{
-		sprites_cap *= 2;
+	{	
+		fatal("No more than 128 sprites are supported by a TextScrollMap");
+		sprites_cap = sprites_cap*2;
 		Sprite** container = new Sprite*[sprites_cap];
 		for(int i=0;i<sprites_count;i++)
 			container[i] = sprites[i];		
 		delete[] sprites;
 		sprites = container;
 	}
+	DEBUG_MSG(" reg %x\n",(u32)spr);
 	sprites[sprites_count++]=spr;
 	
 }
 
 TextScrollMap::~TextScrollMap()
-{
+{	
 	for(int i=0;i<4;i++)
-		if(bg[i])
-			delete bg[i];
+		if(bg[i])		
+		{
+			dbg_ctx="BG";
+			delete bg[i];		
+		}
+	dbg_ctx="Camera";
 	delete camera;
 	
 	for(int i=0;i<sprites_count;i++)
 	{
+		DEBUG_MSG(" del %x\n",(u32)sprites[i]);
+	}
+		
+	for(int i=0;i<sprites_count;i++)
+	{
+		dbg_ctx="Sprite";
 		delete sprites[i];
 	}
+	dbg_ctx="TSM:Sprite*";
 	delete[] sprites;	
 	
 	OamPool::reset();
+	DEBUG_MSG("-SCR\n");
 	
 	//((u16*)VRAM)[0]=1;
 	//for(int i=0;i<60;i++) VBlankIntrWait();
