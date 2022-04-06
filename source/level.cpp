@@ -12,6 +12,7 @@
 #include "level_2_bin.h"
 #include "level_3_bin.h"
 #include "level_4_bin.h"
+#include "level_5_bin.h"
 //...
 
 const int LEVELS_COUNT = all_levelsMapLen/(2*75*105);
@@ -24,7 +25,7 @@ const void* get_level_map(u32 no)
 }
 
 
-const u8* levels_bin[] = { NULL, level_1_bin, level_2_bin, level_3_bin, level_4_bin };
+const u8* levels_bin[] = { NULL, level_1_bin, level_2_bin, level_3_bin, level_4_bin, level_5_bin };
 
 #include "notebook-sheet.h"
 #include "player.h"
@@ -598,7 +599,7 @@ void Level::init()
 	u8 obscnt = *(lvldat++);
 	
 	qopt_size=4*obscnt;
-	quick_obstacle_pos_table = new u16[qopt_size];
+	//quick_obstacle_pos_table = new u16[qopt_size];
 	
 	for(int i=0;i<obscnt;i++)
 	{
@@ -990,8 +991,7 @@ void Level::add_obstacle_activator(u8 id, s16 x, s16 y)
 
 Level::~Level()
 {
-	stop_bgm();
-	delete[] quick_obstacle_pos_table;
+	stop_bgm();	
 }
 
 int Level::dialog_controlled_jump_p(void* sender)

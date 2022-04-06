@@ -34,7 +34,7 @@ public:
 	u16 id;
 	
 	u16 qopt_size=0;
-	u16* quick_obstacle_pos_table = NULL;
+	u16 quick_obstacle_pos_table[64];
 	
 	Level(const void* lvl_map, const u8* lvl_src);
 public:	
