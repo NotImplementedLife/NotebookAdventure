@@ -36,6 +36,8 @@ public:
 	void update_actor(PhysicalObject* obj);
 	u16 id;
 	
+	u8 goddess_tick=0;
+	
 	u16 qopt_size=0;
 	u16 quick_obstacle_pos_table[64];
 	

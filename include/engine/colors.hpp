@@ -26,6 +26,8 @@ extern const u16 SYS_COLORS[];
 
 u16 cl_brighten(u16 color, u8 level);
 
+u16 cl_blend(u16 color_1, u16 color_2, u8 alpha);
+
 
 
 

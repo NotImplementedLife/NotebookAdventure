@@ -14,13 +14,13 @@ Background::Background(u16 id, u16 char_base,u16 map_base,u16 map_width, u16 map
 	REG_DISPCNT |= BG_ON(id);
 	REG_BG_CNT(id)  = BG_256_COLOR | BG_SIZE_0 |  BG_MAP_BASE(map_base) | CHAR_BASE(char_base);
 	char_base_address = (u16*)(CHAR_BASE_ADR(char_base));
-	map_base_address = (u16*)(MAP_BASE_ADR(map_base));
-	set_scroll(0,0);
+	map_base_address = (u16*)(MAP_BASE_ADR(map_base));	
 	width = map_width;
 	height = map_height;
 	ptr_bg_hofs = PTR_BG_HOFS(id);
 	ptr_bg_vofs = PTR_BG_VOFS(id);
 	old_x=old_y=0x8000;
+	set_scroll(0,0);
 	set_priority(m_id);
 }
 

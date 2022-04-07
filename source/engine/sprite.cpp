@@ -326,6 +326,7 @@ bool Sprite::touches(Sprite* spr)
 
 bool Sprite::is_of_class(const char *xclass)
 {
+	if(_class==NULL) return false;
 	return !strcmp(_class, xclass);
 }
 

@@ -40,6 +40,8 @@ u32 choose_star_pos(const u8* level_map);
 #include "star.h"
 #include "trampoline.h"
 
+#include "hue.h"
+
 #include "obstacle_activator.h"
 #include "obstacle_horizontal.h"
 #include "obstacle_vertical.h"
@@ -843,6 +845,10 @@ void Level::on_frame()
 void Level::on_end_frame()
 {	
 	mmFrame();
+	if(goddess_mode)
+	{
+		goddess_tick++;
+	}
 }
 
 void Level::on_key_down(int keys)
