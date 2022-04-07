@@ -33,6 +33,8 @@ All these being said, I have to add: _Nevermind_. Creating this game was fun. It
 
 This game is my up-to-now best, and I'm incredibly excited to show it to the world (or the ~10 people who will play it, in the optimistic case).
 
+And I din it... _super_ !
+
 # How to build
 
 Building process requires te [devkitPro](https://devkitpro.org/) environment to be installed on your system.
