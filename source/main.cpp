@@ -32,12 +32,12 @@ int main(void) {
 	int screen_result = LVL_MENU;
 	TextScrollMap* screen = NULL;	
 
-	dbg_ctx="Level";
-	screen = new Level(5);
+	/*dbg_ctx="Level";
+	screen = new Level(4);
 	screen->init();
 	screen->run();
 	dbg_ctx="TitleScreen";
-	delete screen;	
+	delete screen;	*/
 		
 	u16 last_enter_id=0;
 	

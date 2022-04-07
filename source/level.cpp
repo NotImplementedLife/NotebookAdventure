@@ -32,6 +32,7 @@ u32 choose_star_pos(const u8* level_map);
 #include "notebook-sheet.h"
 #include "player.h"
 #include "goddess_form.h"
+#include "goddess_icon.h"
 #include "cat.h"
 #include "dialog_frame.h"
 #include "dialog_arr.h"
@@ -257,6 +258,8 @@ public:
 
 class GoddessStar : public Sprite
 {
+private:
+	sf24 dy;
 public:
 	GoddessStar() : Sprite(SIZE_16x16,1,"gstar")
 	{
@@ -265,8 +268,23 @@ public:
 		update_visual();		
 		set_anchor(ANCHOR_CENTER);		
 		attr->hide();
+		dy = sf24(0,50);
 	}
 	
+	void update()
+	{
+		move(0,dy);
+		if(dy>0)
+		{
+			dy-=sf24(0,1);			
+			if(dy==0) dy=-sf24(0,50);
+		}
+		else if(dy<0)
+		{
+			dy+=sf24(0,1);			
+			if(dy==0) dy=sf24(0,50);
+		}
+	}		
 };
 
 class Explorer : public Sprite
@@ -298,7 +316,7 @@ class Trampoline : public Sprite
 {
 public:
 	Trampoline() : Sprite(SIZE_16x16, 2, "tram")
-	{
+	{		
 		get_visual()->set_frame(0,0x0208);
 		get_visual()->set_frame(1,0x0210);
 		get_visual()->set_crt_gfx(0);
@@ -491,6 +509,7 @@ void Level::init()
 	LOAD_GRIT_SPRITE_TILES(trampoline, 0x208, 56);	
 	LOAD_GRIT_SPRITE_TILES(goddess_form, 0x180, 0x50);
 	LOAD_GRIT_SPRITE_TILES(star, 0x1C0, 0xA5);
+	LOAD_GRIT_SPRITE_TILES(goddess_icon, 0x1C8, 0xAA);
 
 	LevelBackgroundBage* bg_page = new LevelBackgroundBage();
 	set_background(3, bg_page, 0x10);
@@ -507,6 +526,19 @@ void Level::init()
 	
 	REG_BLDCNT = (1<<2) | (1<<6) | (1<<11);
 	REG_BLDALPHA = 13 | (3<<8);
+	
+	goddess_icon = new Sprite(SIZE_8x8,1,"gdicn");
+	goddess_icon->get_visual()->set_frame(0,0x1C8);
+	goddess_icon->get_visual()->set_crt_gfx(0);
+	goddess_icon->update_visual();
+	goddess_icon->attr->set_x(229);
+	goddess_icon->attr->set_y(3);	
+	goddess_icon->attr->hide();
+	
+	if(UserData.goddess_count>0)
+	{
+		goddess_icon->attr->show();
+	}
 	
 	dbg_ctx="Explorer";
 	explorer = new Explorer();
@@ -570,7 +602,7 @@ void Level::init()
 	goddess_crown = new GoddessCrown();
 	register_sprite(goddess_crown);
 	
-	if(id%5==0)
+	if(id%4==0 && UserData.goddess_collected<id)
 	{		
 		goddess_star = new GoddessStar();
 		register_sprite(goddess_star);
@@ -729,9 +761,23 @@ void Level::on_frame()
 	}
 	
 	update_actor(player);
-	update_actor(cat);
+	update_actor(cat);	
+
+	if(goddess_star) goddess_star->update();
 	
 	goddess_crown->set_pos(player->pos_x,player->pos_y-20);
+	
+	if(goddess_star)
+	{
+		if(player->touches(goddess_star) || cat->touches(goddess_star))
+		{
+			goddess_star->attr->hide();
+			lock_execution(0);
+			dialog->run_on_dialog_finished(2, dialog_obtained_goddess_star, this);
+			dialog->launch_dialog(2,"Obtained Goddess Star!\nCompleting any level is now a piece of cake. "
+			"Press SELECT to activate it. Use your ability wisely!",0);
+		}
+	}
 	
 	for(int i=0;i<sprites_count;i++)
 	{
@@ -767,14 +813,12 @@ void Level::on_frame()
 			if(player->touches(sprites[i]) || cat->touches(sprites[i]))
 			{				
 				sprites[i]->get_visual()->set_crt_gfx(1);				
-				obst_status[oid]=1;
-				//((ObstacleActivator*)sprites[i])->spec_move(1);
+				obst_status[oid]=1;				
 			}
 			else
 			{
 				sprites[i]->get_visual()->set_crt_gfx(0);
-				obst_status[oid]=-1;
-				//((ObstacleActivator*)sprites[i])->spec_move(-1);
+				obst_status[oid]=-1;				
 			}
 		}		
 		else if(sprites[i]->is_of_class("obs"))
@@ -817,9 +861,7 @@ void Level::on_key_down(int keys)
 		}
 		
 		if(keys & KEY_START)
-		{
-			//xfocus->ignore_air_limits();
-			//xfocus->set_pos(100,100);			
+		{			
 			lock_execution(0);
 			dialog->run_on_dialog_finished(2, pause_dialog_finished, this);
 			dialog->launch_dialog(2, "Game paused\n    \x01Resume          \01Retry          \01Menu", 0);
@@ -846,6 +888,16 @@ void Level::on_key_down(int keys)
 		{
 			xfocus->get_visual()->set_animation_track(ANIM_FRAMES_1);			
 		}
+		
+		if(focus==player)			
+		{
+			if((keys & KEY_SELECT) && (!goddess_icon->attr->is_hidden()))
+			{
+				goddess_mode=true;
+				goddess_icon->attr->hide();
+				goddess_crown->attr->show();			
+			}
+		}
 	}	
 }
 
@@ -857,7 +909,7 @@ void Level::on_loaded()
 void Level::on_key_held(int keys)
 {			
 	if(focus!=explorer)
-	{		
+	{			
 		if(keys & KEY_DOWN)  
 		{	
 			int block = get_block_data((int)(xfocus->pos_x),(int)xfocus->get_pos_y());
@@ -910,6 +962,16 @@ void Level::on_key_held(int keys)
 			if(on_right!=1)
 				xfocus->charge_v(sf24(2),0);		
 		}	
+		
+		if(goddess_mode && focus==player && (keys & KEY_A)) 
+		{
+			s16 px=(int)xfocus->get_pos_x();
+			s16 py=(int)xfocus->get_pos_y();			
+			u8 udata = get_block_data(px, py-8);
+			if(udata==0)			
+				xfocus->charge_a(0,-sf24(3,160));
+		}
+		
 	}	
 	else
 	{
@@ -1044,10 +1106,21 @@ void Level::add_obstacle_activator(u8 id, s16 x, s16 y)
 	a->set_pos(x,y);
 	register_sprite(a);
 }
-
 Level::~Level()
 {
+	delete goddess_icon;
 	stop_bgm();	
+}
+
+int Level::dialog_obtained_goddess_star(void* sender)
+{
+	Level* lvl=(Level*)sender;
+	lvl->unlock_execution();
+	UserData.goddess_count++;
+	if(lvl->id > UserData.goddess_collected)
+		UserData.goddess_collected = lvl->id;
+	lvl->goddess_icon->attr->show();
+	return 1;
 }
 
 int Level::dialog_controlled_jump_p(void* sender)
@@ -1133,14 +1206,131 @@ int Level::pause_dialog_finished(void* sender)
 	return 1;
 }
 
+const s8 dx[] = {-1,0,1,0};
+const s8 dy[] = { 0,-1,0,1};
+
+u8 _L[105][75];
+u16 _S[2500];
+u16 _l;
+
 u32 choose_star_pos(const u8* level_map)
-{
-	u16 x=rand()%75;
-	u16 y=rand()%105;
-		
-	x=8*x+4;
-	y=8*y+4;
+{		
+	u8* lvldat = (u8*)level_map+75*105+16;
+	u16 px=0, py=0;
+	px = (*(lvldat++));
+	px |= (*(lvldat++))<<8;
 	
+	py = (*(lvldat++));
+	py |= (*(lvldat++))<<8;
+	
+	px>>=3; py>>=3;
+	
+	u16 cx=0, cy=0;
+	cx = (*(lvldat++));
+	cx |= (*(lvldat++))<<8;
+	
+	cy = (*(lvldat++));
+	cy |= (*(lvldat++))<<8;
+	
+	cx>>=3; cy>>=3;
+	
+	for(u8 y=0;y<105;y++) for(u8 x=0;x<75;x++) _L[y][x]=0;
+	_l=0;
+	
+	_S[_l++]=(px<<8)|py;
+	
+	while(_l>0)
+	{
+		u16 p = _S[--_l];
+		u8 x = p>>8;
+		u8 y = p&0xFF;
+		
+		_L[y][x]=0x01;
+		
+		for(int i=0;i<4;i++)
+		{
+			u8 nx = x+dx[i];
+			u8 ny = y+dy[i];
+			
+			if(_L[ny][nx]==0 && level_map[mul_75[ny]+nx]!=1)
+			{
+				_L[ny][nx]=0x80;
+				_S[_l++]=(nx<<8)|ny;
+				if(_l>2500) fatal("Stack overflow");
+			}
+		}
+	}
+	
+	for(u8 y=0;y<105;y++)
+	{
+		for(u8 x=0;x<75;x++)
+		{
+			_L[y][x]&=0x7F;
+			int dfx = x-px;
+			int dfy = y-py;
+			if(dfx<0) dfx=-dfx;
+			if(dfy<0) dfy=-dfy;
+			if(dfx<25 && dfy<30 && _L[y][x]) _L[y][x]=2;
+			
+			dfx = x-cx;
+			dfy = y-cy;
+			if(dfx<0) dfx=-dfx;
+			if(dfy<0) dfy=-dfy;
+			if(dfx<25 && dfy<30 && _L[y][x]) _L[y][x]=2;
+		}
+	}
+	
+	u8 spkcnt = *(lvldat++);	
+	for(int i=0;i<spkcnt;i++)
+	{
+		u8 spkx = *(lvldat++);
+		u8 spky = *(lvldat++);
+		u8 spkl = *(lvldat++);
+		for(int j=0;j<spkl;j++)
+		{			
+			_L[spky+1][spkx+j]=2;
+		}		
+	}
+	
+	_l=0;
+	
+	for(u8 y=3;y<104 && _l<1800;y++)
+	{
+		for(u8 x=0;x<74 && _l<1800;x++)
+		{
+			if(_L[y][x]==0 && _L[y-1][x]==1 && _L[y-2][x]==1 &&
+			   _L[y][x+1]==0 && _L[y-1][x+1]==1 && _L[y-2][x+1]==1)
+			{				
+				_S[_l++] = ((x+1)<<8) | (y-2);				
+			}			
+		}
+	}
+	
+	
+	/*for(u8 y=0;y<105;y++) 
+	{
+		for(u8 x=0;x<75;x++)
+			DEBUG_MSG("%i",_L[y][x]);
+		DEBUG_MSG("\n");
+	}*/
+	
+	u16 x=0, y=0;
+	if(_l==0)
+	{
+		x=rand()%75;
+		y=rand()%105;		
+	}
+	else
+	{	
+		int i=rand()%_l;
+		u16 p = _S[i];
+		x=p>>8;
+		y=p&0xFF;
+	}
+			
+	x<<=3;
+	y<<=3;	
+
 	return (x<<16)|y;
 }
 

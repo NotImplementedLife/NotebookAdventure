@@ -8,6 +8,7 @@ extern const u16 mul_75[]; // quick multiplication table
 extern const int LEVELS_COUNT;
 
 class PhysicalObject;
+class GoddessStar;
 
 class Level : public TextScrollMap
 {
@@ -19,9 +20,10 @@ public:
 	
 	Sprite* focus;
 	Sprite* goddess_crown;
+	Sprite* goddess_icon;
 	PhysicalObject* xfocus;
-	Sprite* goddess_star;
-
+	GoddessStar* goddess_star;	
+	
 	bool goddess_mode = false;
 	
 	const u8* blocks_data;
@@ -78,7 +80,8 @@ public:
 	
 	static int dialog_controlled_jump_p(void* sender);
 	static int dialog_controlled_jump_c(void* sender);
+	static int dialog_obtained_goddess_star(void* sender);
 	static int game_over_dialog_finished(void* sender);
-	static int level_completed_dialog_finished(void* sender);
+	static int level_completed_dialog_finished(void* sender);	
 	static int pause_dialog_finished(void* sender);
 };

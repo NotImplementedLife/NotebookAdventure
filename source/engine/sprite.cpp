@@ -307,6 +307,8 @@ sf24 Sprite::get_right_coord() const
 
 bool Sprite::touches(Sprite* spr)
 {
+	if(this->attr->is_hidden() || spr->attr->is_hidden())
+		return false;
 	sf24 x0 = pos_x - anchx;
 	sf24 y0 = pos_y -anchy;
 	s16 w0 = hitbox.width;

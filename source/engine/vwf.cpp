@@ -106,8 +106,8 @@ int Vwf::put_char(char c)
 			opt_report_dialog(opt_report_dest, (crt_col<<3) | px_offset, crt_row<<4);
 		}
 	}
-	
-	u8* tmp=new u8[16];	
+		
+	//u8* tmp=new u8[16];	
 	for(int i=0;i<16;i++) tmp[i]=0;		
 	
 	for(int y=0;y<8;y++)
@@ -133,7 +133,7 @@ int Vwf::put_char(char c)
 		dmaCopy(tmp,((u8*)render_space)+4*(2*width*(crt_row+1)+16*crt_col+2*y), 8);
 		dmaCopy(tmp+8,&render_space[2*width*(crt_row+1)+16*(crt_col+1)+2*y], 8);	
 	}
-	delete[] tmp;
+	//delete[] tmp;
 	px_offset+=sz;
 	crt_col+=px_offset>>3;
 	px_offset&=7;

@@ -25,6 +25,8 @@ private:
 	
 	DialogOptionReport opt_report_dialog;
 	void* opt_report_dest;
+	
+	u8 tmp[16]; //  to avoid new[], delete[] tmp;
 public:	
 	/*! \brief creates a Vwf processor
 		\param font the rendered text font
