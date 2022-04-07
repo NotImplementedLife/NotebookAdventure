@@ -844,10 +844,20 @@ void Level::on_frame()
 
 void Level::on_end_frame()
 {	
-	mmFrame();
+	mmFrame();	
+	u16* hue = (u16*)hueBitmap;
 	if(goddess_mode)
 	{
 		goddess_tick++;
+		u8 hid=goddess_tick>>1;
+		for(int i=0;i<96;i++)
+		{			
+			BG_PALETTE[i]=cl_blend(hue[hid],((u16*)notebook_sheetPal)[i],12);
+		}		
+		for(int i=0;i<32;i++)
+		{			
+			BG_PALETTE[160+i]=cl_blend(hue[hid],((u16*)all_levelsPal)[i],12);
+		}
 	}
 }
 
@@ -898,11 +908,12 @@ void Level::on_key_down(int keys)
 		if(focus==player)			
 		{
 			if((keys & KEY_SELECT) && (!goddess_icon->attr->is_hidden()))
-			{
+			{				
 				goddess_mode=true;
 				goddess_icon->attr->hide();
 				goddess_crown->attr->show();			
 				UserData.goddess_count--;
+				dialog->launch_dialog(0,"Goddess mode",150);
 			}
 		}
 	}	
