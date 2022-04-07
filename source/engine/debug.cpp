@@ -7,6 +7,9 @@
 #include <cstdlib>
 
 #include "error.hpp"
+
+#ifdef DEBUG_ENABLED
+
 int cnt=0;
 
 const char* dbg_ctx="";
@@ -29,6 +32,7 @@ void operator delete(void * p)
 	free(p);
 }
 
+#endif
 
 namespace Debug
 {

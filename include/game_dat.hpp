@@ -17,4 +17,6 @@ extern __UserData UserData;
 
 void load_user_data();
 
+void reset_user_data();
+
 void save_user_data();

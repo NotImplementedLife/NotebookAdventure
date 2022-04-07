@@ -32,38 +32,38 @@ int main(void) {
 	int screen_result = LVL_MENU;
 	TextScrollMap* screen = NULL;	
 
-	/*dbg_ctx="Level";
+	/*//dbg_ctx="Level";
 	screen = new Level(4);
 	screen->init();
 	screen->run();
-	dbg_ctx="TitleScreen";
+	//dbg_ctx="TitleScreen";
 	delete screen;	*/
 		
 	u16 last_enter_id=0;
 	
 	// quick level playthrough test
-	int lvl=1;
+	/*int lvl=1;
 	while(1)
 	{
-		dbg_ctx="TitleScreen";
+		//dbg_ctx="TitleScreen";
 		screen = new TitleScreen();
 		screen->exit_flag=1;
 		screen->init();
 		screen->run();
-		dbg_ctx="TitleScreen";
+		//dbg_ctx="TitleScreen";
 		delete screen;
 		
-		dbg_ctx="Level";
+		//dbg_ctx="Level";
 		screen = new Level(lvl);
 		((Level*)screen)->completed=LVL_MENU; // Quit
 		screen->init();
 		screen->run();
-		dbg_ctx="TitleScreen";
+		//dbg_ctx="TitleScreen";
 		delete screen;			
 
 		lvl++;
 		if(lvl==6) lvl=1;
-	}
+	}*/
 	
 	while(1)
 	{		

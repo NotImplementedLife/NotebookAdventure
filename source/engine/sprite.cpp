@@ -33,9 +33,9 @@ Hitbox::Hitbox(ObjSize size)
 ObjVisual::ObjVisual(u8 frames_count)
 {
 	this->frames_count = frames_count;
-	dbg_ctx="frames";
+	//dbg_ctx="frames";
 	frames = new u16[frames_count];
-	dbg_ctx="framesets";
+	//dbg_ctx="framesets";
 	framesets = new u8[64]; // 8 animation framesets, max 8 frames each
 	
 	anim_enabled = false;
@@ -143,9 +143,9 @@ void ObjVisual::update()
 
 ObjVisual::~ObjVisual()
 {	
-	dbg_ctx="frames";
+	//dbg_ctx="frames";
 	delete[] frames;
-	dbg_ctx="framesets";
+	//dbg_ctx="framesets";
 	delete[] framesets;
 }
 
@@ -154,7 +154,7 @@ Sprite::Sprite(ObjSize size, u16 frames_count, const char* _class)
 	id = OamPool::add_obj(ObjAttribute(size,0,0,0));
 	attr = OamPool::get_object_by_id(id);
 	hitbox = Hitbox(size);	
-	dbg_ctx="ObjVisual";
+	//dbg_ctx="ObjVisual";
 	visual = new ObjVisual(frames_count);
 	this->_class=_class;
 	attr->set_priority(1);
@@ -176,8 +176,8 @@ void Sprite::auto_detect_hitbox()
 	u8 x0=hb.width, y0=hb.height, x1=0, y1=0;
 	if(_1D)
 	{
-		dbg_ctx="_l8";
-		u8 *line = new u8[8];
+		//dbg_ctx="_l8";
+		u8 *line = new u8[8]; // to do: switch to static array
 		for(int ty=0;ty<hcnt;ty++)		
 			for(int tx=0;tx<wcnt;tx++)
 			{				
@@ -197,7 +197,7 @@ void Sprite::auto_detect_hitbox()
 						}					
 				}				
 			}		
-		dbg_ctx="_l8";
+		//dbg_ctx="_l8";
 		delete[] line;
 	}
 	else
@@ -332,7 +332,7 @@ bool Sprite::is_of_class(const char *xclass)
 Sprite::~Sprite()
 {
 	OamPool::remove_obj(id);	
-	dbg_ctx="ObjVisual";
+	//dbg_ctx="ObjVisual";
 	delete visual;	
 	//((u32*)VRAM)[0]++;
 }

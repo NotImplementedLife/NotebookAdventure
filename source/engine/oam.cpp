@@ -154,7 +154,7 @@ namespace OamPool
 		for(int i=0;i<32;i++) __oam_busy[i]=0;	
 		obj_cap=1;
 		obj_len=0;	
-		dbg_ctx="obj_addr";
+		//dbg_ctx="obj_addr";
 		obj_addr=new frag32[obj_cap];
 	}	
 	
@@ -163,7 +163,7 @@ namespace OamPool
 		__oam_size = __oam_id_cnt = 0;
 		for(int i=0;i<32;i++) __oam_busy[i]=0;	
 		
-		dbg_ctx="obj_addr";
+		//dbg_ctx="obj_addr";
 		delete[] obj_addr;
 		obj_cap=obj_len=0;
 		
@@ -208,11 +208,11 @@ namespace OamPool
 		if(obj_len>=obj_cap)
 		{					
 			obj_cap<<=1;
-			dbg_ctx="redim(obj_addr)";
+			//dbg_ctx="redim(obj_addr)";
 			frag32* container = new frag32[obj_cap];
 			for(int i=0;i<obj_len;i++)
 				container[i]=obj_addr[i];
-			dbg_ctx="del_old(obj_addr)";
+			//dbg_ctx="del_old(obj_addr)";
 			delete[] obj_addr;
 			obj_addr=container;
 			

@@ -24,6 +24,14 @@ void load_user_data()
 	}
 }
 
+void reset_user_data()
+{
+	for(u32 i=0;i<sizeof(UserData);i++)
+			((u8*)&UserData)[i]=0;
+	UserData.current_level=1;
+	save_user_data();
+}
+
 void save_user_data()
 {	
 	SaveTool::write(&UserData, sizeof(UserData), 0x10);

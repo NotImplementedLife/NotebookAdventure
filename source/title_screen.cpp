@@ -199,9 +199,7 @@ void TitleScreen::on_key_down(int keys)
 		{
 			case 0: // New Game
 			{
-				UserData.current_level = 1;
-				UserData.time_played_as_human = 0;
-				UserData.time_played_as_cat = 0;
+				reset_user_data();
 				this->exit(LVL_ENTER_CODE(1)); break;
 			}
 			case 1: this->exit(LVL_ENTER_CODE(UserData.current_level)); break;

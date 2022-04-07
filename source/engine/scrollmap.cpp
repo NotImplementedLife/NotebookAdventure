@@ -9,13 +9,13 @@ TextScrollMap::TextScrollMap()
 		bg[i] = NULL;
 		scroll_speed[i] = 0x10;
 	}
-	dbg_ctx="Camera";
+	//dbg_ctx="Camera";
 	camera = new Camera();
 	
 	sprites_cap = 128;
 	sprites_cap = 128;
 	sprites_count = 0;
-	dbg_ctx="TSM:Sprite*";
+	//dbg_ctx="TSM:Sprite*";
 	sprites = new Sprite*[sprites_cap];	
 	DEBUG_MSG("+SCR\n");
 }
@@ -155,7 +155,7 @@ void TextScrollMap::register_sprite(Sprite* spr)
 		delete[] sprites;
 		sprites = container;
 	}
-	DEBUG_MSG(" reg %x\n",(u32)spr);
+	//DEBUG_MSG(" reg %x\n",(u32)spr);
 	sprites[sprites_count++]=spr;
 	
 }
@@ -165,10 +165,10 @@ TextScrollMap::~TextScrollMap()
 	for(int i=0;i<4;i++)
 		if(bg[i])		
 		{
-			dbg_ctx="BG";
+			//dbg_ctx="BG";
 			delete bg[i];		
 		}
-	dbg_ctx="Camera";
+	//dbg_ctx="Camera";
 	delete camera;
 	
 	for(int i=0;i<sprites_count;i++)
@@ -178,15 +178,13 @@ TextScrollMap::~TextScrollMap()
 		
 	for(int i=0;i<sprites_count;i++)
 	{
-		dbg_ctx="Sprite";
+		//dbg_ctx="Sprite";
 		delete sprites[i];
 	}
-	dbg_ctx="TSM:Sprite*";
+	//dbg_ctx="TSM:Sprite*";
 	delete[] sprites;	
 	
 	OamPool::reset();
 	DEBUG_MSG("-SCR\n");
 	
-	//((u16*)VRAM)[0]=1;
-	//for(int i=0;i<60;i++) VBlankIntrWait();
 }
