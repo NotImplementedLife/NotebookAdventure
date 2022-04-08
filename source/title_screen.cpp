@@ -200,7 +200,7 @@ void TitleScreen::on_key_down(int keys)
 			case 0: // New Game
 			{
 				reset_user_data();
-				this->exit(LVL_ENTER_CODE(1)); break;
+				this->exit(NEW_GAME | LVL_ENTER_CODE(1)); break;
 			}
 			case 1: this->exit(LVL_ENTER_CODE(UserData.current_level)); break;
 			case 2: this->exit(LVL_ENTER_CODE(sel_level)); break;

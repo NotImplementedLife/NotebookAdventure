@@ -6,6 +6,7 @@
 #include "debug.hpp"
 
 #include "game_dat.hpp"
+#include "intro.hpp"
 #include "level.hpp"
 #include "title_screen.hpp"
 #include "audio.hpp"
@@ -15,7 +16,7 @@
 #include "level_2_bin.h"
 #include "all_levels.h"
 
-#include "esodev_logo.hpp"
+//#include "esodev_logo.hpp"
 
 int main(void) {
 	irqInit();
@@ -106,6 +107,17 @@ int main(void) {
 			if(last_enter_id+1>UserData.current_level && last_enter_id<LEVELS_COUNT)				
 				UserData.current_level = last_enter_id+1;			
 		}		
+		
+		if(screen_result & NEW_GAME)
+		{
+			screen_result &= ~NEW_GAME;
+				
+			screen = new Intro();
+			screen->init();
+			screen->run();
+			delete screen;			
+			
+		}
 		save_user_data();
 	}	
 	

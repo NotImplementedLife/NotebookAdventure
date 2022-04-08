@@ -238,7 +238,10 @@ void Background::key_held(u16 keys) { }
 	
 void Background::key_up(u16 keys) { }
 
-Background::~Background() = default;
+Background::~Background() 
+{
+	REG_DISPCNT &= ~(BG_ON(m_id));
+}
 
 
 
