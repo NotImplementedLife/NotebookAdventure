@@ -513,6 +513,8 @@ void Level::init()
 	LOAD_GRIT_SPRITE_TILES(star, 0x1C0, 0xA5, TMP_SPRITE_PALETTE);
 	LOAD_GRIT_SPRITE_TILES(goddess_icon, 0x1C8, 0xAA, TMP_SPRITE_PALETTE);
 
+	camera->set_bounds(600,840);
+
 	LevelBackgroundBage* bg_page = new LevelBackgroundBage();
 	set_background(3, bg_page, 0x10);
 	
