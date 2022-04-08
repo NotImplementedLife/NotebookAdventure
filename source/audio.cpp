@@ -39,12 +39,12 @@ void cancel_sfx(int sfx_id)
 
 void play_bgm(int mod_id)
 {
+	mmPause();
+	mmStop();
 	mmStart(mod_id, MM_PLAY_LOOP);
 }
 
 void stop_bgm()
-{
-	//mmPause();
-	mmStop();
-	//mmFrame();
+{	
+	mmStop();	
 }

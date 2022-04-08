@@ -597,10 +597,6 @@ void Level::init()
 	
 	set_focus(player);	
 	
-	play_bgm(MOD_NADV_LEVEL);
-	mmSetModuleVolume(512+256);
-	mmSetModulePitch(1024);
-	
 	goddess_crown = new GoddessCrown();
 	register_sprite(goddess_crown);
 	
@@ -844,7 +840,7 @@ void Level::on_frame()
 
 void Level::on_end_frame()
 {	
-	mmFrame();	
+	mmFrame();
 	u16* hue = (u16*)hueBitmap;
 	if(goddess_mode)
 	{
@@ -922,6 +918,9 @@ void Level::on_key_down(int keys)
 void Level::on_loaded()
 {
 	dialog->launch_dialog(0,(const char*)blocks_data+75*105, 60);	
+	mmSetModuleVolume(512+256);
+	mmSetModulePitch(1024);
+	play_bgm(MOD_NADV_LEVEL);	
 }
 
 void Level::on_key_held(int keys)

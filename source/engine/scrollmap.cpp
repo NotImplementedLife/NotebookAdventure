@@ -3,6 +3,7 @@
 #include "debug.hpp"
 
 #include <fade.h>
+#include <maxmod.h>
 
 TextScrollMap::TextScrollMap()
 {
@@ -132,21 +133,20 @@ u8 TextScrollMap::run()
 		{			
 			bg[i]->init();	
 		}
-		
-	on_loaded();	
 	
 	if(!do_one_frame())
 		return exit_flag;
 	
 	if(use_tmp_palette)
 	{
-		FadeToPalette(TMP_BG_PALETTE, 32);
-		//load_tmp_palette();
+		FadeToPalette(TMP_BG_PALETTE, 32);		
 	}
-			
-	while(do_one_frame());
 	
-	FadeToGrayScale(31,32);
+	on_loaded();
+			
+	while(do_one_frame());	
+	
+	FadeToGrayScale(31,32);		
 	
 	return exit_flag;
 }

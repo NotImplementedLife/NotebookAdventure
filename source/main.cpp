@@ -15,7 +15,7 @@
 #include "level_2_bin.h"
 #include "all_levels.h"
 
-//#include "esodev_logo.hpp"
+#include "esodev_logo.hpp"
 
 int main(void) {
 	irqInit();
@@ -56,7 +56,7 @@ int main(void) {
 		//dbg_ctx="TitleScreen";
 		screen = new TitleScreen();
 		screen->exit_flag=1;
-		screen->init();
+		screen->init();		
 		screen->run();
 		//dbg_ctx="TitleScreen";
 		delete screen;
@@ -64,7 +64,7 @@ int main(void) {
 		//dbg_ctx="Level";
 		screen = new Level(lvl);
 		((Level*)screen)->completed=LVL_MENU; // Quit
-		screen->init();
+		screen->init();		
 		screen->run();
 		//dbg_ctx="TitleScreen";
 		delete screen;			

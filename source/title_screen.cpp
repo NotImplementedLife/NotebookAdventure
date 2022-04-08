@@ -142,7 +142,7 @@ void TitleScreen::init()
 	
 	play_bgm(MOD_NADV_INTRO);
 	mmSetModuleVolume(128);
-	mmSetModulePitch(512+256);		
+	mmSetModulePitch(512+256);	
 }
 
 void TitleScreen::on_key_down(int keys)
@@ -187,13 +187,14 @@ void TitleScreen::on_key_down(int keys)
 	}
 	else if(keys & KEY_A)
 	{		
-		//mmSetModuleVolume(64);
-		play_sfx(&sfx_enter_lvl);
+		mmSetModuleVolume(32);
+		mmStop();
+		play_sfx(&sfx_enter_lvl);		
 		for(int k=60;k--;)
 		{
 			VBlankIntrWait();
 			mmFrame();
-		}			
+		}								
 		switch(crt_option)
 		{
 			case 0: // New Game
