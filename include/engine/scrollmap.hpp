@@ -11,6 +11,7 @@ class TextScrollMap
 private:
 	char magic[8]="ScrollM";
 protected:
+	bool use_tmp_palette = true;
 	Background* bg[4];
 	u8 scroll_speed[4]; // fixed 4.4, background's scroll relative to camera position
 	                    // 0.0 = fixed bg, 1.0 = normal
@@ -33,9 +34,10 @@ public:
 	bool execution_locked() const;
 	void lock_execution(int lock_id);
 	void unlock_execution();
-	
+		
 	virtual void init();
 	
+	int do_one_frame();
 	u8 run();
 	void exit(u8 code);
 	void set_background(u8 i, Background* bgi, u8 scroll_speedi=0x10);

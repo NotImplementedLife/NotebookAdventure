@@ -23,7 +23,7 @@ public:
 	{
 		Background::load_tiles(notebook_sheetTiles,notebook_sheetTilesLen, true, 0);
 		Background::set_map_stream_source(notebook_sheetMap);
-		dmaCopy((u8*)notebook_sheetPal,(u8*)(BG_PALETTE),notebook_sheetPalLen);		
+		dmaCopy(notebook_sheetPal,TMP_BG_PALETTE,notebook_sheetPalLen);				
 	}	
 };
 
@@ -36,7 +36,7 @@ public:
 	{
 		Background::load_tiles(titleTiles,titleTilesLen, true, 160);
 		Background::set_map_stream_source(titleMap);
-		dmaCopy((u8*)titlePal,(u8*)(BG_PALETTE)+2*160,titlePalLen);		
+		dmaCopy(titlePal,TMP_BG_PALETTE+ 160,titlePalLen);
 	}	
 };
 
@@ -81,9 +81,9 @@ void TitleScreen::init()
 	
 	camera->move(300,146);
 	
-	LOAD_GRIT_SPRITE_TILES(title_text, 0x0008, 0);
-	LOAD_GRIT_SPRITE_TILES(title_crayon, 0x0100, 68);
-	LOAD_GRIT_SPRITE_TILES(digits, 0x0120, 0x50);	
+	LOAD_GRIT_SPRITE_TILES(title_text, 0x0008, 0, TMP_SPRITE_PALETTE);
+	LOAD_GRIT_SPRITE_TILES(title_crayon, 0x0100, 68, TMP_SPRITE_PALETTE);
+	LOAD_GRIT_SPRITE_TILES(digits, 0x0120, 0x50, TMP_SPRITE_PALETTE);
 	
 	Sprite* opt_new = new Sprite(SIZE_64x32,1);
 	opt_new->get_visual()->set_frame(0,0x008);
@@ -142,8 +142,7 @@ void TitleScreen::init()
 	
 	play_bgm(MOD_NADV_INTRO);
 	mmSetModuleVolume(128);
-	mmSetModulePitch(512+256);
-	DEBUG_MSG("HERE\n");
+	mmSetModulePitch(512+256);		
 }
 
 void TitleScreen::on_key_down(int keys)

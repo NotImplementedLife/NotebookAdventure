@@ -28,6 +28,13 @@ u16 cl_brighten(u16 color, u8 level);
 
 u16 cl_blend(u16 color_1, u16 color_2, u8 alpha);
 
+extern u16 tmp_palette[512];
+
+void load_tmp_palette();
+
+#define TMP_BG_PALETTE (tmp_palette)
+
+#define TMP_SPRITE_PALETTE (tmp_palette+256)
 
 
 

@@ -333,7 +333,15 @@ bool Sprite::is_of_class(const char *xclass)
 Sprite::~Sprite()
 {
 	OamPool::remove_obj(id);	
-	//dbg_ctx="ObjVisual";
-	delete visual;	
-	//((u32*)VRAM)[0]++;
+	delete visual;		
+}
+
+
+Sprite* quick_sprite(u16 tile_id, ObjSize size, u8 anchx, u8 anchy)
+{
+	Sprite* spr = new Sprite(size, 1);
+	spr->get_visual()->set_frame(0, tile_id);
+	spr->get_visual()->set_crt_gfx(0);
+	spr->set_anchor(anchx, anchy);	
+	return spr;
 }

@@ -5,3 +5,5 @@ build/
 docs/
 resources/
 levels/
+*esodev*
+*.sav

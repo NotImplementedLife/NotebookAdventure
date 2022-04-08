@@ -12,13 +12,13 @@ class Camera;
 	\param tile_id OBJ tile position 
 	\param palette_start_index paltte correction index (useful if loading different sprites with own palettes)
  */
-#define LOAD_GRIT_SPRITE_TILES(res_name, tile_id, palette_start_index) {\
+#define LOAD_GRIT_SPRITE_TILES(res_name, tile_id, palette_start_index, palette) {\
 	dmaCopy( res_name ## Tiles,(u8*)SPR_VRAM((tile_id)), res_name ## TilesLen); \
 	if(palette_start_index!=0) { \
-		dmaCopy( ((u8*)(res_name ## Pal)) + 2, (u16*)(SPRITE_PALETTE)+palette_start_index, (res_name ## PalLen)-2); \
+		dmaCopy( ((u8*)(res_name ## Pal)) + 2, (u16*)(palette)+palette_start_index, (res_name ## PalLen)-2); \
 		reindex_palette((u16*)SPR_VRAM((tile_id)), res_name ## TilesLen, (palette_start_index)-1);\
 	} else  \
-		dmaCopy( ((u8*)(res_name ## Pal)), (u16*)(SPRITE_PALETTE), (res_name ## PalLen)); \
+		dmaCopy( ((u8*)(res_name ## Pal)), (u16*)(palette), (res_name ## PalLen)); \
 	}
 	
 	
@@ -176,5 +176,8 @@ public:
 #define ANCHOR_BOTTOM_RIGHT     255, 255
 
 // Usage : sprite->set_anchor(ANCHOR_CENTER)
+
+
+Sprite* quick_sprite(u16 tile_id, ObjSize size, u8 anchx, u8 anchy);
 
 

@@ -57,7 +57,7 @@ public:
 	{		
 		Background::load_tiles(notebook_sheetTiles,notebook_sheetTilesLen, true, 0);
 		Background::set_map_stream_source(notebook_sheetMap);
-		dmaCopy((u8*)notebook_sheetPal,(u8*)(BG_PALETTE),notebook_sheetPalLen);		
+		dmaCopy((u8*)notebook_sheetPal,(u8*)(TMP_BG_PALETTE),notebook_sheetPalLen);		
 	}	
 };
 
@@ -73,7 +73,7 @@ public:
 	void init() override
 	{				
 		Background::load_tiles(all_levelsTiles, all_levelsTilesLen, true, 160);
-		dmaCopy((u8*)all_levelsPal,(u16*)(BG_PALETTE)+160, all_levelsPalLen);
+		dmaCopy((u8*)all_levelsPal,(u16*)(TMP_BG_PALETTE)+160, all_levelsPalLen);
 	}	
 };
 
@@ -190,7 +190,7 @@ private:
 public:
 	Player() : PhysicalObject(SIZE_32x32, 16)
 	{
-		LOAD_GRIT_SPRITE_TILES(player, 8, 0);
+		LOAD_GRIT_SPRITE_TILES(player, 8, 0, TMP_SPRITE_PALETTE);
 			
 		get_visual()->set_frame(0,0x0008);
 		get_visual()->set_frame(1,0x0028);
@@ -221,7 +221,7 @@ private:
 public:
 	Cat() : PhysicalObject(SIZE_16x16, 16)
 	{
-		LOAD_GRIT_SPRITE_TILES(cat, 0x120, 128);
+		LOAD_GRIT_SPRITE_TILES(cat, 0x120, 128, TMP_SPRITE_PALETTE);
 			
 		get_visual()->set_frame(0,0x0120);		
 		get_visual()->set_frame(1,0x0128);		
@@ -376,7 +376,7 @@ public:
 		vwf_jc = new Vwf(defaultFont816);
 		create_dialog_box(5, 22, 3, 4, vwf_jc);			
 		
-		BG_PALETTE[0x62] = 0x7FFF;
+		TMP_BG_PALETTE[0x62] = 0x7FFF;
 	}	
 	
 	virtual ~LevelDialog()
@@ -507,11 +507,11 @@ Level::Level(u32 level_no) : Level(get_level_map(level_no), levels_bin[level_no]
 
 void Level::init() 
 {			
-	LOAD_GRIT_SPRITE_TILES(spikes, 0x200, 48);
-	LOAD_GRIT_SPRITE_TILES(trampoline, 0x208, 56);	
-	LOAD_GRIT_SPRITE_TILES(goddess_form, 0x180, 0x50);
-	LOAD_GRIT_SPRITE_TILES(star, 0x1C0, 0xA5);
-	LOAD_GRIT_SPRITE_TILES(goddess_icon, 0x1C8, 0xAA);
+	LOAD_GRIT_SPRITE_TILES(spikes, 0x200, 48, TMP_SPRITE_PALETTE);
+	LOAD_GRIT_SPRITE_TILES(trampoline, 0x208, 56, TMP_SPRITE_PALETTE);	
+	LOAD_GRIT_SPRITE_TILES(goddess_form, 0x180, 0x50, TMP_SPRITE_PALETTE);
+	LOAD_GRIT_SPRITE_TILES(star, 0x1C0, 0xA5, TMP_SPRITE_PALETTE);
+	LOAD_GRIT_SPRITE_TILES(goddess_icon, 0x1C8, 0xAA, TMP_SPRITE_PALETTE);
 
 	LevelBackgroundBage* bg_page = new LevelBackgroundBage();
 	set_background(3, bg_page, 0x10);
@@ -620,9 +620,9 @@ void Level::init()
 	
 	for(int i=0;i<16;i++)
 	{
-		SPRITE_PALETTE[0xD0+i]=SYS_COLORS[i];
-		SPRITE_PALETTE[0xE0+i]=cl_brighten(SYS_COLORS[i],8);
-		SPRITE_PALETTE[0xF0+i]=cl_brighten(SYS_COLORS[i],14);
+		TMP_SPRITE_PALETTE[0xD0+i]=SYS_COLORS[i];
+		TMP_SPRITE_PALETTE[0xE0+i]=cl_brighten(SYS_COLORS[i],8);
+		TMP_SPRITE_PALETTE[0xF0+i]=cl_brighten(SYS_COLORS[i],14);
 	}
 			
 	for(int i=0;i<14;i++)
@@ -702,7 +702,7 @@ void Level::init()
 		u8 ax = *(lvldat++);
 		u8 ay = *(lvldat++);
 		add_obstacle_activator(aid,ax<<2, (ay+1)<<3);
-	}
+	}	
 }
 
 void Level::update_actor(PhysicalObject* obj)

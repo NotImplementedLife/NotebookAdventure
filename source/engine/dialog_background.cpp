@@ -35,7 +35,7 @@ void DialogBackground::load_tiles(const void* source, u8 palette_displacement)
 
 void DialogBackground::set_caret(int obj_tile_id)
 {
-	obj_caret_id = OamPool::add_obj(ObjAttribute(SIZE_8x8, 16, 16, obj_tile_id));
+	obj_caret_id = OamPool::add_obj(ObjAttribute(SIZE_8x8, 16, 16, obj_tile_id));	
 	obj_caret = OamPool::get_object_by_id(obj_caret_id);
 	obj_caret->hide();
 	DEBUG_MSG("  caret_id = %i",obj_caret_id);
@@ -49,8 +49,11 @@ void DialogBackground::assign_caret_to(int dialog_id)
 	u8 top = dialog->top;
 	u8 width = dialog->width;
 	u8 height = dialog->height;	
-	obj_caret->set_x(((left+width-2)<<3)+2);
-	obj_caret->set_y(((top+height-2)<<3)+2);
+	if(obj_caret)
+	{
+		obj_caret->set_x(((left+width-2)<<3)+2);
+		obj_caret->set_y(((top+height-2)<<3)+2);
+	}
 }
 
 void DialogBackground::clear_map()
@@ -73,16 +76,18 @@ void DialogBackground::key_down(u16 keys)
 			{
 				if(opt_crt_sel>0) opt_crt_sel--;
 			}
-			
-			obj_caret->show();
-			obj_caret->set_x(opt_x[opt_crt_sel]);
-			obj_caret->set_y(opt_y[opt_crt_sel]);
+			if(obj_caret)
+			{
+				obj_caret->show();
+				obj_caret->set_x(opt_x[opt_crt_sel]);
+				obj_caret->set_y(opt_y[opt_crt_sel]);
+			}
 		}
 		
 		if(!_cooldown[active_dialog_id] && caret_waiting && (keys & KEY_A))
 		{		
 			caret_waiting = 0;					
-			obj_caret->hide();		
+			if(obj_caret) obj_caret->hide();
 									
 			opt_result[opt_rescnt++]=opt_crt_sel;						
 			opt_crt_sel=0;
@@ -106,7 +111,7 @@ void DialogBackground::key_down(u16 keys)
 			if(_cooldown[active_dialog_id]==1)
 			{
 				caret_waiting = 0;
-				obj_caret->hide();		
+				if(obj_caret) obj_caret->hide();		
 					
 				if(caret_release_action & DIALOG_CLEAR)
 				{
@@ -150,11 +155,11 @@ void DialogBackground::render()
 		{	
 			caret_waiting=1;
 			if(!_cooldown[active_dialog_id])
-				obj_caret->show();
+				if(obj_caret) obj_caret->show();
 		}
 		else if(caret_waiting==5)
 		{
-			obj_caret->hide();
+			if(obj_caret) obj_caret->hide();
 		}		
 		return;
 	}
@@ -179,7 +184,7 @@ void DialogBackground::render()
 		if(awaiting_text[active_dialog_id][0]=='\0')
 		{
 			awaiting_text[active_dialog_id]=NULL;
-			obj_caret->hide();			
+			if(obj_caret) obj_caret->hide();			
 			caret_release_action |= DIALOG_HIDE;
 			
 		}

@@ -15,6 +15,7 @@
 #include "level_2_bin.h"
 #include "all_levels.h"
 
+//#include "esodev_logo.hpp"
 
 int main(void) {
 	irqInit();
@@ -31,9 +32,16 @@ int main(void) {
 	
 	int screen_result = LVL_MENU;
 	TextScrollMap* screen = NULL;	
+		
+	#ifdef ESODEV
+	screen = new EsoDevLogo();
+	screen->init();
+	screen->run();
+	delete screen;
+	#endif
 
-	/*//dbg_ctx="Level";
-	screen = new Level(4);
+	//dbg_ctx="Level";
+	/*screen = new Level(4);
 	screen->init();
 	screen->run();
 	//dbg_ctx="TitleScreen";

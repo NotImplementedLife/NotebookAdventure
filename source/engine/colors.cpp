@@ -53,6 +53,19 @@ u16 cl_blend(u16 color_1, u16 color_2, u8 alpha)
 }
 
 
+u16 tmp_palette[512];
+
+void load_tmp_palette()
+{
+	for(int i=0;i<512;i++)
+	{
+		BG_PALETTE[i]=TMP_BG_PALETTE[i];
+	}	
+	//dmaCopy(TMP_BG_PALETTE, BG_PALETTE, 1024);
+	//BG_PALETTE[0]=TMP_BG_PALETTE[0];
+	//dmaCopy(TMP_SPRITE_PALETTE, SPRITE_PALETTE, 512);
+}
+
 
 
 
