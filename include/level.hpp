@@ -22,6 +22,7 @@ public:
 	Sprite* focus;
 	Sprite* goddess_crown;
 	Sprite* goddess_icon;
+	Sprite* final_heart;
 	PhysicalObject* xfocus;
 	GoddessStar* goddess_star;	
 	

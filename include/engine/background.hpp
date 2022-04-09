@@ -16,8 +16,12 @@ protected:
 	s16 tile_offset_x, tile_offset_y;
 	u16 *ptr_bg_hofs, *ptr_bg_vofs;
 	u16 bg_hofs, bg_vofs;
-	s16 old_x=0x8000, old_y=0x8000;	
+	s16 old_x=0x8000, old_y=0x8000;
+
+	u32 width_mul_table[256];
 	
+private:	
+	u32 width_mul(u32 factor);
 protected:
 	/*! \brief loads tileset graphics into its specific VRAM block
 		\param source     tiles buffer data

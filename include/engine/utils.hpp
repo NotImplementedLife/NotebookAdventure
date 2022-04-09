@@ -21,12 +21,12 @@ public:
 	
 	sf24 operator + (const sf24& b) const;
 	sf24 operator - (const sf24& b) const;
-	sf24 operator * (const sf24& b) const;	
+	//sf24 operator * (const sf24& b) const;	
 	
 	sf24 operator -() const;
 	void operator += (const sf24& b);
 	void operator -= (const sf24& b);
-	void operator *= (const sf24& b);	
+	//void operator *= (const sf24& b);	
 	
 	explicit operator int() const;
 	explicit operator s16() const;

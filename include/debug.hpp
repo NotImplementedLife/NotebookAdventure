@@ -1,6 +1,6 @@
 #pragma once
 
-#define DEBUG_ENABLED
+//#define DEBUG_ENABLED
 
 namespace Debug
 {

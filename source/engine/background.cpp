@@ -21,6 +21,8 @@ Background::Background(u16 id, u16 char_base,u16 map_base,u16 map_width, u16 map
 	old_x=old_y=0x8000;
 	set_scroll(0,0);
 	set_priority(m_id);
+	
+	for(u32 i=0;i<256;i++) width_mul_table[i]=width*i;
 }
 
 void Background::set_priority(u8 priority)
@@ -74,6 +76,15 @@ void Background::init() { }
 
 u16 abs(s16 x) { return x<0?-x:x;}
 
+u32 Background::width_mul(u32 factor)
+{	
+	if(factor<256)
+	{
+		return width_mul_table[factor];
+	}		
+	return (width_mul(factor>>8)<<8)+width_mul_table[factor&0xFF];
+}
+
 void Background::build_map()
 {		
 	u16 screen_base_x = bg_hofs>>3;
@@ -87,7 +98,7 @@ void Background::build_map()
 			u16* target_line = ((u16*)map_base_address) + (((screen_base_y+y)&31)<<5);
 			if(0<=tile_offset_y+y && tile_offset_y+y<height)
 			{
-				u16* source_line = ((u16*)map_stream_source) + width*(tile_offset_y+y);		
+				u16* source_line = ((u16*)map_stream_source) + width_mul(tile_offset_y+y);
 				for(int x=0;x<=30;x++)
 				{			
 					int src_offset=x + tile_offset_x;
@@ -116,7 +127,7 @@ void Background::build_map()
 				u16* target_line = ((u16*)map_base_address) + (((screen_base_y+y)&31)<<5);				
 				if(0<=tile_offset_y+y && tile_offset_y+y<height)
 				{
-					u16* source_line = ((u16*)map_stream_source) + width*(tile_offset_y+y);												
+					u16* source_line = ((u16*)map_stream_source) + width_mul(tile_offset_y+y);												
 					for(int x=31;d>0;x--)
 					{			
 						int src_offset=x+ tile_offset_x;
@@ -144,7 +155,7 @@ void Background::build_map()
 				u16* target_line = ((u16*)map_base_address) + (((screen_base_y+y)&31)<<5);				
 				if(0<=tile_offset_y+y && tile_offset_y+y<height)
 				{
-					u16* source_line = ((u16*)map_stream_source) + width*(tile_offset_y+y);												
+					u16* source_line = ((u16*)map_stream_source) + width_mul(tile_offset_y+y);												
 					for(int x=0;d>0;x++)
 					{			
 						int src_offset=x+ tile_offset_x;
@@ -173,7 +184,7 @@ void Background::build_map()
 				u16* target_line = ((u16*)map_base_address) + (((screen_base_y+y)&31)<<5);				
 				if(0<=tile_offset_y+y && tile_offset_y+y<height)
 				{
-					u16* source_line = ((u16*)map_stream_source) + width*(tile_offset_y+y);												
+					u16* source_line = ((u16*)map_stream_source) + width_mul(tile_offset_y+y);												
 					for(int x=0;x<=30;x++)
 					{			
 						int src_offset=x+ tile_offset_x;
@@ -202,7 +213,7 @@ void Background::build_map()
 				u16* target_line = ((u16*)map_base_address) + (((screen_base_y+y)&31)<<5);				
 				if(0<=tile_offset_y+y && tile_offset_y+y<height)
 				{
-					u16* source_line = ((u16*)map_stream_source) + width*(tile_offset_y+y);												
+					u16* source_line = ((u16*)map_stream_source) + width_mul(tile_offset_y+y);
 					for(int x=0;x<=30;x++)
 					{			
 						int src_offset=x+ tile_offset_x;

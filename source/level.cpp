@@ -43,6 +43,7 @@ u32 choose_star_pos(const u8* level_map);
 #include "spikes.h"
 #include "star.h"
 #include "trampoline.h"
+#include "heart.h"
 
 #include "hue.h"
 
@@ -223,14 +224,10 @@ public:
 	}	
 	
 	virtual ~LevelDialog()
-	{		
-		//dbg_ctx="Vwf";
-		delete vwf;  
-		//dbg_ctx="Vwf";
-		delete vwf_jp;
-		//dbg_ctx="Vwf";
-		delete vwf_g;
-		//dbg_ctx="Vwf";
+	{				
+		delete vwf;  		
+		delete vwf_jp;		
+		delete vwf_g;		
 		delete vwf_jc;
 	}
 };
@@ -356,6 +353,7 @@ void Level::init()
 	LOAD_GRIT_SPRITE_TILES(goddess_form, 0x180, 0x50, TMP_SPRITE_PALETTE);
 	LOAD_GRIT_SPRITE_TILES(star, 0x1C0, 0xA5, TMP_SPRITE_PALETTE);
 	LOAD_GRIT_SPRITE_TILES(goddess_icon, 0x1C8, 0xAA, TMP_SPRITE_PALETTE);
+	LOAD_GRIT_SPRITE_TILES(heart, 0x220, 0xCE, TMP_SPRITE_PALETTE);
 
 	camera->set_bounds(600,840);
 
@@ -541,6 +539,10 @@ void Level::init()
 		u8 obsy = *(lvldat++);		
 		add_obstacle(obsid,obso,(obsx<<3)+4,(obsy<<3)+4,4*i);
 	}
+	
+	final_heart = quick_sprite(0x220, SIZE_8x8, ANCHOR_CENTER);
+	final_heart->attr->hide();
+	register_sprite(final_heart);
 }
 
 void Level::update_actor(PhysicalObject* obj)
@@ -678,7 +680,12 @@ void Level::on_frame()
 			dialog->run_on_dialog_finished(2, level_completed_dialog_finished, this);
 			dialog->launch_dialog(2, "Well played!\n                  \x01Next            \01Menu", 0);			
 			mmStop();
+			final_heart->attr->show();			
+			final_heart->set_pos(((s16)(player->pos_x+cat->pos_x))>>1,((s16)(player->pos_y+cat->pos_y))>>1);
+			
 		}
+		if(player->pos_y>0)
+			final_heart->pos_y-=sf24(0,180);
 	}	
 }
 

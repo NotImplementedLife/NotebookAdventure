@@ -1,6 +1,6 @@
 #include "utils.hpp"
 
-#include "debug.hpp"
+#include "error.hpp"
 
 sf24::sf24() {}
 
@@ -31,8 +31,8 @@ sf24 sf24::operator - (const sf24& b) const
 	return create_from_data(data-b.data);
 }
 
-sf24 sf24::operator * (const sf24& b) const
-{	
+/*sf24 sf24::operator * (const sf24& b) const
+{		
 	u32 sgn = (data ^ b.data) & 0x80000000;
 	u32 d1 = data, d2=b.data;
 	d1 = d1>=0 ? d1: -d1;
@@ -44,7 +44,7 @@ sf24 sf24::operator * (const sf24& b) const
 	res &= 0x7FFFFFFF;
 	res |= sgn;	
 	return create_from_data(res);
-}
+}*/
 
 sf24 sf24::operator -() const
 {
@@ -61,7 +61,7 @@ void sf24::operator -= (const sf24& b)
 	data-=b.data;
 }
 
-void sf24::operator *= (const sf24& b)
+/*void sf24::operator *= (const sf24& b)
 {
 	u32 sgn = (data ^ b.data) & 0x80000000;
 	u32 d1 = data, d2=b.data;
@@ -74,7 +74,7 @@ void sf24::operator *= (const sf24& b)
 	res &= 0x7FFFFFFF;
 	res |= sgn;	
 	data=res;
-}
+}*/
 
 sf24::operator int() const
 {
