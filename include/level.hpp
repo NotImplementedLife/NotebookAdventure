@@ -49,6 +49,8 @@ public:
 
 	void init() override;
 	
+	void on_start_frame() override;
+	
 	void on_frame() override;
 	
 	void on_end_frame() override;

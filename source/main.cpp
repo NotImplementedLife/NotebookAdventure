@@ -1,11 +1,6 @@
 #define ESODEV
 
-#include <gba.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "engine.hpp"
-
-#include "debug.hpp"
 
 #include "game_dat.hpp"
 #include "intro.hpp"
@@ -17,7 +12,8 @@
 #include "esodev.hpp"
 #endif
 
-int main(void) {
+int main(void) 
+{
 	irqInit();
 	irqEnable(IRQ_VBLANK);
 	SetMode(MODE_0 | OBJ_ENABLE | OBJ_1D_MAP);
@@ -39,15 +35,13 @@ int main(void) {
 	screen->run();
 	delete screen;
 	#endif
-
-	//dbg_ctx="Level";
+	
+	/*
 	screen = new Level(5);
 	screen->init();
 	screen->run();
-	//dbg_ctx="TitleScreen";
-	delete screen;	
+	delete screen;	*/
 		
-	u16 last_enter_id=0;
 	
 	// quick level playthrough test
 	/*int lvl=1;
@@ -73,6 +67,7 @@ int main(void) {
 		if(lvl==6) lvl=1;
 	}*/
 	
+	u16 last_enter_id=0;
 	while(1)
 	{		
 		switch(screen_result&3)

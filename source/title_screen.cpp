@@ -1,7 +1,5 @@
 #include "title_screen.hpp"
 
-#include <string.h>
-
 #include "debug.hpp"
 
 #include "notebook-sheet.h"
@@ -17,7 +15,7 @@
 class TitleBackgroundPage : public Background
 {
 public:
-	TitleBackgroundPage() : Background(3,2,31,75,105) { strcpy(magic,"TitleBgPage"); DEBUG_MSG("iTBG\n"); }
+	TitleBackgroundPage() : Background(3,2,31,75,105) { }
 	
 	void init() override
 	{
@@ -30,7 +28,7 @@ public:
 class TitleForegroundPage : public Background
 {
 public:
-	TitleForegroundPage() : Background(2,1,30,30,20) { strcpy(magic,"TitleFgPage"); DEBUG_MSG("iTFG\n");}
+	TitleForegroundPage() : Background(2,1,30,30,20) { }
 	
 	void init() override
 	{

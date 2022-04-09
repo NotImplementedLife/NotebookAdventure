@@ -7,8 +7,7 @@
 
 class Background
 {
-protected:	
-	char magic[15] = "Background";	
+protected:		
 	u8 m_id;
 	u16 *char_base_address, *map_base_address;
 	u16 width, height;

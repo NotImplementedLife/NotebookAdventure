@@ -42,6 +42,7 @@ public:
 	void exit(u8 code);
 	void set_background(u8 i, Background* bgi, u8 scroll_speedi=0x10);
 	
+	virtual void on_start_frame();
 	virtual void on_frame();
 	virtual void on_end_frame();
 	

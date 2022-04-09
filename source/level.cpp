@@ -50,12 +50,10 @@ u32 choose_star_pos(const u8* level_map);
 #include "obstacle_horizontal.h"
 #include "obstacle_vertical.h"
 
-#include <string.h>
-
 class LevelBackgroundBage : public Background
 {
 public:
-	LevelBackgroundBage() : Background(3,2,31,75,105) { strcpy(magic,"LevelBgPage"); }
+	LevelBackgroundBage() : Background(3,2,31,75,105) { }
 	
 	void init() override
 	{		
@@ -69,8 +67,7 @@ class LevelDungeon : public Background
 {
 public:
 	LevelDungeon(const void* level_map) : Background(2,0,29,75,105)
-	{ 
-		strcpy(magic,"LevelDungeon"); 
+	{ 		
 		Background::set_map_stream_source(level_map);
 	}
 	
@@ -186,7 +183,7 @@ private:
 	Vwf *vwf_jc;
 	Vwf *vwf_g;
 public:
-	LevelDialog() : DialogBackground(0, 1, 28) { strcpy(magic,"LvlDialog"); }
+	LevelDialog() : DialogBackground(0, 1, 28) { }
 	
 	void init() override
 	{				
@@ -349,8 +346,7 @@ Level::Level(const void* lvl_map, const u8* lvl_src) : TextScrollMap()
 
 Level::Level(u32 level_no) : Level(get_level_map(level_no), levels_bin[level_no]) 
 {
-	id = level_no;
-	DEBUG_MSG("Enter level %i\n",id);
+	id = level_no;	
 }
 
 void Level::init() 
@@ -455,8 +451,7 @@ void Level::init()
 		u16 s_pos_y = star_pos & 0xFFFF;
 		u16 s_pos_x = (star_pos>>16) & 0xFFFF;
 		goddess_star->set_pos(s_pos_x,s_pos_y);
-		goddess_star->attr->show();
-		DEBUG_MSG("Goddess star: %i %i\n",s_pos_x, s_pos_y);
+		goddess_star->attr->show();		
 	}
 	else goddess_star = NULL;
 		
@@ -579,7 +574,7 @@ void Level::update_actor(PhysicalObject* obj)
 		if(bdata==1 || (bdata==0 && udata==2))
 		{
 			// 8 multiple correction
-			obj->pos_y = ((int)obj->pos_y)&(~7);
+			obj->pos_y = ((int)obj->pos_y) & (~7);
 		}
 		if(bdata==2)
 		{
@@ -591,9 +586,7 @@ void Level::update_actor(PhysicalObject* obj)
 }
 
 void Level::on_frame() 
-{	
-	mmFrame();
-	DEBUG_MSG("BEGIN FRAME\n");
+{			
 	if(completed)
 	{
 		this->exit(completed);
@@ -607,10 +600,8 @@ void Level::on_frame()
 		UserData.time_played_as_cat++;
 	}
 	
-	update_actor(player);
-	DEBUG_MSG("UP\n");
-	update_actor(cat);	
-	DEBUG_MSG("UC\n");
+	update_actor(player);	
+	update_actor(cat);		
 		
 
 	if(goddess_star) goddess_star->update();
@@ -630,8 +621,7 @@ void Level::on_frame()
 	}
 	
 	for(int i=0;i<14;i++) obst_status[i]=-1;
-	
-	DEBUG_MSG("BFOR\n");
+		
 	for(int i=0;i<sprites_count;i++)
 	{
 		if(sprites[i]->is_of_class(CLASS_SPIKES))
@@ -678,25 +668,27 @@ void Level::on_frame()
 			Obstacle* obs = (Obstacle*)sprites[i];
 			obs->spec_move(obst_status[obs->get_id()]);
 			obs->update_qopt(quick_obstacle_pos_table);
-		}
-		else if(player->touches(cat))
-		{
-			if(!input_locked())
-			{
-				lock_input(0);
-				dialog->run_on_dialog_finished(2, level_completed_dialog_finished, this);
-				dialog->launch_dialog(2, "Well played!\n                  \x01Next            \01Menu", 0);			
-				mmStop();
-			}
-		}
+		}		
 	}
-	DEBUG_MSG("EFOR\n");
+	if(player->touches(cat))
+	{
+		if(!input_locked())
+		{
+			lock_input(0);
+			dialog->run_on_dialog_finished(2, level_completed_dialog_finished, this);
+			dialog->launch_dialog(2, "Well played!\n                  \x01Next            \01Menu", 0);			
+			mmStop();
+		}
+	}	
+}
+
+void Level::on_start_frame() 
+{
+	mmFrame();
 }
 
 void Level::on_end_frame()
-{	
-	DEBUG_MSG("EndFr\n");	
-	DEBUG_MSG("EndFr2\n");
+{		
 	if(goddess_mode)
 	{
 		u16* hue = (u16*)hueBitmap;
@@ -710,9 +702,7 @@ void Level::on_end_frame()
 		{			
 			BG_PALETTE[160+i]=cl_blend(hue[hid],((u16*)all_levelsPal)[i],12);
 		}
-	}
-	
-	DEBUG_MSG("%x. END FRAME\n",framecount);
+	}	
 	framecount++;
 }
 
@@ -722,24 +712,20 @@ void Level::on_key_down(int keys)
 	{				
 		if(keys & KEY_A) 
 		{
-			DEBUG_MSG("Key down A\n");
 			s16 px=(s16)xfocus->pos_x;
-			s16 py=(s16)xfocus->pos_y;
-			DEBUG_MSG("POS = %i, %i\n",px, py);
+			s16 py=(s16)xfocus->pos_y;		
 			
 			u8 bdata = get_block_data(px, py);
 			u8 udata = get_block_data(px, py-8);
 			if(bdata!=0 && udata==0)		
-			{	
-				DEBUG_MSG("Perform jump\n");
+			{					
 				xfocus->charge_a(0,-sf24(3,160));
 			}
 			return;
 		}
 		
 		if(keys & KEY_START)
-		{			
-			DEBUG_MSG("Key down START\n");
+		{						
 			lock_execution(0);
 			dialog->run_on_dialog_finished(2, pause_dialog_finished, this);
 			dialog->launch_dialog(2, "Game paused\n    \x01Resume          \01Retry          \01Menu", 0);
@@ -748,21 +734,17 @@ void Level::on_key_down(int keys)
 		}
 		
 		if(keys & KEY_L)
-		{
-			DEBUG_MSG("Key down L\n");
-			//DEBUG_MSG("FOCUS : ")
+		{						
 			xfocus->get_visual()->set_animation_track(ANIM_FRAMES_0);
 			set_focus(focus==cat ? player:cat);		
 			if(keysHeld() & (KEY_LEFT|KEY_RIGHT))
 			{
 				xfocus->get_visual()->set_animation_track(ANIM_FRAMES_1);
-			}
-			DEBUG_MSG("HERE\n");
+			}			
 			return;
 		}
 		if(keys & KEY_R)
-		{
-			DEBUG_MSG("Key down R\n");
+		{			
 			explorer->set_pos(xfocus->pos_x,xfocus->pos_y);
 			set_focus(explorer);
 			return;
@@ -777,8 +759,7 @@ void Level::on_key_down(int keys)
 		if(focus==player)			
 		{
 			if((keys & KEY_SELECT) && (!goddess_icon->attr->is_hidden()))
-			{				
-				DEBUG_MSG("Key down SELECT\n");
+			{								
 				goddess_mode=true;
 				goddess_icon->attr->hide();
 				goddess_crown->attr->show();			
@@ -941,19 +922,12 @@ void Level::set_focus(Sprite* spr)
 	{		
 		xfocus=(PhysicalObject*)spr;
 		if(spr==player)
-		{
-			DEBUG_MSG("FOCUS player\n");
+		{			
 		}
 		else if(spr==cat)
-		{
-			DEBUG_MSG("FOCUS cat\n");
+		{			
 		}
-	}
-	else if(focus==explorer)
-	{
-		DEBUG_MSG("FOCUS explorer\n");
-	}
-	else DEBUG_MSG("FOCUS UNKNOWN\n");	
+	}		
 	camera->follow(focus);	
 	focus->update_position(camera);		
 }
@@ -963,8 +937,7 @@ void Level::add_spikes(s16 x, s16 y, s8 len)
 {	
 	while(len>=4)
 	{		
-		Spikes* spikes = new Spikes(SIZE_32x8);
-		DEBUG_MSG("Spikes [%x]: %i %i %i\n",(u32) spikes, x, y, 4);
+		Spikes* spikes = new Spikes(SIZE_32x8);		
 		spikes->set_pos(x,y);
 		x+=32;
 		len-=4;
@@ -972,8 +945,7 @@ void Level::add_spikes(s16 x, s16 y, s8 len)
 	}
 	while(len>=2)
 	{		
-		Spikes* spikes = new Spikes(SIZE_16x8);
-		DEBUG_MSG("Spikes [%x]: %i %i %i\n",(u32) spikes, x, y, 2);
+		Spikes* spikes = new Spikes(SIZE_16x8);		
 		spikes->set_pos(x,y);
 		x+=16;
 		len-=2;
@@ -981,8 +953,7 @@ void Level::add_spikes(s16 x, s16 y, s8 len)
 	}	
 	while(len>=1)
 	{		
-		Spikes* spikes = new Spikes(SIZE_8x8);
-		DEBUG_MSG("Spikes [%x]: %i %i %i\n",(u32) spikes, x, y, 1);
+		Spikes* spikes = new Spikes(SIZE_8x8);		
 		spikes->set_pos(x,y);
 		x+=8;
 		len-=1;
@@ -992,8 +963,7 @@ void Level::add_spikes(s16 x, s16 y, s8 len)
 
 void Level::add_trampoline(s16 x, s16 y)
 {		
-	Trampoline* tr = new Trampoline();
-	DEBUG_MSG("Trampoline [%x]: %i %i %i\n",(u32)tr, x, y);
+	Trampoline* tr = new Trampoline();	
 	tr->set_pos(x,y);
 	register_sprite(tr);
 	
@@ -1001,10 +971,7 @@ void Level::add_trampoline(s16 x, s16 y)
 
 void Level::add_obstacle(u8 id, u8 orientation, s16 x, s16 y, u16 qopt_id)
 {	
-	Obstacle* o=new Obstacle(id, (ObstacleOrientation)orientation);
-	
-	DEBUG_MSG("Obstacle [%x]: %i %i %i %i\n",(u32)o, id, x, y, qopt_id);
-	
+	Obstacle* o=new Obstacle(id, (ObstacleOrientation)orientation);	
 	o->set_pos(x,y);
 	o->qopt_id=qopt_id;
 	o->update_qopt(quick_obstacle_pos_table);
@@ -1013,10 +980,7 @@ void Level::add_obstacle(u8 id, u8 orientation, s16 x, s16 y, u16 qopt_id)
 
 void Level::add_obstacle_activator(u8 id, s16 x, s16 y)
 {	
-	ObstacleActivator* a = new ObstacleActivator(id);
-	
-	DEBUG_MSG("Activator [%x]: %i %i %i %i\n",(u32)a, id, x, y);
-	
+	ObstacleActivator* a = new ObstacleActivator(id);	
 	a->set_pos(x,y);
 	register_sprite(a);
 }

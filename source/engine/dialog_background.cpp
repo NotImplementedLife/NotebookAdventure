@@ -1,10 +1,8 @@
 #include "dialog_background.hpp"
 #include "error.hpp"
-#include <string.h>
 
 DialogBackground::DialogBackground(u16 id, u16 char_base, u16 map_base) : Background(id, char_base, map_base, 32, 32)
-{
-	strcpy(magic,"DialogBkg");
+{	
 	dialogs_count=0;	
 	for(int i=0;i<4; i++)
 	{

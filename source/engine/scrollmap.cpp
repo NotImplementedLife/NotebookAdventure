@@ -76,6 +76,8 @@ int TextScrollMap::do_one_frame()
 	{
 		return 0;
 	}
+	on_start_frame();
+	
 	scanKeys();
 	int keys_down = keysDown();
 	int keys_held = keysHeld();
@@ -147,7 +149,9 @@ u8 TextScrollMap::run()
 	return exit_flag;
 }
 
-void TextScrollMap::on_end_frame() { };
+void TextScrollMap::on_end_frame() { }
+
+void TextScrollMap::on_start_frame() { }
 
 void TextScrollMap::exit(u8 code)
 {

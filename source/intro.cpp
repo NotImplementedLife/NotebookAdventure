@@ -4,12 +4,10 @@
 #include "intro-fg.h"
 #include "emojis.h"
 
-#include <string.h>
-
 class IntroBackgroundPage : public Background
 {
 public:
-	IntroBackgroundPage() : Background(3,3,31,75,105) { strcpy(magic,"IntroBgPage"); }
+	IntroBackgroundPage() : Background(3,3,31,75,105) { }
 	
 	void init() override
 	{
@@ -22,7 +20,7 @@ public:
 class IntroForegroundPage : public Background
 {
 public:
-	IntroForegroundPage() : Background(2,1,30,30,20) { strcpy(magic,"IntroFgPage");}
+	IntroForegroundPage() : Background(2,1,30,30,20) { }
 	
 	void init() override
 	{
