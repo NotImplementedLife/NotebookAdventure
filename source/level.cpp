@@ -13,6 +13,8 @@
 #include "level_3_bin.h"
 #include "level_4_bin.h"
 #include "level_5_bin.h"
+#include "level_6_bin.h"
+#include "level_7_bin.h"
 //...
 
 #include "physical_object.hpp"
@@ -29,7 +31,11 @@ const void* get_level_map(u32 no)
 }
 
 
-const u8* levels_bin[] = { NULL, level_1_bin, level_2_bin, level_3_bin, level_4_bin, level_5_bin };
+const u8* levels_bin[] = 
+{	NULL, 
+	level_1_bin, level_2_bin, level_3_bin, level_4_bin, level_5_bin, 
+	level_6_bin, level_7_bin 
+};
 
 u32 choose_star_pos(const u8* level_map);
 
@@ -910,16 +916,16 @@ u8 Level::get_block_data(s16 x, s16 y) const
 u8 Level::get_block_data_tiled(u8 x, u8 y) const
 {
 	u8 on_map = blocks_data[mul_75[y]+x];
-	if(on_map)
+	if(on_map==1)
 		return on_map;
-	// check obstacles
+	// check for obstacles
 	u16 yx=(y<<8)|x;
 	for(int i=0;i<qopt_size;i++)
 	{
 		if(yx==quick_obstacle_pos_table[i])
 			return 1;
 	}
-	return 0;
+	return on_map;
 }
 
 void Level::set_focus(Sprite* spr)
