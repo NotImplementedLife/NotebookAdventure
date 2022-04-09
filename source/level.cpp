@@ -18,6 +18,8 @@
 #include "level_8_bin.h"
 //...
 
+#include "hue_data_bin.h"
+
 #include "physical_object.hpp"
 #include "actor_player.hpp"
 #include "actor_cat.hpp"
@@ -52,8 +54,6 @@ u32 choose_star_pos(const u8* level_map);
 #include "trampoline.h"
 #include "heart.h"
 
-#include "hue.h"
-
 #include "obstacle_activator.h"
 #include "obstacle_horizontal.h"
 #include "obstacle_vertical.h"
@@ -81,8 +81,8 @@ public:
 	
 	void init() override
 	{				
-		Background::load_tiles(all_levelsTiles, all_levelsTilesLen, true, 160);
-		dmaCopy((u8*)all_levelsPal,(u16*)(TMP_BG_PALETTE)+160, all_levelsPalLen);
+		Background::load_tiles(all_levelsTiles, all_levelsTilesLen, true, 96);
+		dmaCopy((u8*)all_levelsPal,(u16*)(TMP_BG_PALETTE)+96, all_levelsPalLen);
 	}	
 };
 
@@ -204,7 +204,7 @@ public:
 		// Dialog 0: use to display level title
 		//dbg_ctx="Vwf";
 		vwf = new Vwf(defaultFont816);
-		vwf->set_text_color(0x62);
+		vwf->set_text_color(0x80);
 		create_dialog_box(1, 1, 16, 4, vwf);		
 		
 		// Dialog 1: use dialog timings to control jumping on sprites
@@ -220,14 +220,14 @@ public:
 		//dbg_ctx="Vwf";
 		vwf_g = new Vwf(defaultFont816);
 		create_dialog_box(1,14,28,6, vwf_g);
-		vwf_g->set_text_color(0x62);
+		vwf_g->set_text_color(0x80);
 
 		// Dialog 3: jump dialog, for cat
 		//dbg_ctx="Vwf";
 		vwf_jc = new Vwf(defaultFont816);
 		create_dialog_box(5, 22, 3, 4, vwf_jc);			
 		
-		TMP_BG_PALETTE[0x62] = 0x7FFF;
+		TMP_BG_PALETTE[0x82] = 0x7FFF; // it's a bug in vwf |=
 	}	
 	
 	virtual ~LevelDialog()
@@ -704,18 +704,10 @@ void Level::on_start_frame()
 void Level::on_end_frame()
 {		
 	if(goddess_mode)
-	{
-		u16* hue = (u16*)hueBitmap;
+	{		
 		goddess_tick++;
-		u8 hid=goddess_tick>>1;
-		for(int i=0;i<96;i++)
-		{			
-			BG_PALETTE[i]=cl_blend(hue[hid],((u16*)notebook_sheetPal)[i],12);
-		}		
-		for(int i=0;i<32;i++)
-		{			
-			BG_PALETTE[160+i]=cl_blend(hue[hid],((u16*)all_levelsPal)[i],12);
-		}
+		u8 hid=goddess_tick>>1;		
+		dmaCopy(((u16*)hue_data_bin)+(hid<<7),BG_PALETTE,2*128);	
 	}	
 	framecount++;
 }
