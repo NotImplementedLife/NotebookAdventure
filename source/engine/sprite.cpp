@@ -5,7 +5,6 @@
 
 #include <stdarg.h>
 #include <string.h>
-#include "debug.hpp"
 
 Hitbox::Hitbox()
 {
@@ -149,7 +148,7 @@ ObjVisual::~ObjVisual()
 	delete[] framesets;
 }
 
-Sprite::Sprite(ObjSize size, u16 frames_count, const char* _class)
+Sprite::Sprite(ObjSize size, u16 frames_count, u16 _class)
 {		
 	id = OamPool::add_obj(ObjAttribute(size,0,0,0));
 	attr = OamPool::get_object_by_id(id);
@@ -314,11 +313,11 @@ bool Sprite::touches(Sprite* spr)
 	    && (y0.in_range(y1,y1+h1) || y1.in_range(y0, y0+h0));
 }
 
-bool Sprite::is_of_class(const char *xclass)
+bool Sprite::is_of_class(u16 xclass)
 {
-	if(_class==NULL) return false;
-	if(xclass==NULL) return false;
-	return !strncmp(_class, xclass, 16);
+	if(_class==0 || xclass==0)
+		return false;
+	return _class == xclass;
 }
 
 Sprite::~Sprite()

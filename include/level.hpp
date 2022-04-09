@@ -13,6 +13,7 @@ class GoddessStar;
 class Level : public TextScrollMap
 {
 public:		
+	u32 framecount=0;
 	PhysicalObject* player;
 	PhysicalObject* cat;
 	

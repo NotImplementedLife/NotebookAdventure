@@ -1,6 +1,5 @@
 #include "engine/scrollmap.hpp"
 #include "colors.hpp"
-#include "debug.hpp"
 
 #include <fade.h>
 #include <maxmod.h>
@@ -12,16 +11,13 @@ TextScrollMap::TextScrollMap()
 	{
 		bg[i] = NULL;
 		scroll_speed[i] = 0x10;
-	}
-	//dbg_ctx="Camera";
+	}	
 	camera = new Camera();
 	
 	sprites_cap = 128;
 	sprites_cap = 128;
-	sprites_count = 0;
-	//dbg_ctx="TSM:Sprite*";
-	sprites = new Sprite*[sprites_cap];	
-	DEBUG_MSG("+SCR\n");
+	sprites_count = 0;	
+	sprites = new Sprite*[sprites_cap];		
 }
 
 void TextScrollMap::init() { }
@@ -174,8 +170,7 @@ void TextScrollMap::register_sprite(Sprite* spr)
 			container[i] = sprites[i];		
 		delete[] sprites;
 		sprites = container;
-	}
-	//DEBUG_MSG(" reg %x\n",(u32)spr);
+	}	
 	sprites[sprites_count++]=spr;
 	
 }
@@ -183,28 +178,17 @@ void TextScrollMap::register_sprite(Sprite* spr)
 TextScrollMap::~TextScrollMap()
 {	
 	for(int i=0;i<4;i++)
-		if(bg[i])		
-		{
-			//dbg_ctx="BG";
-			delete bg[i];		
-		}
-	//dbg_ctx="Camera";
+		if(bg[i])						
+			delete bg[i];				
 	delete camera;
-	
-	for(int i=0;i<sprites_count;i++)
-	{
-		DEBUG_MSG(" del %x\n",(u32)sprites[i]);
-	}
+		
 		
 	for(int i=0;i<sprites_count;i++)
-	{
-		//dbg_ctx="Sprite";
+	{		
 		delete sprites[i];
-	}
-	//dbg_ctx="TSM:Sprite*";
-	delete[] sprites;	
+	}	
+	delete[] sprites;
 	
-	OamPool::reset();
-	DEBUG_MSG("-SCR\n");
+	OamPool::reset();	
 	
 }

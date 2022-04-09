@@ -1,7 +1,6 @@
 #include "background.hpp"
 
 #include "error.hpp"
-#include "debug.hpp"
 
 #define REG_BG_CNT(i) *((vu16 *)(REG_BASE + 0x08 + 0x02*(i)))
 #define BG_ON(i) BIT(8+(i))
@@ -82,6 +81,7 @@ void Background::build_map()
 	
 	if(old_x==(s16)0x8000 || (abs(old_x-scroll_x)>=30 || abs(old_y-scroll_y)>=20))
 	{
+		
 		for(int y=0;y<=20;y++)
 		{
 			u16* target_line = ((u16*)map_base_address) + (((screen_base_y+y)&31)<<5);
@@ -90,8 +90,8 @@ void Background::build_map()
 				u16* source_line = ((u16*)map_stream_source) + width*(tile_offset_y+y);		
 				for(int x=0;x<=30;x++)
 				{			
-					int src_offset=x+ tile_offset_x;
-					if(0<=src_offset&&src_offset<width)
+					int src_offset=x + tile_offset_x;
+					if(0<=src_offset && src_offset<width)
 						target_line[(screen_base_x+x)&31] = source_line[src_offset];
 					else
 						target_line[(screen_base_x+x)&31] = 0;

@@ -107,9 +107,9 @@ public:
 	s16 get_actual_x() const;
 	s16 get_actual_y() const;
 public:
-	const char* _class;
+	u16 _class;
 	ObjAttribute* attr;
-	Sprite(ObjSize size, u16 frames_count, const char* objclass=NULL);
+	Sprite(ObjSize size, u16 frames_count, u16 objclass=0);
 	
 	/*! \brief sets sprite hitbox
 		\param left    hitbox left coordinate
@@ -141,7 +141,7 @@ public:
 	
 	void update_visual();
 	
-	bool is_of_class(const char *xclass);
+	bool is_of_class(u16 xclass);
 	
 	void update_position(Camera* cam);
 	

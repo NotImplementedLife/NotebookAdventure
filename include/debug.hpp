@@ -1,6 +1,6 @@
 #pragma once
 
-//#define DEBUG_ENABLED
+#define DEBUG_ENABLED
 
 namespace Debug
 {
@@ -13,11 +13,15 @@ namespace Debug
 
 #ifdef DEBUG_ENABLED
 
+#ifdef ALLOC_OVERRIDE
+
 extern const char* dbg_ctx;
 
 void * operator new(size_t size);
 
 void operator delete(void * p);
+
+#endif
 
 #endif
 

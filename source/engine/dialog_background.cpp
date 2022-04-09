@@ -1,7 +1,6 @@
 #include "dialog_background.hpp"
 #include "error.hpp"
 #include <string.h>
-#include "debug.hpp"
 
 DialogBackground::DialogBackground(u16 id, u16 char_base, u16 map_base) : Background(id, char_base, map_base, 32, 32)
 {
@@ -37,8 +36,7 @@ void DialogBackground::set_caret(int obj_tile_id)
 {
 	obj_caret_id = OamPool::add_obj(ObjAttribute(SIZE_8x8, 16, 16, obj_tile_id));	
 	obj_caret = OamPool::get_object_by_id(obj_caret_id);
-	obj_caret->hide();
-	DEBUG_MSG("  caret_id = %i",obj_caret_id);
+	obj_caret->hide();	
 }
 
 void DialogBackground::assign_caret_to(int dialog_id)

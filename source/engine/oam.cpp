@@ -2,8 +2,6 @@
 
 #include "error.hpp"
 
-#include "debug.hpp"
-
 ObjAttribute::ObjAttribute()
 {
 	attr1=attr2=attr3=0;
@@ -232,8 +230,7 @@ namespace OamPool
 		
 		lock_id(buff_id);		
 		__oam_size++;
-				
-		DEBUG_MSG("  add %i\n",id);
+						
 		return id;
 	}
 	
@@ -250,8 +247,7 @@ namespace OamPool
 	}
 	
 	void remove_obj(u16 id)
-	{		
-		DEBUG_MSG("  rem %i\n",id);		
+	{				
 		u16 p=-1;
 		for(u16 i=0;i<obj_len;i++)
 		{

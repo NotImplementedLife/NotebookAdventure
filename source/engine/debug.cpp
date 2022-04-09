@@ -10,6 +10,7 @@
 
 #ifdef DEBUG_ENABLED
 
+#ifdef ALLOC_OVERRIDE
 int cnt=0;
 
 const char* dbg_ctx="";
@@ -31,6 +32,8 @@ void operator delete(void * p)
 	cnt++;	
 	free(p);
 }
+
+#endif
 
 #endif
 

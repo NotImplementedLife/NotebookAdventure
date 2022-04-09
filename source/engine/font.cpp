@@ -1,5 +1,4 @@
 #include "font.hpp"
-#include "debug.hpp"
 
 Font816::Font816(const void* font_gfx)
 {	
