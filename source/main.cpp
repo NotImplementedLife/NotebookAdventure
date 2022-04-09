@@ -1,3 +1,5 @@
+#define ESODEV
+
 #include <gba.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,12 +13,9 @@
 #include "title_screen.hpp"
 #include "audio.hpp"
 
-
-#include "level_1_bin.h"
-#include "level_2_bin.h"
-#include "all_levels.h"
-
-#include "esodev_logo.hpp"
+#ifdef ESODEV
+#include "esodev.hpp"
+#endif
 
 int main(void) {
 	irqInit();
@@ -35,7 +34,7 @@ int main(void) {
 	TextScrollMap* screen = NULL;	
 		
 	#ifdef ESODEV
-	screen = new EsoDevLogo();
+	screen = new EsoDevSplashScreen();
 	screen->init();
 	screen->run();
 	delete screen;
