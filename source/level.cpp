@@ -514,7 +514,16 @@ void Level::init()
 			
 			obj_addr[j]=res;			
 		}
-	}
+	}	
+	
+	u8 actcnt = *(lvldat++);
+	for(int i=0;i<actcnt;i++)
+	{
+		u8 aid = *(lvldat++);
+		u8 ax = *(lvldat++);
+		u8 ay = *(lvldat++);
+		add_obstacle_activator(aid,ax<<2, (ay+1)<<3);
+	}	
 	
 	u8 obscnt = *(lvldat++);
 	
@@ -529,16 +538,6 @@ void Level::init()
 		u8 obsy = *(lvldat++);		
 		add_obstacle(obsid,obso,(obsx<<3)+4,(obsy<<3)+4,4*i);
 	}
-	
-	
-	u8 actcnt = *(lvldat++);
-	for(int i=0;i<actcnt;i++)
-	{
-		u8 aid = *(lvldat++);
-		u8 ax = *(lvldat++);
-		u8 ay = *(lvldat++);
-		add_obstacle_activator(aid,ax<<2, (ay+1)<<3);
-	}	
 }
 
 void Level::update_actor(PhysicalObject* obj)
@@ -617,6 +616,8 @@ void Level::on_frame()
 		}
 	}
 	
+	for(int i=0;i<14;i++) obst_status[i]=-1;
+	
 	for(int i=0;i<sprites_count;i++)
 	{
 		if(sprites[i]->is_of_class("spikes"))
@@ -651,12 +652,12 @@ void Level::on_frame()
 			if(player->touches(sprites[i]) || cat->touches(sprites[i]))
 			{				
 				sprites[i]->get_visual()->set_crt_gfx(1);				
-				obst_status[oid]=1;				
+				obst_status[oid]=1;
 			}
 			else
 			{
 				sprites[i]->get_visual()->set_crt_gfx(0);
-				obst_status[oid]=-1;				
+				//obst_status[oid]=-1;				
 			}
 		}		
 		else if(sprites[i]->is_of_class("obs"))

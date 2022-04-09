@@ -16,7 +16,7 @@
 #include "level_2_bin.h"
 #include "all_levels.h"
 
-//#include "esodev_logo.hpp"
+#include "esodev_logo.hpp"
 
 int main(void) {
 	irqInit();
