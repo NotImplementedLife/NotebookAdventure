@@ -15,6 +15,7 @@
 #include "level_5_bin.h"
 #include "level_6_bin.h"
 #include "level_7_bin.h"
+#include "level_8_bin.h"
 //...
 
 #include "physical_object.hpp"
@@ -34,7 +35,7 @@ const void* get_level_map(u32 no)
 const u8* levels_bin[] = 
 {	NULL, 
 	level_1_bin, level_2_bin, level_3_bin, level_4_bin, level_5_bin, 
-	level_6_bin, level_7_bin 
+	level_6_bin, level_7_bin, level_8_bin
 };
 
 u32 choose_star_pos(const u8* level_map);
@@ -807,9 +808,13 @@ void Level::on_key_held(int keys)
 		else if(keys & KEY_UP)  
 		{
 			int upper = get_block_data((int)(xfocus->pos_x),(int)xfocus->pos_y-1);		
-			if(upper==2)
-			{			
-				xfocus->move(0,-1);
+			int more_upper = get_block_data((int)(xfocus->pos_x),(int)xfocus->pos_y-9);			
+			int more_more_upper = get_block_data((int)(xfocus->pos_x),(int)xfocus->pos_y-17);			
+			
+			if(upper==2 && more_upper!=1)
+			{							
+				if(xfocus==cat || (xfocus==player && more_more_upper!=1))
+					xfocus->move(0,-1);
 			}
 		}
 		
@@ -1101,7 +1106,7 @@ const s8 dx[] = {-1,0,1,0};
 const s8 dy[] = { 0,-1,0,1};
 
 u8 _L[105][75];
-u16 _S[2500];
+u16 _S[3000];
 u16 _l;
 
 u32 choose_star_pos(const u8* level_map)
@@ -1147,7 +1152,7 @@ u32 choose_star_pos(const u8* level_map)
 			{
 				_L[ny][nx]=0x80;
 				_S[_l++]=(nx<<8)|ny;
-				if(_l>2500) fatal("Stack overflow");
+				if(_l>3000) fatal("Stack overflow");
 			}
 		}
 	}
