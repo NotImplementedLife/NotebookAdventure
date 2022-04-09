@@ -246,16 +246,6 @@ void Sprite::move(sf24 dx, sf24 dy)
 	pos_y += dy;
 }
 
-sf24 Sprite::get_pos_x() const
-{
-	return pos_x;
-}
-
-sf24 Sprite::get_pos_y() const
-{
-	return pos_y;
-}
-
 s16 Sprite::get_actual_x() const
 {
 	return (s16)pos_x - hitbox.left - anchx;
@@ -327,7 +317,8 @@ bool Sprite::touches(Sprite* spr)
 bool Sprite::is_of_class(const char *xclass)
 {
 	if(_class==NULL) return false;
-	return !strcmp(_class, xclass);
+	if(xclass==NULL) return false;
+	return !strncmp(_class, xclass, 16);
 }
 
 Sprite::~Sprite()

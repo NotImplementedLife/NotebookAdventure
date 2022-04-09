@@ -134,9 +134,6 @@ public:
 	void set_pos(sf24 px, sf24 py);
 	void move(sf24 dx, sf24 dy);
 	
-	sf24 get_pos_x() const;
-	sf24 get_pos_y() const;
-	
 	/*! \brief get sprite visual 
 		\return sprite visual
 	 */

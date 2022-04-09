@@ -542,12 +542,12 @@ void Level::init()
 
 void Level::update_actor(PhysicalObject* obj)
 {	
-	u8 bdata = get_block_data((int)obj->get_pos_x(), (int)obj->get_pos_y());	
+	u8 bdata = get_block_data((int)obj->pos_x, (int)obj->pos_y);	
 	if(bdata==0)
 	{		
-		u8 y0=((int)obj->get_pos_y())>>3;
+		u8 y0=((int)obj->pos_y)>>3;
 		u8 ymin=y0, ymax=y0;
-		u8 x0=((int)obj->get_pos_x())>>3;
+		u8 x0=((int)obj->pos_x)>>3;
 				
 		for(int y=y0;y<104;y++)
 			if(get_block_data_tiled(x0,y))
@@ -566,7 +566,7 @@ void Level::update_actor(PhysicalObject* obj)
 	}
 	else
 	{		
-		u8 udata = get_block_data((int)obj->get_pos_x(), (int)obj->get_pos_y()-1);		
+		u8 udata = get_block_data((int)obj->pos_x, (int)obj->pos_y-1);		
 		obj->ignore_air_limits();		
 		if(bdata==1 || (bdata==0 && udata==2))
 		{
@@ -704,13 +704,14 @@ void Level::on_key_down(int keys)
 	{				
 		if(keys & KEY_A) 
 		{
-			s16 px=(int)xfocus->get_pos_x();
-			s16 py=(int)xfocus->get_pos_y();
-			//u8 ddata = get_block_data(px, py+8);
+			s16 px=(s16)xfocus->pos_x;
+			s16 py=(s16)xfocus->pos_y;
+			
 			u8 bdata = get_block_data(px, py);
 			u8 udata = get_block_data(px, py-8);
 			if(bdata!=0 && udata==0)			
 				xfocus->charge_a(0,-sf24(3,160));
+			return;
 		}
 		
 		if(keys & KEY_START)
@@ -719,7 +720,7 @@ void Level::on_key_down(int keys)
 			dialog->run_on_dialog_finished(2, pause_dialog_finished, this);
 			dialog->launch_dialog(2, "Game paused\n    \x01Resume          \01Retry          \01Menu", 0);
 			mmPause();
-			
+			return;
 		}
 		
 		if(keys & KEY_L)
@@ -730,16 +731,19 @@ void Level::on_key_down(int keys)
 			{
 				xfocus->get_visual()->set_animation_track(ANIM_FRAMES_1);
 			}
+			return;
 		}
 		if(keys & KEY_R)
 		{
 			explorer->set_pos(xfocus->pos_x,xfocus->pos_y);
 			set_focus(explorer);
+			return;
 		}
 		
 		if(keys & (KEY_LEFT|KEY_RIGHT)) 
 		{
-			xfocus->get_visual()->set_animation_track(ANIM_FRAMES_1);			
+			xfocus->get_visual()->set_animation_track(ANIM_FRAMES_1);		
+			return;
 		}
 		
 		if(focus==player)			
@@ -751,6 +755,7 @@ void Level::on_key_down(int keys)
 				goddess_crown->attr->show();			
 				UserData.goddess_count--;
 				dialog->launch_dialog(0,"Goddess mode",150);
+				return;
 			}
 		}
 	}	
@@ -770,7 +775,7 @@ void Level::on_key_held(int keys)
 	{			
 		if(keys & KEY_DOWN)  
 		{	
-			int block = get_block_data((int)(xfocus->pos_x),(int)xfocus->get_pos_y());
+			int block = get_block_data((int)(xfocus->pos_x),(int)xfocus->pos_y);
 			if(block==2)
 			{				
 				xfocus->move(0,1);
@@ -778,7 +783,7 @@ void Level::on_key_held(int keys)
 		}
 		else if(keys & KEY_UP)  
 		{
-			int upper = get_block_data((int)(xfocus->pos_x),(int)xfocus->get_pos_y()-1);		
+			int upper = get_block_data((int)(xfocus->pos_x),(int)xfocus->pos_y-1);		
 			if(upper==2)
 			{			
 				xfocus->move(0,-1);
@@ -792,12 +797,12 @@ void Level::on_key_held(int keys)
 			if(xfocus==player)
 				goddess_crown->attr->set_flip_h(1);
 			
-			int on_left = get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->get_pos_y()-2);
-			on_left |= get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->get_pos_y()-10);
+			int on_left = get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->pos_y-2);
+			on_left |= get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->pos_y-10);
 			if(xfocus==player)
 			{
-				on_left |= get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->get_pos_y()-18);
-				on_left |= get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->get_pos_y()-26);
+				on_left |= get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->pos_y-18);
+				on_left |= get_block_data((int)(xfocus->get_left_coord())-1,(int)xfocus->pos_y-26);
 			}
 			
 			if(on_left!=1)
@@ -809,12 +814,12 @@ void Level::on_key_held(int keys)
 			if(xfocus==player)
 				goddess_crown->attr->set_flip_h(0);
 			
-			int on_right = get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->get_pos_y()-2);
-			on_right |= get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->get_pos_y()-10);
+			int on_right = get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->pos_y-2);
+			on_right |= get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->pos_y-10);
 			if(xfocus==player)
 			{
-				on_right |= get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->get_pos_y()-18);
-				on_right |= get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->get_pos_y()-26);
+				on_right |= get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->pos_y-18);
+				on_right |= get_block_data((int)(xfocus->get_right_coord())+1,(int)xfocus->pos_y-26);
 			}
 			
 			if(on_right!=1)
@@ -823,8 +828,8 @@ void Level::on_key_held(int keys)
 		
 		if(goddess_mode && focus==player && (keys & KEY_A)) 
 		{
-			s16 px=(int)xfocus->get_pos_x();
-			s16 py=(int)xfocus->get_pos_y();			
+			s16 px=(int)xfocus->pos_x;
+			s16 py=(int)xfocus->pos_y;			
 			u8 udata = get_block_data(px, py-8);
 			if(udata==0)			
 				xfocus->charge_a(0,-sf24(3,160));
@@ -835,7 +840,7 @@ void Level::on_key_held(int keys)
 	{
 		if(keys & KEY_DOWN)  
 		{
-			explorer->move(0,2);
+			explorer->move(0,2);			
 		}
 		else if(keys & KEY_UP)
 		{
@@ -850,6 +855,10 @@ void Level::on_key_held(int keys)
 		{
 			explorer->move(2,0);
 		}
+		if(explorer->pos_x<120) explorer->pos_x=120;
+		else if(explorer->pos_x>480) explorer->pos_x=480;
+		if(explorer->pos_y<80) explorer->pos_y=80;
+		else if(explorer->pos_y>760) explorer->pos_y=760;
 	}
 }
 
